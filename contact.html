@@ -199,6 +199,35 @@
     }
 
     function renderForm(config, studio) {
+      // Apply theme
+      var theme = config.theme || 'classic';
+      if (theme === 'light') {
+        document.body.style.background = '#FFFFFF';
+        document.querySelector('.card').style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
+      } else if (theme === 'dark') {
+        document.body.style.background = '#1A1A1A';
+        document.body.style.color = '#F5F5F5';
+        document.querySelectorAll('.card').forEach(function(c) {
+          c.style.background = '#2A2A2A';
+          c.style.boxShadow = '0 2px 12px rgba(0,0,0,0.3)';
+        });
+        document.querySelector('h1').style.color = '#F5F5F5';
+        document.querySelector('.subtitle').style.color = '#A89B8C';
+        // Style inputs for dark mode
+        var style = document.createElement('style');
+        style.textContent = [
+          'input[type=text],input[type=email],input[type=tel],input[type=date],textarea{background:#333;border-color:#444;color:#F5F5F5;}',
+          'input:focus,textarea:focus{border-color:#B8977E;}',
+          'label{color:#A89B8C;}',
+          '.radio-label,.checkbox-label{background:#333;border-color:#444;color:#F5F5F5;}',
+          '.radio-label:has(input:checked),.checkbox-label:has(input:checked){border-color:#B8977E;background:rgba(184,151,126,0.1);}',
+          '.powered{color:#555;} .powered a{color:#A89B8C;}',
+          '.error-msg{background:#3A2020;color:#E57373;}',
+          '.success h2{color:#F5F5F5;} .success p{color:#A89B8C;}',
+        ].join('');
+        document.head.appendChild(style);
+      }
+
       // Studio name
       if (studio && studio.studio_name) {
         document.getElementById('studioName').textContent = studio.studio_name;
