@@ -1,0 +1,2 @@
+/contact/:id/embed  https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/contact-form?id=:id&embed=1  200
+/contact/:id        https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/contact-form?id=:id  200
