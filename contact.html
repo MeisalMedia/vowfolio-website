@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nb">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact</title>
+  <title>Kontakt</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -63,6 +63,7 @@
       outline: none;
       border-color: #9B7E5E;
     }
+    input::placeholder, textarea::placeholder { color: #C4B5A3; }
     textarea { resize: vertical; min-height: 80px; }
     input[type="date"] { cursor: pointer; }
     .radio-group, .checkbox-group {
@@ -102,20 +103,54 @@
       font-size: 15px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
       margin-top: 8px;
     }
     .submit-btn:hover { background: #A6876E; }
-    .submit-btn:disabled { background: #C4B5A3; cursor: not-allowed; }
-    .success { text-align: center; padding: 48px 24px; }
-    .success-icon { font-size: 48px; margin-bottom: 16px; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { background: #C4B5A3; cursor: not-allowed; transform: none; }
+
+    /* Success state */
+    .success {
+      text-align: center;
+      padding: 56px 28px;
+    }
+    .success-check {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: #6B8F71;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .success-check svg {
+      width: 28px;
+      height: 28px;
+      stroke: #fff;
+      stroke-width: 3;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
     .success h2 {
       font-family: Georgia, serif;
       font-size: 22px;
       color: #3D3229;
       margin-bottom: 8px;
     }
-    .success p { color: #9B7E5E; font-size: 14px; }
+    .success p {
+      color: #9B7E5E;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    @keyframes scaleIn {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
     .error-msg {
       background: #FDF2F2;
       color: #C0392B;
@@ -127,11 +162,12 @@
     }
     .powered {
       text-align: center;
-      padding: 12px;
-      font-size: 11px;
-      color: #C4B5A3;
+      padding: 16px 12px;
+      font-size: 10px;
+      color: #D5CBBF;
+      letter-spacing: 0.3px;
     }
-    .powered a { color: #9B7E5E; text-decoration: none; }
+    .powered a { color: #C4B5A3; text-decoration: none; }
     .hero-img {
       width: 100%;
       height: 180px;
@@ -145,34 +181,50 @@
       color: #9B7E5E;
       font-size: 14px;
     }
+
+    /* Sending spinner */
+    .sending-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <div class="card" id="loadingCard">
-    <div class="loading">Loading...</div>
+    <div class="loading">Laster...</div>
   </div>
 
   <div class="card" id="formCard" style="display:none;">
     <div id="heroContainer"></div>
     <div class="card-inner">
-      <h1 id="studioName">Contact Us</h1>
-      <p class="subtitle">Get in touch</p>
+      <h1 id="studioName">Ta kontakt</h1>
+      <p class="subtitle" id="subtitleText">Vi gleder oss til å høre fra dere</p>
       <div class="error-msg" id="errorMsg"></div>
       <form id="contactForm" novalidate>
         <div id="formFields"></div>
-        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+        <button type="submit" class="submit-btn" id="submitBtn">Send forespørsel</button>
       </form>
     </div>
-    <div class="powered">Powered by <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
+    <div class="powered">Drevet av <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
   </div>
 
   <div class="card" id="successCard" style="display:none;">
     <div class="success">
-      <div class="success-icon">&#10024;</div>
-      <h2>Thank you!</h2>
-      <p>Your message has been sent. We'll get back to you soon.</p>
+      <div class="success-check">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2>Takk for henvendelsen!</h2>
+      <p>Vi har mottatt forespørselen deres<br>og tar kontakt så snart vi kan.</p>
     </div>
-    <div class="powered">Powered by <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
+    <div class="powered">Drevet av <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
   </div>
 
   <script>
@@ -182,7 +234,7 @@
     const formId = match ? match[1] : null;
 
     if (!formId) {
-      document.getElementById('loadingCard').innerHTML = '<div class="loading">Form not found.</div>';
+      document.getElementById('loadingCard').innerHTML = '<div class="loading">Skjema ikke funnet.</div>';
     } else {
       loadForm();
     }
@@ -190,11 +242,11 @@
     async function loadForm() {
       try {
         const res = await fetch(API + '?id=' + formId + '&config=1');
-        if (!res.ok) throw new Error('Form not found');
+        if (!res.ok) throw new Error('not found');
         const data = await res.json();
         renderForm(data.config, data.studio);
       } catch (e) {
-        document.getElementById('loadingCard').innerHTML = '<div class="loading">Form not found.</div>';
+        document.getElementById('loadingCard').innerHTML = '<div class="loading">Skjema ikke funnet.</div>';
       }
     }
 
@@ -213,15 +265,15 @@
         });
         document.querySelector('h1').style.color = '#F5F5F5';
         document.querySelector('.subtitle').style.color = '#A89B8C';
-        // Style inputs for dark mode
         var style = document.createElement('style');
         style.textContent = [
           'input[type=text],input[type=email],input[type=tel],input[type=date],textarea{background:#333;border-color:#444;color:#F5F5F5;}',
+          'input::placeholder,textarea::placeholder{color:#666;}',
           'input:focus,textarea:focus{border-color:#B8977E;}',
           'label{color:#A89B8C;}',
           '.radio-label,.checkbox-label{background:#333;border-color:#444;color:#F5F5F5;}',
           '.radio-label:has(input:checked),.checkbox-label:has(input:checked){border-color:#B8977E;background:rgba(184,151,126,0.1);}',
-          '.powered{color:#555;} .powered a{color:#A89B8C;}',
+          '.powered{color:#444;} .powered a{color:#666;}',
           '.error-msg{background:#3A2020;color:#E57373;}',
           '.success h2{color:#F5F5F5;} .success p{color:#A89B8C;}',
         ].join('');
@@ -231,7 +283,7 @@
       // Studio name
       if (studio && studio.studio_name) {
         document.getElementById('studioName').textContent = studio.studio_name;
-        document.title = studio.studio_name + ' — Contact';
+        document.title = studio.studio_name + ' — Kontakt';
       }
 
       // Hero image
@@ -243,78 +295,65 @@
       // Build fields
       var fields = '';
 
-      // Name (always)
-      fields += '<div class="field"><label for="name">Name <span class="req">*</span></label>' +
-        '<input type="text" id="name" name="name" required placeholder="Your name" autocomplete="name"></div>';
+      fields += '<div class="field"><label for="name">Navn <span class="req">*</span></label>' +
+        '<input type="text" id="name" name="name" required placeholder="Ditt navn" autocomplete="name"></div>';
 
-      // Partner name
       if (config.show_partner_name) {
-        fields += '<div class="field"><label for="partner_name">Partner\'s Name</label>' +
-          '<input type="text" id="partner_name" name="partner_name" placeholder="Partner\'s name" autocomplete="off"></div>';
+        fields += '<div class="field"><label for="partner_name">Partnerens navn</label>' +
+          '<input type="text" id="partner_name" name="partner_name" placeholder="Partnerens navn" autocomplete="off"></div>';
       }
 
-      // Email (always)
-      fields += '<div class="field"><label for="email">Email <span class="req">*</span></label>' +
-        '<input type="email" id="email" name="email" required placeholder="your@email.com" autocomplete="email"></div>';
+      fields += '<div class="field"><label for="email">E-post <span class="req">*</span></label>' +
+        '<input type="email" id="email" name="email" required placeholder="navn@epost.no" autocomplete="email"></div>';
 
-      // Phone
       if (config.show_phone) {
-        fields += '<div class="field"><label for="phone">Phone</label>' +
-          '<input type="tel" id="phone" name="phone" placeholder="+47 000 00 000" autocomplete="tel"></div>';
+        fields += '<div class="field"><label for="phone">Telefon</label>' +
+          '<input type="tel" id="phone" name="phone" placeholder="+47 412 34 567" autocomplete="tel"></div>';
       }
 
-      // Preferred contact
       if (config.show_preferred_contact) {
-        fields += '<div class="field"><label>Preferred contact method</label>' +
+        fields += '<div class="field"><label>Foretrukket kontaktmåte</label>' +
           '<div class="radio-group">' +
-          '<label class="radio-label"><input type="radio" name="preferred_contact" value="email" checked><span>Email</span></label>' +
-          '<label class="radio-label"><input type="radio" name="preferred_contact" value="phone"><span>Phone</span></label>' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="email" checked><span>E-post</span></label>' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="phone"><span>Telefon</span></label>' +
           '</div></div>';
       }
 
-      // Wedding date
       if (config.show_wedding_date) {
-        fields += '<div class="field"><label for="wedding_date">Wedding Date</label>' +
+        fields += '<div class="field"><label for="wedding_date">Bryllupsdato</label>' +
           '<input type="date" id="wedding_date" name="wedding_date"></div>';
       }
 
-      // Flexible date
       if (config.show_flexible_date && config.show_wedding_date) {
         fields += '<div class="field"><label class="checkbox-label">' +
-          '<input type="checkbox" name="flexible_date" value="yes"><span>The date is flexible</span></label></div>';
+          '<input type="checkbox" name="flexible_date" value="yes"><span>Datoen er fleksibel</span></label></div>';
       }
 
-      // Venue
       if (config.show_venue) {
-        fields += '<div class="field"><label for="venue">Venue / Location</label>' +
-          '<input type="text" id="venue" name="venue" placeholder="Venue or area" autocomplete="off"></div>';
+        fields += '<div class="field"><label for="venue">Sted / Lokale</label>' +
+          '<input type="text" id="venue" name="venue" placeholder="Kirke, lokale eller område" autocomplete="off"></div>';
       }
 
-      // Photo style
       if (config.show_photo_style) {
-        fields += '<div class="field"><label>What matters most to you?</label>' +
+        fields += '<div class="field"><label>Hva er viktigst for dere?</label>' +
           '<div class="checkbox-group">' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="natural"><span>Natural moments</span></label>' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="portraits"><span>Portraits</span></label>' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="full_day"><span>Full day documented</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="natural"><span>Naturlige øyeblikk</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="portraits"><span>Portretter</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="full_day"><span>Hele dagen dokumentert</span></label>' +
           '</div></div>';
       }
 
-      // Message
       if (config.show_message) {
-        fields += '<div class="field"><label for="message">Tell us about your plans</label>' +
-          '<textarea id="message" name="message" rows="4" placeholder="What are you looking for?"></textarea></div>';
+        fields += '<div class="field"><label for="message">Fortell litt om planene deres</label>' +
+          '<textarea id="message" name="message" rows="4" placeholder="Hva ser dere for dere?"></textarea></div>';
       }
 
       document.getElementById('formFields').innerHTML = fields;
       document.getElementById('loadingCard').style.display = 'none';
       document.getElementById('formCard').style.display = 'block';
 
-      // Notify parent iframe of height
       notifyHeight();
       new ResizeObserver(notifyHeight).observe(document.body);
-
-      // Submit handler
       document.getElementById('contactForm').addEventListener('submit', handleSubmit);
     }
 
@@ -324,7 +363,7 @@
       var btn = document.getElementById('submitBtn');
       errorEl.style.display = 'none';
       btn.disabled = true;
-      btn.textContent = 'Sending...';
+      btn.innerHTML = '<span class="sending-spinner"></span>Sender...';
 
       var data = {};
       var fd = new FormData(e.target);
@@ -344,16 +383,16 @@
           body: JSON.stringify(data)
         });
         var json = await res.json();
-        if (!res.ok || json.error) throw new Error(json.error || 'Something went wrong');
+        if (!res.ok || json.error) throw new Error(json.error || 'Noe gikk galt');
 
         document.getElementById('formCard').style.display = 'none';
         document.getElementById('successCard').style.display = 'block';
         notifyHeight();
       } catch (err) {
-        errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+        errorEl.textContent = err.message || 'Noe gikk galt. Prøv igjen.';
         errorEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Send Message';
+        btn.textContent = 'Send forespørsel';
         notifyHeight();
       }
     }
