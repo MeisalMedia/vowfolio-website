@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #FAF7F2;
+      color: #3D3229;
+      padding: 24px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(61,50,41,0.08);
+      max-width: 520px;
+      width: 100%;
+      overflow: hidden;
+    }
+    .card-inner { padding: 32px 28px; }
+    h1 {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: #3D3229;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      color: #9B7E5E;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .field { margin-bottom: 18px; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #9B7E5E;
+      margin-bottom: 6px;
+    }
+    .req { color: #C0392B; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1.5px solid #E8E0D6;
+      border-radius: 10px;
+      font-size: 15px;
+      color: #3D3229;
+      background: #FDFCFA;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #9B7E5E;
+    }
+    textarea { resize: vertical; min-height: 80px; }
+    input[type="date"] { cursor: pointer; }
+    .radio-group, .checkbox-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .radio-label, .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 400;
+      color: #3D3229;
+      cursor: pointer;
+      padding: 8px 14px;
+      border: 1.5px solid #E8E0D6;
+      border-radius: 10px;
+      background: #FDFCFA;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .radio-label:has(input:checked), .checkbox-label:has(input:checked) {
+      border-color: #9B7E5E;
+      background: rgba(155,126,94,0.05);
+    }
+    .radio-label input, .checkbox-label input {
+      width: auto;
+      accent-color: #9B7E5E;
+    }
+    .submit-btn {
+      width: 100%;
+      padding: 14px;
+      background: #9B7E5E;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+    .submit-btn:hover { background: #876D50; }
+    .submit-btn:disabled { background: #C4B5A3; cursor: not-allowed; }
+    .success { text-align: center; padding: 48px 24px; }
+    .success-icon { font-size: 48px; margin-bottom: 16px; }
+    .success h2 {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      color: #3D3229;
+      margin-bottom: 8px;
+    }
+    .success p { color: #9B7E5E; font-size: 14px; }
+    .error-msg {
+      background: #FDF2F2;
+      color: #C0392B;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .powered {
+      text-align: center;
+      padding: 12px;
+      font-size: 11px;
+      color: #C4B5A3;
+    }
+    .powered a { color: #9B7E5E; text-decoration: none; }
+    .hero-img {
+      width: 100%;
+      height: 180px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 12px 12px 0 0;
+    }
+    .loading {
+      text-align: center;
+      padding: 60px 24px;
+      color: #9B7E5E;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="loadingCard">
+    <div class="loading">Loading...</div>
+  </div>
+
+  <div class="card" id="formCard" style="display:none;">
+    <div id="heroContainer"></div>
+    <div class="card-inner">
+      <h1 id="studioName">Contact Us</h1>
+      <p class="subtitle">Get in touch</p>
+      <div class="error-msg" id="errorMsg"></div>
+      <form id="contactForm" novalidate>
+        <div id="formFields"></div>
+        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+      </form>
+    </div>
+    <div class="powered">Powered by <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
+  </div>
+
+  <div class="card" id="successCard" style="display:none;">
+    <div class="success">
+      <div class="success-icon">&#10024;</div>
+      <h2>Thank you!</h2>
+      <p>Your message has been sent. We'll get back to you soon.</p>
+    </div>
+    <div class="powered">Powered by <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
+  </div>
+
+  <script>
+    const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/contact-form';
+    const path = window.location.pathname;
+    const match = path.match(/\/contact\/([a-z0-9]+)/);
+    const formId = match ? match[1] : null;
+
+    if (!formId) {
+      document.getElementById('loadingCard').innerHTML = '<div class="loading">Form not found.</div>';
+    } else {
+      loadForm();
+    }
+
+    async function loadForm() {
+      try {
+        const res = await fetch(API + '?id=' + formId + '&config=1');
+        if (!res.ok) throw new Error('Form not found');
+        const data = await res.json();
+        renderForm(data.config, data.studio);
+      } catch (e) {
+        document.getElementById('loadingCard').innerHTML = '<div class="loading">Form not found.</div>';
+      }
+    }
+
+    function renderForm(config, studio) {
+      // Studio name
+      if (studio && studio.studio_name) {
+        document.getElementById('studioName').textContent = studio.studio_name;
+        document.title = studio.studio_name + ' — Contact';
+      }
+
+      // Hero image
+      if (studio && studio.portal_hero_url) {
+        document.getElementById('heroContainer').innerHTML =
+          '<div class="hero-img" style="background-image:url(\'' + studio.portal_hero_url + '\')"></div>';
+      }
+
+      // Build fields
+      var fields = '';
+
+      // Name (always)
+      fields += '<div class="field"><label for="name">Name <span class="req">*</span></label>' +
+        '<input type="text" id="name" name="name" required placeholder="Your name" autocomplete="name"></div>';
+
+      // Partner name
+      if (config.show_partner_name) {
+        fields += '<div class="field"><label for="partner_name">Partner\'s Name</label>' +
+          '<input type="text" id="partner_name" name="partner_name" placeholder="Partner\'s name" autocomplete="off"></div>';
+      }
+
+      // Email (always)
+      fields += '<div class="field"><label for="email">Email <span class="req">*</span></label>' +
+        '<input type="email" id="email" name="email" required placeholder="your@email.com" autocomplete="email"></div>';
+
+      // Phone
+      if (config.show_phone) {
+        fields += '<div class="field"><label for="phone">Phone</label>' +
+          '<input type="tel" id="phone" name="phone" placeholder="+47 000 00 000" autocomplete="tel"></div>';
+      }
+
+      // Preferred contact
+      if (config.show_preferred_contact) {
+        fields += '<div class="field"><label>Preferred contact method</label>' +
+          '<div class="radio-group">' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="email" checked><span>Email</span></label>' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="phone"><span>Phone</span></label>' +
+          '</div></div>';
+      }
+
+      // Wedding date
+      if (config.show_wedding_date) {
+        fields += '<div class="field"><label for="wedding_date">Wedding Date</label>' +
+          '<input type="date" id="wedding_date" name="wedding_date"></div>';
+      }
+
+      // Flexible date
+      if (config.show_flexible_date && config.show_wedding_date) {
+        fields += '<div class="field"><label class="checkbox-label">' +
+          '<input type="checkbox" name="flexible_date" value="yes"><span>The date is flexible</span></label></div>';
+      }
+
+      // Venue
+      if (config.show_venue) {
+        fields += '<div class="field"><label for="venue">Venue / Location</label>' +
+          '<input type="text" id="venue" name="venue" placeholder="Venue or area" autocomplete="off"></div>';
+      }
+
+      // Photo style
+      if (config.show_photo_style) {
+        fields += '<div class="field"><label>What matters most to you?</label>' +
+          '<div class="checkbox-group">' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="natural"><span>Natural moments</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="portraits"><span>Portraits</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="full_day"><span>Full day documented</span></label>' +
+          '</div></div>';
+      }
+
+      // Message
+      if (config.show_message) {
+        fields += '<div class="field"><label for="message">Tell us about your plans</label>' +
+          '<textarea id="message" name="message" rows="4" placeholder="What are you looking for?"></textarea></div>';
+      }
+
+      document.getElementById('formFields').innerHTML = fields;
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('formCard').style.display = 'block';
+
+      // Notify parent iframe of height
+      notifyHeight();
+      new ResizeObserver(notifyHeight).observe(document.body);
+
+      // Submit handler
+      document.getElementById('contactForm').addEventListener('submit', handleSubmit);
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      var errorEl = document.getElementById('errorMsg');
+      var btn = document.getElementById('submitBtn');
+      errorEl.style.display = 'none';
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      var data = {};
+      var fd = new FormData(e.target);
+      for (var pair of fd.entries()) {
+        if (pair[0] === 'photo_style') {
+          if (!data[pair[0]]) data[pair[0]] = [];
+          data[pair[0]].push(pair[1]);
+        } else if (pair[1]) {
+          data[pair[0]] = pair[1];
+        }
+      }
+
+      try {
+        var res = await fetch(API + '?id=' + formId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        var json = await res.json();
+        if (!res.ok || json.error) throw new Error(json.error || 'Something went wrong');
+
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('successCard').style.display = 'block';
+        notifyHeight();
+      } catch (err) {
+        errorEl.textContent = err.message || 'Something went wrong. Please try again.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+        notifyHeight();
+      }
+    }
+
+    function notifyHeight() {
+      try {
+        var h = document.documentElement.scrollHeight;
+        window.parent.postMessage({ vowfolioHeight: h }, '*');
+      } catch(e) {}
+    }
+  </script>
+</body>
+</html>
