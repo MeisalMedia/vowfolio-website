@@ -210,7 +210,7 @@ let token = null;
 // Token resolution: support /i/{token} path, ?token= query, and sessionStorage
 (function resolveToken() {
   const path = location.pathname;
-  const pathMatch = path.match(/^\/i\/([a-f0-9]+)$/);
+  const pathMatch = path.match(/^\/i\/([a-f0-9]+)\/?$/);
   if (pathMatch) {
     token = pathMatch[1];
     sessionStorage.setItem('vf_token', token);
