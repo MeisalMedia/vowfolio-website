@@ -1,10 +1,329 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nb">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VowFolio</title>
-  <meta http-equiv="refresh" content="0;url=https://apps.apple.com/app/vowfolio">
+  <title>VowFolio — Studioappen for bryllupsfotografer</title>
+  <meta name="description" content="Alt du trenger for å drive studioet ditt. Klienter, kontrakter, betalinger, dagplan, shotliste og mer — i én app.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF7F2;
+      --espresso: #3D3229;
+      --taupe: #9B7E5E;
+      --sage: #6B8F71;
+      --rose: #C2847A;
+      --sand: #E8E0D6;
+      --white: #FFFFFF;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--espresso);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(250,247,242,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      border-bottom: 1px solid var(--sand);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--taupe);
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+    .nav-cta {
+      background: var(--espresso);
+      color: var(--white);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: #2A2118; }
+
+    /* Hero */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 140px 24px 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sage);
+      background: rgba(107,143,113,0.1);
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--espresso);
+      margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--taupe); }
+    .hero p {
+      font-size: 18px;
+      color: #6B5E52;
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--espresso);
+      color: var(--white);
+      padding: 16px 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .hero-cta:hover { background: #2A2118; transform: translateY(-1px); }
+    .hero-cta svg { width: 20px; height: 20px; }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #A39585;
+    }
+
+    /* Features */
+    .features {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .features-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .features-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .features-header p {
+      font-size: 16px;
+      color: #6B5E52;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(61,50,41,0.1);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: #6B5E52;
+      line-height: 1.6;
+    }
+
+    /* Built by */
+    .story {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .story-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--espresso);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .story-author {
+      font-size: 14px;
+      color: var(--taupe);
+      font-weight: 500;
+    }
+
+    /* CTA section */
+    .cta-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-section p {
+      font-size: 16px;
+      color: #6B5E52;
+      margin-bottom: 32px;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--sand);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: #A39585;
+    }
+    footer a { color: var(--taupe); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .hero { padding: 120px 20px 60px; }
+      .features { padding: 60px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .story { padding: 60px 20px; }
+      .cta-section { padding: 60px 20px; }
+    }
+  </style>
 </head>
-<body></body>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">VowFolio</a>
+      <a href="https://testflight.apple.com/join/epwEKS8J" class="nav-cta">Last ned beta</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">Bygget av en bryllupsfotograf</div>
+    <h1>Alt du trenger for<br><span>studioet ditt</span></h1>
+    <p>Klienter, kontrakter, betalinger, dagplan, shotliste og kontaktskjema — samlet i én app. Slik at du kan fokusere på det du gjør best.</p>
+    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
+      Last ned fra TestFlight
+    </a>
+    <p class="hero-sub">Gratis under beta · iOS 17+</p>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="features-header">
+      <h2>Én app. Hele studioet.</h2>
+      <p>Alt det administrative — organisert, oversiktlig og vakkert.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(155,126,94,0.1);">📋</div>
+        <h3>Kontaktskjema</h3>
+        <p>Legg et skjema på nettsiden din. Nye henvendelser havner rett i appen med push-varsling og e-post.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.1);">📝</div>
+        <h3>Kontrakter</h3>
+        <p>Opprett, send og signer kontrakter digitalt. Kunden signerer på mobilen — du signerer i appen.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(194,132,122,0.1);">📸</div>
+        <h3>Dagplan & Shotliste</h3>
+        <p>Planlegg bryllupsdagen minutt for minutt. Del shotlisten med andreskytter og crew.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(61,50,41,0.08);">💬</div>
+        <h3>Meldinger</h3>
+        <p>Chat med klienter og crew direkte i appen. Alt på ett sted — ingen WhatsApp-kaos.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(155,126,94,0.1);">💰</div>
+        <h3>Betalinger</h3>
+        <p>Hold oversikt over kontrakter, deposita og utestående beløp. Se inntektene dine på dashboardet.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.1);">⭐</div>
+        <h3>Tilbakemeldinger</h3>
+        <p>Send et skjema etter bryllupet. Få kuraterte testimonials og innsikt — uten stjerner og ratings.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story -->
+  <section class="story">
+    <p class="story-quote">"Jeg bygget VowFolio fordi jeg trengte det selv. Etter år med regneark, notater og fem forskjellige apper — ville jeg ha alt samlet."</p>
+    <p class="story-author">— Helge, bryllupsfotograf og grunnlegger</p>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Klar til å prøve?</h2>
+    <p>VowFolio er gratis under beta. Last ned via TestFlight og gi oss tilbakemelding.</p>
+    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
+      Last ned fra TestFlight
+    </a>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 VowFolio · <a href="mailto:hello@vowfolio.com">hello@vowfolio.com</a></p>
+  </footer>
+
+</body>
 </html>
