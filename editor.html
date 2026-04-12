@@ -129,6 +129,13 @@
     .save-indicator { font-size: 12px; color: #8A7D72; display: flex; align-items: center; gap: 6px; }
     .save-indicator.saving { color: var(--taupe); }
     .save-indicator.saved { color: var(--success); }
+
+    /* Formatting toolbar */
+    .format-toolbar { display: flex; gap: 2px; padding: 8px 16px; border-bottom: 1px solid var(--sand); background: var(--white); }
+    .format-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--espresso); font-family: inherit; }
+    .format-btn:hover { background: var(--cream); }
+    .format-btn .lbl { font-size: 11px; font-weight: 700; }
+    .format-sep { width: 1px; background: var(--sand); margin: 4px 6px; }
   </style>
 </head>
 <body>
@@ -318,13 +325,23 @@
       html += '<div class="editor-wrap">';
       // Code pane
       html += '<div class="editor-pane code">';
-      html += '<div class="editor-toolbar">';
+      // Formatting toolbar
+      html += '<div class="format-toolbar">';
+      html += '<button class="format-btn" onclick="wrapSelection(\'**\',\'**\')" title="Fet skrift"><strong>B</strong></button>';
+      html += '<button class="format-btn" onclick="wrapSelection(\'*\',\'*\')" title="Kursiv"><em>I</em></button>';
+      html += '<div class="format-sep"></div>';
+      html += '<button class="format-btn" onclick="prefixLine(\'# \')" title="Overskrift 1"><span class="lbl">H1</span></button>';
+      html += '<button class="format-btn" onclick="prefixLine(\'## \')" title="Overskrift 2"><span class="lbl">H2</span></button>';
+      html += '<button class="format-btn" onclick="prefixLine(\'### \')" title="Overskrift 3"><span class="lbl">H3</span></button>';
+      html += '<div class="format-sep"></div>';
+      html += '<button class="format-btn" onclick="prefixLine(\'- \')" title="Punktliste">•</button>';
+      html += '<button class="format-btn" onclick="insertAtCursor(\'\\n---\\n\')" title="Skillelinje">―</button>';
+      html += '<div class="format-sep"></div>';
       for (const [ph, label] of placeholders) {
         html += '<button class="placeholder-chip" onclick="insertPlaceholder(\'' + ph + '\')">' + label + '</button>';
       }
       html += '</div>';
-      html += '<div class="pane-label">Markdown</div>';
-      html += '<textarea class="editor-textarea" id="tmplContent" oninput="updatePreview()">' + esc(content) + '</textarea>';
+      html += '<textarea class="editor-textarea" id="tmplContent" placeholder="Skriv kontrakten din her... Bruk verkt\u00f8ylinjen for formatering." oninput="updatePreview()">' + esc(content) + '</textarea>';
       html += '</div>';
       // Preview pane
       html += '<div class="editor-pane">';
@@ -338,10 +355,48 @@
     }
 
     function insertPlaceholder(ph) {
+      insertAtCursor(ph);
+    }
+
+    function insertAtCursor(text) {
       const ta = document.getElementById('tmplContent');
       const start = ta.selectionStart;
-      ta.value = ta.value.slice(0, start) + ph + ta.value.slice(ta.selectionEnd);
-      ta.selectionStart = ta.selectionEnd = start + ph.length;
+      ta.value = ta.value.slice(0, start) + text + ta.value.slice(ta.selectionEnd);
+      ta.selectionStart = ta.selectionEnd = start + text.length;
+      ta.focus();
+      updatePreview();
+    }
+
+    function wrapSelection(before, after) {
+      const ta = document.getElementById('tmplContent');
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const selected = ta.value.slice(start, end);
+      const replacement = before + (selected || 'tekst') + after;
+      ta.value = ta.value.slice(0, start) + replacement + ta.value.slice(end);
+      // Select the inner text
+      ta.selectionStart = start + before.length;
+      ta.selectionEnd = start + replacement.length - after.length;
+      ta.focus();
+      updatePreview();
+    }
+
+    function prefixLine(prefix) {
+      const ta = document.getElementById('tmplContent');
+      const start = ta.selectionStart;
+      // Find start of current line
+      const lineStart = ta.value.lastIndexOf('\n', start - 1) + 1;
+      // Check if line already has this prefix
+      const line = ta.value.slice(lineStart);
+      if (line.startsWith(prefix)) {
+        // Remove prefix
+        ta.value = ta.value.slice(0, lineStart) + ta.value.slice(lineStart + prefix.length);
+        ta.selectionStart = ta.selectionEnd = start - prefix.length;
+      } else {
+        // Add prefix
+        ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+        ta.selectionStart = ta.selectionEnd = start + prefix.length;
+      }
       ta.focus();
       updatePreview();
     }
