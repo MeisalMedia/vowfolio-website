@@ -210,12 +210,10 @@ let token = null;
 // Token resolution: support /i/{token} path, ?token= query, and sessionStorage
 (function resolveToken() {
   const path = location.pathname;
-  const pathMatch = path.match(/^\/i\/([a-f0-9]{64})$/);
+  const pathMatch = path.match(/^\/i\/([a-f0-9]+)$/);
   if (pathMatch) {
     token = pathMatch[1];
-    // Store in session and redirect to clean /quiz URL
     sessionStorage.setItem('vf_token', token);
-    history.replaceState(null, '', '/quiz');
     loadQuiz();
     return;
   }
@@ -225,8 +223,6 @@ let token = null;
   if (queryToken) {
     token = queryToken;
     sessionStorage.setItem('vf_token', token);
-    // Clean URL
-    history.replaceState(null, '', '/quiz');
     loadQuiz();
     return;
   }
