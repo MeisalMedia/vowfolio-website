@@ -1,5 +1,5 @@
-/contact/:id/embed  /contact.html  200
-/contact/:id        /contact.html  200
-/s/:token           /signing.html  200
-/f/:token           /feedback.html 200
-/i/:token           /quiz.html     200
+/contact/*/embed  /contact.html  200
+/contact/*        /contact.html  200
+/s/*              /signing.html  200
+/f/*              /feedback.html 200
+/i/*              /quiz.html     200
