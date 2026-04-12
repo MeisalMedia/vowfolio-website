@@ -326,6 +326,7 @@
       // Code pane
       html += '<div class="editor-pane code">';
       // Formatting toolbar
+      // Formatting toolbar
       html += '<div class="format-toolbar">';
       html += '<button class="format-btn" onclick="wrapSelection(\'**\',\'**\')" title="Fet skrift"><strong>B</strong></button>';
       html += '<button class="format-btn" onclick="wrapSelection(\'*\',\'*\')" title="Kursiv"><em>I</em></button>';
@@ -336,7 +337,10 @@
       html += '<div class="format-sep"></div>';
       html += '<button class="format-btn" onclick="prefixLine(\'- \')" title="Punktliste">•</button>';
       html += '<button class="format-btn" onclick="insertAtCursor(\'\\n---\\n\')" title="Skillelinje">―</button>';
-      html += '<div class="format-sep"></div>';
+      html += '</div>';
+      // Placeholder chips
+      html += '<div class="editor-toolbar">';
+      html += '<span style="font-size:11px;color:#8A7D72;font-weight:600">SETT INN:</span> ';
       for (const [ph, label] of placeholders) {
         html += '<button class="placeholder-chip" onclick="insertPlaceholder(\'' + ph + '\')">' + label + '</button>';
       }
