@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tilbakemelding | VowFolio</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #FAF7F2;
+      color: #3D3229;
+      min-height: 100vh;
+      padding: 24px 16px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .container { max-width: 520px; width: 100%; }
+    .brand {
+      text-align: center;
+      padding: 24px 0 20px;
+      margin-bottom: 24px;
+    }
+    .brand h1 {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: #9B7E5E;
+      letter-spacing: 2px;
+    }
+    .brand p {
+      font-size: 12px;
+      color: #B8A99A;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.07);
+      padding: 32px 28px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #3D3229;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .card .subtitle {
+      text-align: center;
+      color: #9B7E5E;
+      font-size: 14px;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .question {
+      margin-bottom: 24px;
+    }
+    .question label {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: #3D3229;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    .question .hint {
+      font-size: 12px;
+      color: #B8A99A;
+      margin-bottom: 8px;
+    }
+    .req { color: #C0392B; font-size: 12px; }
+    textarea {
+      width: 100%;
+      padding: 14px;
+      border: 1.5px solid #E8E0D6;
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #3D3229;
+      background: #FDFCFA;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.2s;
+    }
+    textarea:focus { outline: none; border-color: #9B7E5E; }
+    textarea::placeholder { color: #C4B5A3; }
+
+    /* Yes/No toggle */
+    .toggle-group {
+      display: flex;
+      gap: 12px;
+    }
+    .toggle-option {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      border: 1.5px solid #E8E0D6;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #3D3229;
+      background: #FDFCFA;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-option.selected {
+      border-color: #9B7E5E;
+      background: rgba(155,126,94,0.08);
+      color: #9B7E5E;
+      font-weight: 600;
+    }
+    .toggle-option:hover { border-color: #C4B5A3; }
+
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #9B7E5E;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      font-family: Georgia, serif;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 8px;
+      letter-spacing: 0.3px;
+    }
+    .submit-btn:hover { background: #8A6E4E; }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn:disabled { background: #C4B5A3; cursor: not-allowed; transform: none; }
+
+    .error-msg {
+      background: #FDF2F2;
+      color: #C0392B;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* Success */
+    .success { text-align: center; padding: 48px 24px; }
+    .success-check {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: #6B8F71;
+      margin: 0 auto 24px;
+      display: flex; align-items: center; justify-content: center;
+      animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .success-check svg { width: 32px; height: 32px; stroke: #fff; stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    @keyframes scaleIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    .success h2 { font-family: Georgia, serif; font-size: 24px; color: #3D3229; margin-bottom: 8px; }
+    .success p { color: #9B7E5E; font-size: 15px; line-height: 1.5; }
+
+    .powered { text-align: center; padding: 16px; font-size: 10px; color: #D5CBBF; }
+    .powered a { color: #C4B5A3; text-decoration: none; }
+    .loading { text-align: center; padding: 60px 24px; color: #9B7E5E; font-size: 14px; }
+
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand">
+      <h1 id="studioName">VowFolio</h1>
+      <p>Tilbakemelding</p>
+    </div>
+
+    <div class="card" id="loadingCard">
+      <div class="loading">Laster...</div>
+    </div>
+
+    <div class="card" id="errorCard" style="display:none;">
+      <div style="text-align:center;padding:24px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">&#9888;</div>
+        <h2 style="color:#9B7E5E;" id="errorTitle">Feil</h2>
+        <p style="color:#8A7D72;" id="errorMsg"></p>
+      </div>
+    </div>
+
+    <div class="card" id="alreadyCard" style="display:none;">
+      <div class="success">
+        <div class="success-check">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h2>Takk!</h2>
+        <p>Dere har allerede gitt tilbakemelding.<br>Vi setter stor pris på det.</p>
+      </div>
+    </div>
+
+    <div id="formCard" style="display:none;">
+      <div class="card">
+        <h2>Hvordan var opplevelsen?</h2>
+        <p class="subtitle" id="coupleGreeting">Vi vil gjerne høre fra dere</p>
+
+        <div class="error-msg" id="formError"></div>
+
+        <form id="feedbackForm" novalidate>
+          <div class="question">
+            <label>Hva var det beste med å jobbe med fotografen? <span class="req">*</span></label>
+            <textarea name="best_part" placeholder="Fortell oss gjerne..." required></textarea>
+          </div>
+
+          <div class="question">
+            <label>Hvordan føltes dagen med fotografen til stede? <span class="req">*</span></label>
+            <textarea name="experience_day" placeholder="Var det avslappet, morsomt, naturlig..."></textarea>
+          </div>
+
+          <div class="question">
+            <label>Hva overrasket dere mest?</label>
+            <p class="hint">Valgfritt</p>
+            <textarea name="surprise" placeholder="Noe dere ikke forventet..."></textarea>
+          </div>
+
+          <div class="question">
+            <label>Ville dere anbefalt fotografen?</label>
+            <div class="toggle-group">
+              <div class="toggle-option selected" id="toggleYes" onclick="setRecommend(true)">Ja, absolutt</div>
+              <div class="toggle-option" id="toggleNo" onclick="setRecommend(false)">Nei</div>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn" id="submitBtn">Send tilbakemelding</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card" id="successCard" style="display:none;">
+      <div class="success">
+        <div class="success-check">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h2>Tusen takk!</h2>
+        <p>Tilbakemeldingen deres betyr veldig mye.<br>Den hjelper oss å bli enda bedre.</p>
+      </div>
+    </div>
+
+    <div class="powered">Drevet av <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a></div>
+  </div>
+
+  <script>
+    var API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/feedback-form';
+    var path = window.location.pathname;
+    var match = path.match(/\/f\/([a-f0-9]+)/);
+    var token = match ? match[1] : null;
+    var wouldRecommend = true;
+
+    if (!token) {
+      showError('Manglende token', 'Ingen tilbakemeldingslenke ble funnet.');
+    } else {
+      loadFeedback();
+    }
+
+    async function loadFeedback() {
+      try {
+        var res = await fetch(API + '?token=' + encodeURIComponent(token));
+        var data = await res.json();
+
+        if (!res.ok || data.error) {
+          showError('Ugyldig lenke', data.message || 'Kunne ikke laste skjemaet.');
+          return;
+        }
+
+        if (data.already_submitted) {
+          document.getElementById('loadingCard').style.display = 'none';
+          document.getElementById('alreadyCard').style.display = 'block';
+          if (data.studio_name) document.getElementById('studioName').textContent = data.studio_name;
+          return;
+        }
+
+        if (data.studio_name) {
+          document.getElementById('studioName').textContent = data.studio_name;
+          document.title = data.studio_name + ' — Tilbakemelding';
+        }
+
+        if (data.couple_name) {
+          document.getElementById('coupleGreeting').textContent =
+            'Hei ' + data.couple_name + '! Vi vil gjerne høre hvordan dere opplevde dagen.';
+        }
+
+        document.getElementById('loadingCard').style.display = 'none';
+        document.getElementById('formCard').style.display = 'block';
+
+        document.getElementById('feedbackForm').addEventListener('submit', handleSubmit);
+      } catch (e) {
+        showError('Nettverksfeil', 'Kunne ikke laste skjemaet. Prøv igjen.');
+      }
+    }
+
+    function showError(title, msg) {
+      document.getElementById('loadingCard').style.display = 'none';
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMsg').textContent = msg;
+      document.getElementById('errorCard').style.display = 'block';
+    }
+
+    function setRecommend(val) {
+      wouldRecommend = val;
+      document.getElementById('toggleYes').className = 'toggle-option' + (val ? ' selected' : '');
+      document.getElementById('toggleNo').className = 'toggle-option' + (!val ? ' selected' : '');
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      var errorEl = document.getElementById('formError');
+      var btn = document.getElementById('submitBtn');
+      errorEl.style.display = 'none';
+
+      var fd = new FormData(e.target);
+      var data = {
+        best_part: (fd.get('best_part') || '').trim(),
+        experience_day: (fd.get('experience_day') || '').trim(),
+        surprise: (fd.get('surprise') || '').trim(),
+        would_recommend: wouldRecommend
+      };
+
+      if (!data.best_part) { errorEl.textContent = 'Vennligst svar på første spørsmål.'; errorEl.style.display = 'block'; return; }
+      if (!data.experience_day) { errorEl.textContent = 'Vennligst svar på andre spørsmål.'; errorEl.style.display = 'block'; return; }
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Sender...';
+
+      try {
+        var res = await fetch(API + '?token=' + encodeURIComponent(token), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        var result = await res.json();
+
+        if (!res.ok || result.error) {
+          errorEl.textContent = result.error || result.message || 'Noe gikk galt.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Send tilbakemelding';
+          return;
+        }
+
+        document.getElementById('formCard').style.display = 'none';
+        document.getElementById('successCard').style.display = 'block';
+      } catch (err) {
+        errorEl.textContent = 'Nettverksfeil. Prøv igjen.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send tilbakemelding';
+      }
+    }
+  </script>
+</body>
+</html>
