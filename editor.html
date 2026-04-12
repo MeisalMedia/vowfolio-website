@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VowFolio Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FAF7F2; --espresso: #3D3229; --taupe: #9B7E5E; --sage: #6B8F71;
+      --rose: #C2847A; --sand: #E8E0D6; --white: #FFFFFF; --danger: #C0392B;
+      --accent-light: #C4A97D; --success: #6B8F71;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--espresso); min-height: 100vh; }
+
+    /* Login */
+    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-card { background: var(--white); border-radius: 16px; padding: 48px 40px; max-width: 400px; width: 100%; box-shadow: 0 4px 24px rgba(61,50,41,0.08); text-align: center; }
+    .login-card h1 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--taupe); letter-spacing: 1px; margin-bottom: 8px; }
+    .login-card .sub { font-size: 14px; color: #8A7D72; margin-bottom: 32px; }
+    .login-card input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 12px; background: var(--cream); color: var(--espresso); }
+    .login-card input:focus { outline: none; border-color: var(--taupe); }
+    .login-card .btn { width: 100%; padding: 14px; background: var(--espresso); color: var(--white); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .login-card .btn:hover { background: #2A2118; }
+    .login-card .btn:disabled { background: #C4B5A3; cursor: not-allowed; }
+    .login-card .error { color: var(--danger); font-size: 13px; margin-top: 8px; }
+
+    /* App shell */
+    .app { display: none; }
+    .app.active { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; background: var(--white); border-right: 1px solid var(--sand); padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+    .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--taupe); padding: 0 24px 24px; letter-spacing: 1px; border-bottom: 1px solid var(--sand); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6B5E52; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+    .nav-item:hover { background: var(--cream); }
+    .nav-item.active { background: var(--taupe); color: var(--white); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--sand); }
+    .sidebar-footer .user-email { font-size: 12px; color: #8A7D72; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-footer .logout-btn { font-size: 13px; color: var(--danger); cursor: pointer; background: none; border: none; font-family: inherit; }
+
+    /* Main content */
+    .main { flex: 1; overflow-y: auto; }
+    .main-header { padding: 24px 32px; border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; background: var(--white); position: sticky; top: 0; z-index: 10; }
+    .main-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; }
+    .main-content { padding: 32px; }
+
+    /* Buttons */
+    .btn-primary { background: var(--espresso); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-primary:hover { background: #2A2118; }
+    .btn-secondary { background: var(--taupe); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-outline { background: none; border: 1.5px solid var(--sand); color: var(--espresso); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+    .btn-outline:hover { border-color: var(--taupe); }
+    .btn-danger { background: none; border: 1.5px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+
+    /* Template list */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .template-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border: 1.5px solid transparent; }
+    .template-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(61,50,41,0.1); border-color: var(--sand); }
+    .template-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .template-card .meta { font-size: 12px; color: #8A7D72; }
+    .template-card .type-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-top: 8px; }
+
+    /* Editor */
+    .editor-wrap { display: flex; gap: 0; height: calc(100vh - 73px); }
+    .editor-pane { flex: 1; display: flex; flex-direction: column; }
+    .editor-pane.code { border-right: 1px solid var(--sand); }
+    .editor-toolbar { padding: 12px 16px; border-bottom: 1px solid var(--sand); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: var(--white); }
+    .placeholder-chip { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--sand); background: var(--cream); color: var(--taupe); cursor: pointer; font-family: inherit; font-weight: 500; }
+    .placeholder-chip:hover { border-color: var(--taupe); background: var(--taupe); color: var(--white); }
+    .editor-textarea { flex: 1; padding: 20px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; border: none; resize: none; background: var(--white); color: var(--espresso); }
+    .editor-textarea:focus { outline: none; }
+    .preview-pane { flex: 1; overflow-y: auto; padding: 32px; background: var(--white); }
+    .preview-pane h1 { font-family: 'Playfair Display', serif; font-size: 22px; border-bottom: 2px solid var(--taupe); padding-bottom: 8px; margin-bottom: 16px; }
+    .preview-pane h2 { font-size: 17px; margin-top: 24px; margin-bottom: 8px; }
+    .preview-pane p { margin: 8px 0; font-size: 14px; line-height: 1.7; }
+    .preview-pane strong { color: var(--espresso); }
+    .preview-pane hr { border: none; border-top: 1px solid var(--sand); margin: 20px 0; }
+    .pane-label { font-size: 11px; font-weight: 600; color: #8A7D72; text-transform: uppercase; letter-spacing: 1px; padding: 8px 16px; background: var(--cream); border-bottom: 1px solid var(--sand); }
+
+    /* Document list */
+    .doc-table { width: 100%; border-collapse: collapse; }
+    .doc-table th { text-align: left; font-size: 12px; font-weight: 600; color: #8A7D72; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--sand); }
+    .doc-table td { padding: 14px 16px; border-bottom: 1px solid var(--sand); font-size: 14px; }
+    .doc-table tr:hover { background: var(--cream); cursor: pointer; }
+    .status-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+    .status-draft { background: #F5F0EB; color: var(--taupe); }
+    .status-sent { background: #EBF0F5; color: #4A7FB5; }
+    .status-signed { background: #EBF5EC; color: var(--success); }
+
+    /* Document view */
+    .doc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .doc-header h2 { font-family: 'Playfair Display', serif; }
+    .doc-actions { display: flex; gap: 8px; }
+    .signers-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); margin-bottom: 24px; }
+    .signer-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+    .signer-status { width: 8px; height: 8px; border-radius: 50%; }
+    .contract-preview { background: var(--white); border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); line-height: 1.7; font-size: 14px; }
+    .contract-preview h1, .contract-preview h2 { font-family: 'Playfair Display', serif; }
+
+    /* Create flow */
+    .create-form { max-width: 600px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--taupe); margin-bottom: 6px; }
+    .form-group select, .form-group input { width: 100%; padding: 12px 14px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--white); }
+    .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--taupe); }
+
+    /* Copied toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 10px 24px; border-radius: 20px; font-size: 14px; font-weight: 600; display: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .toast.show { display: block; animation: fadeInUp 0.3s; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; color: #8A7D72; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state h3 { font-size: 18px; color: var(--espresso); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; margin-bottom: 24px; }
+
+    /* Title input in editor */
+    .title-input { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; border: none; background: none; width: 100%; padding: 0; color: var(--espresso); }
+    .title-input:focus { outline: none; }
+    .title-input::placeholder { color: #C4B5A3; }
+
+    /* Saving indicator */
+    .save-indicator { font-size: 12px; color: #8A7D72; display: flex; align-items: center; gap: 6px; }
+    .save-indicator.saving { color: var(--taupe); }
+    .save-indicator.saved { color: var(--success); }
+  </style>
+</head>
+<body>
+
+  <!-- Login -->
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>VowFolio</h1>
+      <p class="sub">Logg inn for å administrere kontrakter</p>
+      <input type="email" id="loginEmail" placeholder="E-post" autocomplete="email">
+      <input type="password" id="loginPassword" placeholder="Passord" autocomplete="current-password">
+      <button class="btn" id="loginBtn" onclick="login()">Logg inn</button>
+      <p class="error" id="loginError"></p>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div class="app" id="appView">
+    <div class="sidebar">
+      <div class="sidebar-logo">VowFolio</div>
+      <div class="sidebar-nav">
+        <div class="nav-item active" onclick="navigate('templates')" id="navTemplates">
+          <span class="icon">📋</span> Maler
+        </div>
+        <div class="nav-item" onclick="navigate('documents')" id="navDocuments">
+          <span class="icon">📄</span> Dokumenter
+        </div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-email" id="userEmail"></div>
+        <button class="logout-btn" onclick="logout()">Logg ut</button>
+      </div>
+    </div>
+    <div class="main" id="mainContent"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---- Supabase setup ----
+    const SUPABASE_URL = 'https://ubdqueuknaqegipnbsxc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZHF1ZXVrbmFxZWdpcG5ic3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjY2MTYsImV4cCI6MjA4OTgwMjYxNn0.UiUReWtlh6lGtoon2AwyQblIVEbzW1LMA3PBH8XclD0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let templates = [];
+    let documents = [];
+    let weddings = [];
+    let contacts = [];
+    let studioName = '';
+    let currentView = 'templates';
+    let saveTimeout = null;
+
+    // ---- Init ----
+    async function init() {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        showApp();
+      }
+    }
+    init();
+
+    // ---- Auth ----
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value;
+      const err = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+      err.textContent = '';
+      btn.disabled = true;
+      btn.textContent = 'Logger inn...';
+
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        err.textContent = error.message;
+        btn.disabled = false;
+        btn.textContent = 'Logg inn';
+        return;
+      }
+      currentUser = data.user;
+      showApp();
+    }
+
+    async function logout() {
+      await sb.auth.signOut();
+      currentUser = null;
+      document.getElementById('appView').classList.remove('active');
+      document.getElementById('loginView').style.display = 'flex';
+    }
+
+    async function showApp() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('appView').classList.add('active');
+      document.getElementById('userEmail').textContent = currentUser.email;
+      await loadData();
+      navigate('templates');
+    }
+
+    async function loadData() {
+      const [t, d, w, c, s] = await Promise.all([
+        sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
+        sb.from('document_instances').select('*').order('created_at', { ascending: false }),
+        sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
+        sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id'),
+        sb.from('studio_settings').select('studio_name').limit(1),
+      ]);
+      templates = t.data || [];
+      documents = d.data || [];
+      weddings = w.data || [];
+      contacts = c.data || [];
+      studioName = s.data?.[0]?.studio_name || '';
+    }
+
+    // ---- Navigation ----
+    function navigate(view, params) {
+      currentView = view;
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navId = view === 'templates' || view === 'editTemplate' || view === 'newTemplate'
+        ? 'navTemplates' : 'navDocuments';
+      document.getElementById(navId).classList.add('active');
+
+      const main = document.getElementById('mainContent');
+      switch (view) {
+        case 'templates': renderTemplateList(main); break;
+        case 'newTemplate': renderTemplateEditor(main, null); break;
+        case 'editTemplate': renderTemplateEditor(main, params); break;
+        case 'documents': renderDocumentList(main); break;
+        case 'createDoc': renderCreateDocument(main, params); break;
+        case 'viewDoc': renderDocumentView(main, params); break;
+      }
+    }
+
+    // ---- Template List ----
+    function renderTemplateList(el) {
+      const typeColors = { contract: 'var(--taupe)', quote: 'var(--sage)', questionnaire: 'var(--rose)', info_document: '#4A7FB5' };
+      const typeLabels = { contract: 'Kontrakt', quote: 'Tilbud', questionnaire: 'Spørreskjema', info_document: 'Info' };
+
+      let html = '<div class="main-header"><h2>Kontraktsmaler</h2><button class="btn-primary" onclick="navigate(\'newTemplate\')">+ Ny mal</button></div>';
+      html += '<div class="main-content">';
+
+      if (templates.length === 0) {
+        html += '<div class="empty-state"><div class="icon">📋</div><h3>Ingen maler enda</h3><p>Opprett din første kontraktsmal for å komme i gang.</p><button class="btn-primary" onclick="navigate(\'newTemplate\')">Opprett mal</button></div>';
+      } else {
+        html += '<div class="template-grid">';
+        for (const t of templates) {
+          const color = typeColors[t.type] || 'var(--taupe)';
+          const label = typeLabels[t.type] || t.type;
+          const date = new Date(t.updated_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' });
+          html += '<div class="template-card" onclick="navigate(\'editTemplate\', \'' + t.id + '\')">';
+          html += '<h3>' + esc(t.title) + '</h3>';
+          html += '<p class="meta">Oppdatert ' + date + '</p>';
+          html += '<span class="type-badge" style="background:' + color + '20;color:' + color + '">' + label + '</span>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    // ---- Template Editor ----
+    function renderTemplateEditor(el, templateId) {
+      const tmpl = templateId ? templates.find(t => t.id === templateId) : null;
+      const title = tmpl ? tmpl.title : '';
+      const content = tmpl ? tmpl.content : '';
+      const type = tmpl ? tmpl.type : 'contract';
+
+      const placeholders = [
+        ['{{primary_name}}', 'Navn'], ['{{partner_name}}', 'Partner'], ['{{email}}', 'E-post'],
+        ['{{phone}}', 'Telefon'], ['{{wedding_date}}', 'Dato'], ['{{venue_name}}', 'Lokale'],
+        ['{{venue_address}}', 'Adresse'], ['{{studio_name}}', 'Studio'], ['{{package_price}}', 'Pris'],
+        ['{{today_date}}', 'Dagens dato'],
+      ];
+
+      let html = '<div class="main-header">';
+      html += '<div style="display:flex;align-items:center;gap:16px;flex:1">';
+      html += '<button class="btn-outline" onclick="navigate(\'templates\')" style="padding:8px 12px">← Tilbake</button>';
+      html += '<input class="title-input" id="tmplTitle" placeholder="Maltittel..." value="' + esc(title) + '">';
+      html += '</div>';
+      html += '<div style="display:flex;align-items:center;gap:12px">';
+      html += '<span class="save-indicator" id="saveStatus">Klar</span>';
+      if (tmpl) html += '<button class="btn-danger" onclick="deleteTemplate(\'' + tmpl.id + '\')">Slett</button>';
+      html += '<button class="btn-primary" onclick="saveTemplate(\'' + (tmpl?.id || '') + '\')">' + (tmpl ? 'Lagre' : 'Opprett') + '</button>';
+      html += '</div></div>';
+
+      html += '<div class="editor-wrap">';
+      // Code pane
+      html += '<div class="editor-pane code">';
+      html += '<div class="editor-toolbar">';
+      for (const [ph, label] of placeholders) {
+        html += '<button class="placeholder-chip" onclick="insertPlaceholder(\'' + ph + '\')">' + label + '</button>';
+      }
+      html += '</div>';
+      html += '<div class="pane-label">Markdown</div>';
+      html += '<textarea class="editor-textarea" id="tmplContent" oninput="updatePreview()">' + esc(content) + '</textarea>';
+      html += '</div>';
+      // Preview pane
+      html += '<div class="editor-pane">';
+      html += '<div class="pane-label">Forhåndsvisning</div>';
+      html += '<div class="preview-pane" id="tmplPreview"></div>';
+      html += '</div>';
+      html += '</div>';
+
+      el.innerHTML = html;
+      updatePreview();
+    }
+
+    function insertPlaceholder(ph) {
+      const ta = document.getElementById('tmplContent');
+      const start = ta.selectionStart;
+      ta.value = ta.value.slice(0, start) + ph + ta.value.slice(ta.selectionEnd);
+      ta.selectionStart = ta.selectionEnd = start + ph.length;
+      ta.focus();
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const content = document.getElementById('tmplContent').value;
+      document.getElementById('tmplPreview').innerHTML = mdToHtml(content);
+    }
+
+    async function saveTemplate(id) {
+      const title = document.getElementById('tmplTitle').value.trim();
+      const content = document.getElementById('tmplContent').value;
+      if (!title) { showToast('Tittel mangler'); return; }
+
+      const status = document.getElementById('saveStatus');
+      status.textContent = 'Lagrer...';
+      status.className = 'save-indicator saving';
+
+      if (id) {
+        await sb.from('document_templates').update({ title, content, updated_at: new Date().toISOString() }).eq('id', id);
+      } else {
+        const { data } = await sb.from('document_templates').insert({ title, content, type: 'contract' }).select().single();
+        if (data) id = data.id;
+      }
+
+      await loadData();
+      status.textContent = '✓ Lagret';
+      status.className = 'save-indicator saved';
+      setTimeout(() => { status.textContent = 'Klar'; status.className = 'save-indicator'; }, 2000);
+
+      if (!id) navigate('templates');
+    }
+
+    async function deleteTemplate(id) {
+      if (!confirm('Slett denne malen?')) return;
+      await sb.from('document_templates').delete().eq('id', id);
+      await loadData();
+      navigate('templates');
+    }
+
+    // ---- Document List ----
+    function renderDocumentList(el) {
+      const statusLabels = { draft: 'Utkast', sent: 'Sendt', viewed: 'Sett', signed_by_client: 'Klient signert', signed_by_photographer: 'Fotograf signert', fully_signed: 'Ferdig signert', archived: 'Arkivert' };
+      const statusClass = { draft: 'status-draft', sent: 'status-sent', viewed: 'status-sent', signed_by_client: 'status-signed', signed_by_photographer: 'status-signed', fully_signed: 'status-signed', archived: 'status-draft' };
+
+      let html = '<div class="main-header"><h2>Dokumenter</h2><button class="btn-primary" onclick="navigate(\'createDoc\')">+ Ny kontrakt</button></div>';
+      html += '<div class="main-content">';
+
+      if (documents.length === 0) {
+        html += '<div class="empty-state"><div class="icon">📄</div><h3>Ingen dokumenter enda</h3><p>Opprett en kontrakt fra en mal.</p><button class="btn-primary" onclick="navigate(\'createDoc\')">Opprett kontrakt</button></div>';
+      } else {
+        html += '<table class="doc-table"><thead><tr><th>Tittel</th><th>Klient</th><th>Status</th><th>Opprettet</th></tr></thead><tbody>';
+        for (const doc of documents) {
+          const contact = contacts.find(c => c.id === doc.contact_id);
+          const clientName = contact ? contact.primary_name : '—';
+          const date = new Date(doc.created_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' });
+          html += '<tr onclick="navigate(\'viewDoc\', \'' + doc.id + '\')">';
+          html += '<td><strong>' + esc(doc.title) + '</strong></td>';
+          html += '<td>' + esc(clientName) + '</td>';
+          html += '<td><span class="status-badge ' + (statusClass[doc.status] || '') + '">' + (statusLabels[doc.status] || doc.status) + '</span></td>';
+          html += '<td>' + date + '</td>';
+          html += '</tr>';
+        }
+        html += '</tbody></table>';
+      }
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    // ---- Create Document ----
+    function renderCreateDocument(el) {
+      let weddingOpts = '<option value="">Velg bryllup...</option>';
+      for (const w of weddings) {
+        const name = w.partner2 ? w.partner1 + ' & ' + w.partner2 : w.partner1;
+        const date = w.wedding_date ? new Date(w.wedding_date).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        weddingOpts += '<option value="' + w.id + '">' + esc(name) + (date ? ' — ' + date : '') + '</option>';
+      }
+
+      let templateOpts = '<option value="">Velg mal...</option>';
+      for (const t of templates) {
+        templateOpts += '<option value="' + t.id + '">' + esc(t.title) + '</option>';
+      }
+
+      let html = '<div class="main-header"><h2>Opprett kontrakt</h2></div>';
+      html += '<div class="main-content"><div class="create-form">';
+      html += '<div class="form-group"><label>Mal</label><select id="createTemplate">' + templateOpts + '</select></div>';
+      html += '<div class="form-group"><label>Bryllup / Prosjekt</label><select id="createWedding" onchange="previewCreate()">' + weddingOpts + '</select></div>';
+      html += '<div id="createPreview" style="margin-top:24px"></div>';
+      html += '<button class="btn-primary" style="margin-top:24px" onclick="createDocument()">Opprett kontrakt</button>';
+      html += '</div></div>';
+      el.innerHTML = html;
+    }
+
+    function previewCreate() {
+      const weddingId = document.getElementById('createWedding').value;
+      const templateId = document.getElementById('createTemplate').value;
+      if (!weddingId || !templateId) { document.getElementById('createPreview').innerHTML = ''; return; }
+
+      const wedding = weddings.find(w => w.id === weddingId);
+      const tmpl = templates.find(t => t.id === templateId);
+      const contact = contacts.find(c => c.linked_wedding_id === weddingId) || {};
+      if (!wedding || !tmpl) return;
+
+      const resolved = resolvePlaceholders(tmpl.content, wedding, contact);
+      document.getElementById('createPreview').innerHTML =
+        '<div class="contract-preview"><h3 style="margin-bottom:16px;color:var(--taupe)">Forhåndsvisning</h3>' + mdToHtml(resolved) + '</div>';
+    }
+
+    async function createDocument() {
+      const weddingId = document.getElementById('createWedding').value;
+      const templateId = document.getElementById('createTemplate').value;
+      if (!templateId) { showToast('Velg en mal'); return; }
+
+      const tmpl = templates.find(t => t.id === templateId);
+      const wedding = weddingId ? weddings.find(w => w.id === weddingId) : null;
+      const contact = weddingId ? contacts.find(c => c.linked_wedding_id === weddingId) : null;
+
+      const resolved = resolvePlaceholders(tmpl.content, wedding, contact || {});
+
+      // Create document instance
+      const { data: doc, error } = await sb.from('document_instances').insert({
+        template_id: templateId,
+        wedding_id: weddingId || null,
+        contact_id: contact?.id || null,
+        type: tmpl.type || 'contract',
+        title: tmpl.title,
+        content: resolved,
+        status: 'draft',
+      }).select().single();
+
+      if (error) { showToast('Feil: ' + error.message); return; }
+
+      // Create signers
+      const clientName = contact?.primary_name || wedding?.partner1 || '';
+      const clientEmail = contact?.email || '';
+      await sb.from('document_signers').insert([
+        { document_id: doc.id, role: 'client', name: clientName, email: clientEmail, status: 'pending' },
+        { document_id: doc.id, role: 'photographer', name: studioName || 'Photographer', email: currentUser.email, status: 'pending' },
+      ]);
+
+      await loadData();
+      navigate('viewDoc', doc.id);
+      showToast('Kontrakt opprettet');
+    }
+
+    // ---- Document View ----
+    async function renderDocumentView(el, docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc) { el.innerHTML = '<div class="main-content"><p>Dokument ikke funnet.</p></div>'; return; }
+
+      // Fetch signers
+      const { data: signers } = await sb.from('document_signers').select('*').eq('document_id', docId);
+
+      const statusLabels = { draft: 'Utkast', sent: 'Sendt', viewed: 'Sett', signed_by_client: 'Klient signert', fully_signed: 'Ferdig signert' };
+      const statusClass = { draft: 'status-draft', sent: 'status-sent', viewed: 'status-sent', signed_by_client: 'status-signed', fully_signed: 'status-signed' };
+
+      let html = '<div class="main-header"><h2>' + esc(doc.title) + '</h2><div class="doc-actions">';
+      html += '<button class="btn-outline" onclick="navigate(\'documents\')">← Tilbake</button>';
+      if (doc.status === 'draft') {
+        html += '<button class="btn-secondary" onclick="sendToSigning(\'' + docId + '\')">Send til signering</button>';
+      }
+      html += '</div></div>';
+
+      html += '<div class="main-content">';
+
+      // Status + Signers
+      html += '<div class="signers-card">';
+      html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">';
+      html += '<span class="status-badge ' + (statusClass[doc.status] || 'status-draft') + '">' + (statusLabels[doc.status] || doc.status) + '</span>';
+      html += '</div>';
+
+      if (signers) {
+        for (const s of signers) {
+          const signed = s.status === 'signed';
+          html += '<div class="signer-row">';
+          html += '<div class="signer-status" style="background:' + (signed ? 'var(--success)' : 'var(--sand)') + '"></div>';
+          html += '<div><strong>' + esc(s.name || s.role) + '</strong> <span style="color:#8A7D72;font-size:12px">(' + (s.role === 'client' ? 'Klient' : 'Fotograf') + ')</span></div>';
+          html += '<div style="margin-left:auto;font-size:12px;color:#8A7D72">' + (signed ? '✓ Signert' : 'Venter') + '</div>';
+          html += '</div>';
+        }
+      }
+      html += '</div>';
+
+      // Contract content
+      html += '<div class="contract-preview">' + mdToHtml(doc.content) + '</div>';
+      html += '</div>';
+      el.innerHTML = html;
+    }
+
+    async function sendToSigning(docId) {
+      // Get client signer
+      const { data: signers } = await sb.from('document_signers').select('*').eq('document_id', docId).eq('role', 'client');
+      const clientSigner = signers?.[0];
+      if (!clientSigner) { showToast('Ingen klient-signer funnet'); return; }
+
+      // Generate token
+      const rawToken = generateToken();
+      const tokenHash = await hashToken(rawToken);
+
+      // Revoke old links
+      await sb.from('document_share_links')
+        .update({ revoked_at: new Date().toISOString() })
+        .eq('document_id', docId)
+        .eq('signer_id', clientSigner.id)
+        .is('revoked_at', null);
+
+      // Create share link
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate() + 30);
+      await sb.from('document_share_links').insert({
+        document_id: docId,
+        signer_id: clientSigner.id,
+        token_hash: tokenHash,
+        expires_at: expiry.toISOString(),
+      });
+
+      // Update status
+      await sb.from('document_instances')
+        .update({ status: 'sent', sent_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq('id', docId);
+
+      const url = 'https://vowfolio.com/s/' + rawToken;
+      await navigator.clipboard.writeText(url);
+
+      await loadData();
+      navigate('viewDoc', docId);
+      showToast('Signeringslenke kopiert!');
+    }
+
+    // ---- Helpers ----
+    function generateToken() {
+      const bytes = new Uint8Array(32);
+      crypto.getRandomValues(bytes);
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function hashToken(token) {
+      const data = new TextEncoder().encode(token);
+      const buf = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function resolvePlaceholders(content, wedding, contact) {
+      const w = wedding || {};
+      const c = contact || {};
+      const dateFormatter = new Intl.DateTimeFormat('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+      const weddingDate = w.wedding_date ? dateFormatter.format(new Date(w.wedding_date)) : 'TBD';
+      const today = dateFormatter.format(new Date());
+      const price = w.contract_value ? w.contract_value.toLocaleString('nb-NO') + ' kr' : 'TBD';
+
+      return content
+        .replace(/\{\{primary_name\}\}/g, c.primary_name || w.partner1 || '')
+        .replace(/\{\{partner_name\}\}/g, c.partner_name || w.partner2 || '')
+        .replace(/\{\{email\}\}/g, c.email || '')
+        .replace(/\{\{phone\}\}/g, c.phone || '')
+        .replace(/\{\{wedding_date\}\}/g, weddingDate)
+        .replace(/\{\{venue_name\}\}/g, w.venue || c.venue_name || '')
+        .replace(/\{\{venue_address\}\}/g, w.venue_address || c.venue_address || '')
+        .replace(/\{\{studio_name\}\}/g, studioName)
+        .replace(/\{\{package_price\}\}/g, price)
+        .replace(/\{\{today_date\}\}/g, today)
+        .replace(/\s*&\s*\n/g, '\n'); // Clean up empty partner
+    }
+
+    function mdToHtml(md) {
+      let h = esc(md);
+      h = h.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+      h = h.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+      h = h.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      h = h.replace(/^---$/gm, '<hr>');
+      h = h.replace(/^- (.+)$/gm, '<li>$1</li>');
+      h = h.replace(/\n\n/g, '</p><p>');
+      h = '<p>' + h + '</p>';
+      h = h.replace(/<p>\s*<\/p>/g, '');
+      return h;
+    }
+
+    function esc(s) {
+      if (!s) return '';
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+  </script>
+</body>
+</html>
