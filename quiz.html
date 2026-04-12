@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wedding Questionnaire — VowFolio</title>
+  <meta name="description" content="Help your photographer plan the perfect wedding day.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F2;color:#3D3229;min-height:100vh;-webkit-font-smoothing:antialiased}
+    .container{max-width:600px;margin:0 auto;padding:20px 16px 100px}
+    .brand{text-align:center;padding:32px 0 20px}
+    .brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#9B7E5E;letter-spacing:3px;text-transform:uppercase}
+    .brand-sub{font-size:11px;color:#B0A090;margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+    .meta{text-align:center;margin-bottom:28px}
+    .meta h2{font-family:'Playfair Display',serif;font-size:20px;color:#3D3229;margin-bottom:4px}
+    .meta p{font-size:13px;color:#8A7D6E}
+    .progress-bar{height:4px;background:#E8DFD1;border-radius:2px;margin-bottom:28px;overflow:hidden}
+    .progress-fill{height:100%;background:#6B8F71;border-radius:2px;transition:width 0.3s ease}
+    .step-counter{text-align:center;font-size:12px;color:#8A7D6E;margin-bottom:16px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(61,50,41,0.06);padding:28px 24px;margin-bottom:20px}
+    .step-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;margin-bottom:4px}
+    .step-desc{font-size:13px;color:#8A7D6E;margin-bottom:20px;line-height:1.5}
+    label{display:block;font-size:13px;font-weight:500;color:#8A7D6E;margin-bottom:6px}
+    input[type="text"],input[type="email"],input[type="tel"],input[type="number"],textarea{
+      width:100%;padding:12px 14px;border:1px solid #E8DFD1;border-radius:10px;font-size:15px;
+      font-family:'Inter',sans-serif;color:#3D3229;background:#FAFAF8;outline:none;transition:border-color 0.2s
+    }
+    input:focus,textarea:focus{border-color:#9B7E5E}
+    textarea{resize:vertical;min-height:80px}
+    .field{margin-bottom:16px}
+    .field:last-child{margin-bottom:0}
+    .row{display:flex;gap:12px}
+    .row .field{flex:1}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+    .chip{padding:10px 18px;border:1px solid #E8DFD1;border-radius:24px;font-size:14px;cursor:pointer;
+      background:#FAFAF8;color:#3D3229;transition:all 0.2s;font-family:'Inter',sans-serif}
+    .chip.selected{background:#6B8F71;color:#fff;border-color:#6B8F71}
+    .chip:hover{border-color:#9B7E5E}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #F0EBE4}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-label{font-size:14px;color:#3D3229}
+    .toggle{position:relative;width:48px;height:28px;cursor:pointer}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#E8DFD1;border-radius:14px;transition:0.2s}
+    .toggle .slider:before{content:"";position:absolute;height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s}
+    .toggle input:checked+.slider{background:#6B8F71}
+    .toggle input:checked+.slider:before{transform:translateX(20px)}
+    .nav{display:flex;gap:12px;margin-top:8px}
+    .btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;
+      font-family:'Inter',sans-serif;transition:all 0.2s}
+    .btn-back{background:#F0EBE4;color:#8A7D6E}
+    .btn-next{background:#6B8F71;color:#fff}
+    .btn-next:hover{background:#5E8062}
+    .btn-submit{background:#3D3229;color:#fff}
+    .btn-submit:hover{background:#2C2420}
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    .suggestion-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+    .suggestion{padding:6px 12px;border:1px solid #E8DFD1;border-radius:16px;font-size:12px;cursor:pointer;
+      color:#8A7D6E;background:#FAFAF8;transition:all 0.2s}
+    .suggestion:hover{border-color:#6B8F71;color:#6B8F71}
+    .time-input{width:100%;padding:12px 14px;border:1px solid #E8DFD1;border-radius:10px;font-size:15px;
+      font-family:'Inter',sans-serif;color:#3D3229;background:#FAFAF8;outline:none}
+    .loading,.error-state,.success-state{text-align:center;padding:64px 24px}
+    .spinner{width:36px;height:36px;border:3px solid #E8DFD1;border-top-color:#6B8F71;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success-icon{font-size:56px;margin-bottom:16px}
+    .state-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px}
+    .state-text{font-size:14px;color:#8A7D6E;line-height:1.6}
+    .footer{text-align:center;padding:20px 0;font-size:11px;color:#B0A090}
+    .hidden{display:none}
+    @media(max-width:480px){.row{flex-direction:column;gap:0}}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-name">VowFolio</div>
+    <div class="brand-sub">Wedding Photography</div>
+    <div id="lang-toggle" style="margin-top:12px">
+      <button onclick="setLang('en')" id="lang-en" style="padding:4px 12px;border:1px solid #E8DFD1;border-radius:6px;font-size:12px;cursor:pointer;background:#3D3229;color:#fff;font-family:Inter,sans-serif;margin-right:4px">EN</button>
+      <button onclick="setLang('no')" id="lang-no" style="padding:4px 12px;border:1px solid #E8DFD1;border-radius:6px;font-size:12px;cursor:pointer;background:#FAFAF8;color:#8A7D6E;font-family:Inter,sans-serif">NO</button>
+    </div>
+  </div>
+  <div id="app">
+    <div class="loading"><div class="spinner"></div><p style="margin-top:16px;color:#8A7D6E">Loading questionnaire...</p></div>
+  </div>
+  <div class="footer">Powered by VowFolio</div>
+</div>
+
+<script>
+const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal';
+const app = document.getElementById('app');
+
+// i18n
+let lang = localStorage.getItem('vf_lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
+const t = {
+  en: {
+    loading: 'Loading questionnaire...',
+    step: 'Step', of: 'of',
+    back: 'Back', next: 'Next', submit: 'Submit', submitting: 'Submitting...',
+    missingLink: 'Missing Link', missingLinkDesc: 'Please use the link from your photographer.',
+    invalidLink: 'Invalid Link', expired: 'Link Expired',
+    connError: 'Connection Error', connErrorDesc: 'Could not reach the server.',
+    welcome: 'Welcome to VowFolio', comingSoon: 'This portal is coming soon.',
+    thankYou: 'Thank You!', thankYouDesc: 'Your questionnaire has been submitted successfully.<br>Your photographer will review your answers and get back to you.',
+    // Steps
+    s0title: "Who's getting married?", s0desc: 'Tell us about the couple.',
+    partner1: 'Partner 1', partner2: 'Partner 2', firstName: 'First name',
+    s1title: 'Contact Details', s1desc: 'How can we reach you?',
+    email: 'Email', phone: 'Phone',
+    s2title: 'Guest Count', s2desc: 'Approximate number of guests expected.', guests: 'Number of guests',
+    s3title: 'Ceremony Type', s3desc: 'What type of ceremony are you having?',
+    church: 'Church', civil: 'Civil', outdoor: 'Outdoor',
+    s4title: 'Key Times', s4desc: 'Help us plan the day. Leave blank if unsure.',
+    ceremony: 'Ceremony', reception: 'Reception', gettingReady: 'Getting Ready',
+    guestArrival: 'Guest Arrival', speeches: 'Speeches', cakeCutting: 'Cake Cutting', firstDance: 'First Dance',
+    s5title: 'Locations', s5desc: 'Where will things happen?',
+    ceremonyLoc: 'Ceremony Location', ceremonyLocP: 'Church or venue name & address',
+    receptionLoc: 'Reception Location', receptionLocP: 'Venue name & address',
+    gettingReadyLoc: 'Getting Ready Location', gettingReadyLocP: 'Hotel, home, etc.',
+    s6title: 'First Look', s6desc: 'Will you do a first look before the ceremony?',
+    yes: 'Yes', no: 'No', undecided: 'Undecided', firstLookTime: 'First Look Time',
+    s7title: 'Photo Style', s7desc: 'What style speaks to you?',
+    s8title: 'Must-Have Shots', s8desc: 'Any specific photos you definitely want?', s8p: 'List your must-have moments...',
+    s9title: 'VIP & Group Photos', s9desc: 'Who should we make sure to photograph?', s9p: 'List important people and group combos...',
+    s10title: 'Quick Extras', s10desc: 'A few yes/no questions.',
+    hasSpeeches: 'Will there be speeches?', ringBearer: 'Ring bearer?',
+    drone: 'Interested in drone shots?', pets: 'Pets at the wedding?', flash: 'Flash photography OK?',
+    s11title: 'Logistics', s11desc: 'Practical details for the photographer.',
+    arrivalTime: 'Photographer Arrival Time', familyNotes: 'Family Dynamics', familyNotesP: 'Anything we should know about family situations?',
+    s12title: 'Key People', s12desc: 'Who should we coordinate with on the day?',
+    contacts: 'Contacts', contactsP: 'Toastmaster, venue contact, best man, maid of honor...\nFormat: Role: Name | Phone',
+    vendors: 'Other Vendors', vendorsP: 'Videographer, florist, DJ, etc.',
+    toastmaster: 'Toastmaster', venueContact: 'Venue Contact', bestMan: 'Best Man', maidOfHonor: 'Maid of Honor',
+    name: 'Name', phonePh: 'Phone number',
+    s13title: 'Anything Else?', s13desc: 'Any other details, wishes, or notes for your photographer.', s13p: 'Share anything else on your mind...',
+    // Suggestions
+    ring: 'Ring detail', sunset: 'Sunset portrait', firstKiss: 'First kiss', bouquet: 'Bouquet toss', familyGroup: 'Family group', shoes: 'Shoes & accessories',
+    grandparents: 'Grandparents', bridesmaids: 'Bride + bridesmaids', groomsmen: 'Groom + groomsmen', immFamily: 'Immediate family', collegeFriends: 'College friends',
+  },
+  no: {
+    loading: 'Laster spørreskjema...',
+    step: 'Steg', of: 'av',
+    back: 'Tilbake', next: 'Neste', submit: 'Send inn', submitting: 'Sender...',
+    missingLink: 'Manglende lenke', missingLinkDesc: 'Bruk lenken fra fotografen din.',
+    invalidLink: 'Ugyldig lenke', expired: 'Lenken er utløpt',
+    connError: 'Tilkoblingsfeil', connErrorDesc: 'Kunne ikke nå serveren.',
+    welcome: 'Velkommen til VowFolio', comingSoon: 'Denne portalen kommer snart.',
+    thankYou: 'Takk!', thankYouDesc: 'Spørreskjemaet ditt er sendt inn.<br>Fotografen din vil gjennomgå svarene og ta kontakt.',
+    s0title: 'Hvem skal gifte seg?', s0desc: 'Fortell oss om paret.',
+    partner1: 'Partner 1', partner2: 'Partner 2', firstName: 'Fornavn',
+    s1title: 'Kontaktinformasjon', s1desc: 'Hvordan kan vi nå dere?',
+    email: 'E-post', phone: 'Telefon',
+    s2title: 'Antall gjester', s2desc: 'Omtrentlig antall gjester.', guests: 'Antall gjester',
+    s3title: 'Seremonitype', s3desc: 'Hva slags seremoni blir det?',
+    church: 'Kirke', civil: 'Sivil', outdoor: 'Utendørs',
+    s4title: 'Viktige tidspunkter', s4desc: 'Hjelp oss planlegge dagen. La stå tomt hvis usikker.',
+    ceremony: 'Seremoni', reception: 'Mottak', gettingReady: 'Forberedelser',
+    guestArrival: 'Gjestene ankommer', speeches: 'Taler', cakeCutting: 'Kakekutting', firstDance: 'Første dans',
+    s5title: 'Lokasjoner', s5desc: 'Hvor skal ting skje?',
+    ceremonyLoc: 'Seremonisted', ceremonyLocP: 'Kirke eller lokale — navn og adresse',
+    receptionLoc: 'Mottakssted', receptionLocP: 'Navn og adresse',
+    gettingReadyLoc: 'Forberedelsessted', gettingReadyLocP: 'Hotell, hjemme, osv.',
+    s6title: 'First Look', s6desc: 'Vil dere gjøre en first look før seremonien?',
+    yes: 'Ja', no: 'Nei', undecided: 'Usikker', firstLookTime: 'Tidspunkt for First Look',
+    s7title: 'Fotostil', s7desc: 'Hvilken stil appellerer til dere?',
+    s8title: 'Ønskebilder', s8desc: 'Er det noen spesifikke bilder dere absolutt vil ha?', s8p: 'List opp ønskede øyeblikk...',
+    s9title: 'VIP og gruppebilder', s9desc: 'Hvem bør vi sørge for å fotografere?', s9p: 'List viktige personer og gruppekombinasjoner...',
+    s10title: 'Raske tillegg', s10desc: 'Noen ja/nei-spørsmål.',
+    hasSpeeches: 'Blir det taler?', ringBearer: 'Ringbærer?',
+    drone: 'Ønsker dere dronebilder?', pets: 'Kjæledyr i bryllupet?', flash: 'Blits OK?',
+    s11title: 'Logistikk', s11desc: 'Praktiske detaljer for fotografen.',
+    arrivalTime: 'Fotografens ankomsttid', familyNotes: 'Familiedynamikk', familyNotesP: 'Noe vi bør vite om familiesituasjonen?',
+    s12title: 'Nøkkelpersoner', s12desc: 'Hvem bør vi koordinere med på dagen?',
+    contacts: 'Kontakter', contactsP: 'Toastmaster, lokaleansvarlig, forlover...\nFormat: Rolle: Navn | Telefon',
+    vendors: 'Andre leverandører', vendorsP: 'Videograf, florist, DJ, osv.',
+    toastmaster: 'Toastmaster', venueContact: 'Lokaleansvarlig', bestMan: 'Forlover (hans)', maidOfHonor: 'Forlover (hennes)',
+    name: 'Navn', phonePh: 'Telefonnummer',
+    s13title: 'Noe annet?', s13desc: 'Andre detaljer, ønsker eller notater til fotografen.', s13p: 'Del det som er på hjertet...',
+    ring: 'Ringdetalj', sunset: 'Solnedgangsportrett', firstKiss: 'Første kyss', bouquet: 'Brudebukettkast', familyGroup: 'Familiegruppe', shoes: 'Sko og tilbehør',
+    grandparents: 'Besteforeldre', bridesmaids: 'Brud + brudepiker', groomsmen: 'Brudgom + forlovere', immFamily: 'Nærmeste familie', collegeFriends: 'Studievenner',
+  }
+};
+
+function L(key) { return (t[lang] && t[lang][key]) || t.en[key] || key; }
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('vf_lang', l);
+  document.getElementById('lang-en').style.background = l === 'en' ? '#3D3229' : '#FAFAF8';
+  document.getElementById('lang-en').style.color = l === 'en' ? '#fff' : '#8A7D6E';
+  document.getElementById('lang-no').style.background = l === 'no' ? '#3D3229' : '#FAFAF8';
+  document.getElementById('lang-no').style.color = l === 'no' ? '#fff' : '#8A7D6E';
+  if (token) renderStep();
+}
+
+// Set initial toggle state
+if (lang === 'no') { setLang('no'); }
+
+let step = 0;
+const totalSteps = 14;
+let formData = {};
+let weddingInfo = {};
+let token = null;
+
+// Token resolution: support /i/{token} path, ?token= query, and sessionStorage
+(function resolveToken() {
+  const path = location.pathname;
+  const pathMatch = path.match(/^\/i\/([a-f0-9]{64})$/);
+  if (pathMatch) {
+    token = pathMatch[1];
+    // Store in session and redirect to clean /quiz URL
+    sessionStorage.setItem('vf_token', token);
+    history.replaceState(null, '', '/quiz');
+    loadQuiz();
+    return;
+  }
+  // Fallback: ?token= query param (legacy/direct)
+  const params = new URLSearchParams(location.search);
+  const queryToken = params.get('token');
+  if (queryToken) {
+    token = queryToken;
+    sessionStorage.setItem('vf_token', token);
+    // Clean URL
+    history.replaceState(null, '', '/quiz');
+    loadQuiz();
+    return;
+  }
+  // Resume from session
+  const stored = sessionStorage.getItem('vf_token');
+  if (stored && (path === '/quiz' || path === '/quiz/')) {
+    token = stored;
+    loadQuiz();
+    return;
+  }
+  // No token found
+  if (path === '/' || path === '') {
+    app.innerHTML = '<div class="card" style="text-align:center;padding:48px 24px"><div class="state-title">' + L('welcome') + '</div><p class="state-text">' + L('comingSoon') + '</p></div>';
+  } else {
+    showError(L('missingLink'), L('missingLinkDesc'));
+  }
+})();
+
+async function loadQuiz() {
+  try {
+    const res = await fetch(API + '?action=quiz&token=' + encodeURIComponent(token));
+    const data = await res.json();
+    if (!res.ok || data.error) { showError(L('invalidLink'), data.message || L('connErrorDesc')); return; }
+    weddingInfo = data.wedding || {};
+    if (data.form) prefill(data.form);
+    renderStep();
+  } catch(e) { showError(L('connError'), L('connErrorDesc')); }
+}
+
+function prefill(f) {
+  formData = {
+    partner1Name: f.partner1_name || '', partner2Name: f.partner2_name || '',
+    email: f.email || '', phone: f.phone || '',
+    guestCount: f.guest_count ? String(f.guest_count) : '',
+    ceremonyType: f.ceremony_type || '', photoStyle: f.photo_style || '',
+    mustHaveShots: f.must_have_shots || '', vipList: f.vip_list || '',
+    ceremonyTime: f.ceremony_time || '', receptionTime: f.reception_time || '',
+    firstLook: f.first_look, firstLookTime: f.first_look_time || '',
+    gettingReadyTime: f.getting_ready_time || '', guestArrivalTime: f.guest_arrival_time || '',
+    speechesTime: f.speeches_time || '', cakeCuttingTime: f.cake_cutting_time || '',
+    firstDanceTime: f.first_dance_time || '',
+    ceremonyAddress: f.ceremony_address || '', receptionAddress: f.reception_address || '',
+    gettingReadyLocation: f.getting_ready_location || '',
+    hasSpeeches: f.has_speeches, hasRingBearer: f.has_ring_bearer,
+    wantsDrone: f.wants_drone, hasPets: f.has_pets, flashAllowed: f.flash_allowed,
+    photographerArrivalTime: f.photographer_arrival_time || '',
+    familyNotes: f.family_notes || '', coordinator: f.coordinator || '',
+    vendors: f.vendors || '', extraNotes: f.extra_notes || '',
+  };
+}
+
+function v(key) { return formData[key] || ''; }
+function sv(key, val) { formData[key] = val; }
+
+function renderStep() {
+  let h = '';
+  h += '<div class="step-counter">' + L('step') + ' ' + (step+1) + ' ' + L('of') + ' ' + totalSteps + '</div>';
+  h += '<div class="progress-bar"><div class="progress-fill" style="width:' + ((step+1)/totalSteps*100) + '%"></div></div>';
+  h += '<div class="card">';
+
+  switch(step) {
+    case 0: h += stepNames(); break;
+    case 1: h += stepContact(); break;
+    case 2: h += stepGuests(); break;
+    case 3: h += stepCeremony(); break;
+    case 4: h += stepTiming(); break;
+    case 5: h += stepLocations(); break;
+    case 6: h += stepFirstLook(); break;
+    case 7: h += stepPhotoStyle(); break;
+    case 8: h += stepMustHaves(); break;
+    case 9: h += stepVIP(); break;
+    case 10: h += stepExtras(); break;
+    case 11: h += stepLogistics(); break;
+    case 12: h += stepPractical(); break;
+    case 13: h += stepFinal(); break;
+  }
+
+  h += '</div>';
+  h += '<div class="nav">';
+  if (step > 0) h += '<button class="btn btn-back" onclick="prev()">' + L('back') + '</button>';
+  if (step < totalSteps - 1) h += '<button class="btn btn-next" onclick="next()">' + L('next') + '</button>';
+  else h += '<button class="btn btn-submit" onclick="submit()">' + L('submit') + '</button>';
+  h += '</div>';
+
+  app.innerHTML = h;
+}
+
+function next() { saveCurrentStep(); if (step < totalSteps-1) { step++; renderStep(); window.scrollTo(0,0); } }
+function prev() { saveCurrentStep(); if (step > 0) { step--; renderStep(); window.scrollTo(0,0); } }
+
+function saveCurrentStep() {
+  document.querySelectorAll('[data-field]').forEach(el => {
+    if (el.type === 'checkbox') sv(el.dataset.field, el.checked);
+    else sv(el.dataset.field, el.value);
+  });
+}
+
+function field(key, label, type, placeholder) {
+  type = type || 'text';
+  return '<div class="field"><label>' + label + '</label><input type="' + type + '" data-field="' + key + '" value="' + esc(v(key)) + '" placeholder="' + (placeholder||'') + '"></div>';
+}
+function textareaField(key, label, placeholder) {
+  return '<div class="field"><label>' + label + '</label><textarea data-field="' + key + '" placeholder="' + (placeholder||'') + '">' + esc(v(key)) + '</textarea></div>';
+}
+function timeField(key, label) {
+  return '<div class="field"><label>' + label + '</label><input type="time" class="time-input" data-field="' + key + '" value="' + esc(v(key)) + '"></div>';
+}
+
+function chipSelect(key, options) {
+  let h = '<div class="chips">';
+  options.forEach(opt => {
+    const sel = v(key) === opt ? ' selected' : '';
+    h += '<div class="chip' + sel + '" onclick="selectChip(this,\'' + key + '\',\'' + opt + '\')">' + opt + '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+function selectChip(el, key, val) {
+  sv(key, val);
+  el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function toggleField(key, label) {
+  const checked = formData[key] === true ? ' checked' : '';
+  return '<div class="toggle-row"><span class="toggle-label">' + label + '</span><label class="toggle"><input type="checkbox" data-field="' + key + '"' + checked + '><span class="slider"></span></label></div>';
+}
+
+function addSuggestion(key, text) {
+  const ta = document.querySelector('[data-field="' + key + '"]');
+  if (ta) { ta.value = ta.value ? ta.value + '\n' + text : text; sv(key, ta.value); }
+}
+
+// Steps
+function stepNames() {
+  return '<div class="step-title">' + L('s0title') + '</div><div class="step-desc">' + L('s0desc') + '</div>'
+    + field('partner1Name', L('partner1'), 'text', L('firstName'))
+    + field('partner2Name', L('partner2'), 'text', L('firstName'));
+}
+function stepContact() {
+  return '<div class="step-title">' + L('s1title') + '</div><div class="step-desc">' + L('s1desc') + '</div>'
+    + field('email', L('email'), 'email', 'your@email.com')
+    + field('phone', L('phone'), 'tel', '+47 xxx xx xxx');
+}
+function stepGuests() {
+  return '<div class="step-title">' + L('s2title') + '</div><div class="step-desc">' + L('s2desc') + '</div>'
+    + field('guestCount', L('guests'), 'number', '80');
+}
+function stepCeremony() {
+  return '<div class="step-title">' + L('s3title') + '</div><div class="step-desc">' + L('s3desc') + '</div>'
+    + chipSelect('ceremonyType', [L('church'), L('civil'), L('outdoor')]);
+}
+function stepTiming() {
+  return '<div class="step-title">' + L('s4title') + '</div><div class="step-desc">' + L('s4desc') + '</div>'
+    + timeField('gettingReadyTime', L('gettingReady'))
+    + timeField('guestArrivalTime', L('guestArrival'))
+    + timeField('ceremonyTime', L('ceremony'))
+    + timeField('receptionTime', L('reception'))
+    + timeField('speechesTime', L('speeches'))
+    + timeField('cakeCuttingTime', L('cakeCutting'))
+    + timeField('firstDanceTime', L('firstDance'));
+}
+function stepLocations() {
+  return '<div class="step-title">' + L('s5title') + '</div><div class="step-desc">' + L('s5desc') + '</div>'
+    + field('ceremonyAddress', L('ceremonyLoc'), 'text', L('ceremonyLocP'))
+    + field('receptionAddress', L('receptionLoc'), 'text', L('receptionLocP'))
+    + field('gettingReadyLocation', L('gettingReadyLoc'), 'text', L('gettingReadyLocP'));
+}
+function stepFirstLook() {
+  return '<div class="step-title">' + L('s6title') + '</div><div class="step-desc">' + L('s6desc') + '</div>'
+    + chipSelect('firstLook', [L('yes'), L('no'), L('undecided')])
+    + '<div style="margin-top:16px">' + timeField('firstLookTime', L('firstLookTime')) + '</div>';
+}
+function stepPhotoStyle() {
+  return '<div class="step-title">' + L('s7title') + '</div><div class="step-desc">' + L('s7desc') + '</div>'
+    + chipSelect('photoStyle', ['Reportage', 'Classic', 'Editorial', 'Fine Art', 'Dark & Moody']);
+}
+function stepMustHaves() {
+  let h = '<div class="step-title">' + L('s8title') + '</div><div class="step-desc">' + L('s8desc') + '</div>';
+  h += textareaField('mustHaveShots', '', L('s8p'));
+  h += '<div class="suggestion-chips">';
+  [L('ring'),L('sunset'),L('firstKiss'),L('bouquet'),L('familyGroup'),L('shoes')].forEach(s => {
+    h += '<div class="suggestion" onclick="addSuggestion(\'mustHaveShots\',\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+function stepVIP() {
+  let h = '<div class="step-title">' + L('s9title') + '</div><div class="step-desc">' + L('s9desc') + '</div>';
+  h += textareaField('vipList', '', L('s9p'));
+  h += '<div class="suggestion-chips">';
+  [L('grandparents'),L('bridesmaids'),L('groomsmen'),L('immFamily'),L('collegeFriends')].forEach(s => {
+    h += '<div class="suggestion" onclick="addSuggestion(\'vipList\',\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+function stepExtras() {
+  return '<div class="step-title">' + L('s10title') + '</div><div class="step-desc">' + L('s10desc') + '</div>'
+    + toggleField('hasSpeeches', L('hasSpeeches'))
+    + toggleField('hasRingBearer', L('ringBearer'))
+    + toggleField('wantsDrone', L('drone'))
+    + toggleField('hasPets', L('pets'))
+    + toggleField('flashAllowed', L('flash'));
+}
+function stepLogistics() {
+  return '<div class="step-title">' + L('s11title') + '</div><div class="step-desc">' + L('s11desc') + '</div>'
+    + timeField('photographerArrivalTime', L('arrivalTime'))
+    + textareaField('familyNotes', L('familyNotes'), L('familyNotesP'));
+}
+function stepPractical() {
+  var h = '<div class="step-title">' + L('s12title') + '</div><div class="step-desc">' + L('s12desc') + '</div>';
+  var roles = [
+    {key: 'toastmaster', label: L('toastmaster')},
+    {key: 'venueContact', label: L('venueContact')},
+    {key: 'bestMan', label: L('bestMan')},
+    {key: 'maidOfHonor', label: L('maidOfHonor')},
+  ];
+  roles.forEach(function(r) {
+    h += '<div style="margin-bottom:16px;padding:14px;background:#FAFAF8;border-radius:10px;border:1px solid #E8DFD1">';
+    h += '<div style="font-size:13px;font-weight:600;color:#9B7E5E;margin-bottom:8px">' + r.label + '</div>';
+    h += '<div class="field" style="margin-bottom:8px"><input type="text" data-field="' + r.key + 'Name" value="' + esc(v(r.key+'Name')) + '" placeholder="' + L('name') + '" style="width:100%;padding:10px 12px;border:1px solid #E8DFD1;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;background:#fff"></div>';
+    h += '<div class="field"><input type="tel" data-field="' + r.key + 'Phone" value="' + esc(v(r.key+'Phone')) + '" placeholder="' + L('phonePh') + '" style="width:100%;padding:10px 12px;border:1px solid #E8DFD1;border-radius:8px;font-size:14px;font-family:Inter,sans-serif;background:#fff"></div>';
+    h += '</div>';
+  });
+  h += textareaField('vendors', L('vendors'), L('vendorsP'));
+  return h;
+}
+function stepFinal() {
+  return '<div class="step-title">' + L('s13title') + '</div><div class="step-desc">' + L('s13desc') + '</div>'
+    + textareaField('extraNotes', '', L('s13p'));
+}
+
+async function submit() {
+  saveCurrentStep();
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true; btn.textContent = L('submitting');
+
+  // Fix firstLook from string to boolean (handles both EN and NO values)
+  var fl = formData.firstLook;
+  if (fl === 'Yes' || fl === 'Ja') formData.firstLook = true;
+  else if (fl === 'No' || fl === 'Nei') formData.firstLook = false;
+  else formData.firstLook = null;
+
+  // Build coordinator field from structured inputs (app expects "Role: Name | Phone\n" format)
+  var coordLines = [];
+  var roles = ['toastmaster','venueContact','bestMan','maidOfHonor'];
+  var roleLabels = {toastmaster:'Toastmaster',venueContact:'Venue Contact',bestMan:'Best Man',maidOfHonor:'Maid of Honor'};
+  roles.forEach(function(r) {
+    var name = (formData[r+'Name'] || '').trim();
+    var phone = (formData[r+'Phone'] || '').trim();
+    if (name) {
+      coordLines.push(roleLabels[r] + ': ' + name + (phone ? ' | ' + phone : ''));
+    }
+  });
+  formData.coordinator = coordLines.join('\n');
+
+  try {
+    const res = await fetch(API + '?action=quiz-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, form_data: formData })
+    });
+    const data = await res.json();
+    if (data.error) { btn.disabled = false; btn.textContent = 'Submit'; alert(data.message || 'Error saving.'); return; }
+    showSuccess();
+  } catch(e) { btn.disabled = false; btn.textContent = 'Submit'; alert('Network error.'); }
+}
+
+function showSuccess() {
+  app.innerHTML = '<div class="card success-state"><div class="success-icon">&#10004;</div><div class="state-title">' + L('thankYou') + '</div><div class="state-text">' + L('thankYouDesc') + '</div></div>';
+}
+function showError(title, msg) {
+  app.innerHTML = '<div class="card error-state"><div style="font-size:48px;margin-bottom:16px">&#9888;&#65039;</div><div class="state-title">' + esc(title) + '</div><div class="state-text">' + esc(msg) + '</div></div>';
+}
+function esc(s) { if (!s) return ''; var d=document.createElement('div'); d.textContent=s; return d.innerHTML.replace(/"/g,'&quot;'); }
+</script>
+</body>
+</html>

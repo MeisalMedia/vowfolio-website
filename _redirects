@@ -2,3 +2,4 @@
 /contact/:id        /contact.html  200
 /s/:token           /signing.html  200
 /f/:token           /feedback.html 200
+/i/:token           /quiz.html     200
