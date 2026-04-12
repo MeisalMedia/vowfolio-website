@@ -295,6 +295,15 @@
       // Build fields
       var fields = '';
 
+      // Project type selector
+      fields += '<div class="field"><label>Hva gjelder det?</label>' +
+        '<div class="checkbox-group">' +
+        '<label class="radio-label"><input type="radio" name="project_type" value="wedding" checked><span>Bryllup</span></label>' +
+        '<label class="radio-label"><input type="radio" name="project_type" value="couple"><span>Par / forlovelse</span></label>' +
+        '<label class="radio-label"><input type="radio" name="project_type" value="family"><span>Familie</span></label>' +
+        '<label class="radio-label"><input type="radio" name="project_type" value="other"><span>Annet</span></label>' +
+        '</div></div>';
+
       fields += '<div class="field"><label for="name">Navn <span class="req">*</span></label>' +
         '<input type="text" id="name" name="name" required placeholder="Ditt navn" autocomplete="name"></div>';
 
