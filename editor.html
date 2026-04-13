@@ -275,6 +275,13 @@
       el.innerHTML = html;
 
       // Initialize Quill
+      // Register HR blot
+      const BlockEmbed = Quill.import('blots/block/embed');
+      class DividerBlot extends BlockEmbed { static create() { return document.createElement('hr'); } }
+      DividerBlot.blotName = 'divider';
+      DividerBlot.tagName = 'hr';
+      Quill.register(DividerBlot);
+
       quillEditor = new Quill('#quillEditor', {
         theme: 'snow',
         placeholder: 'Skriv kontrakten din her...',
@@ -306,8 +313,9 @@
       if (!quillEditor) return;
       const range = quillEditor.getSelection(true);
       quillEditor.insertText(range.index, '\n');
-      quillEditor.clipboard.dangerouslyPasteHTML(range.index + 1, '<hr>');
-      quillEditor.setSelection(range.index + 2);
+      quillEditor.insertEmbed(range.index + 1, 'divider', true);
+      quillEditor.insertText(range.index + 2, '\n');
+      quillEditor.setSelection(range.index + 3);
     }
 
     function getEditorMarkdown() {
@@ -454,17 +462,42 @@
 
     function mdToHtml(md) {
       if (!md) return '';
-      let h = esc(md);
-      h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
-      h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
-      h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-      h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-      h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-      h = h.replace(/^---$/gm,'<hr>');
-      h = h.replace(/^- (.+)$/gm,'<li>$1</li>');
-      h = h.replace(/\n\n/g,'</p><p>');
-      h = '<p>'+h+'</p>';
-      h = h.replace(/<p>\s*<\/p>/g,'');
+      // Process line by line for better structure
+      const lines = md.split('\n');
+      let html = '';
+      let inList = false;
+
+      for (let line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed === '---') {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<hr>';
+          continue;
+        }
+
+        if (trimmed.startsWith('- ')) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += '<li>' + formatInline(trimmed.slice(2)) + '</li>';
+          continue;
+        }
+
+        if (inList) { html += '</ul>'; inList = false; }
+
+        if (trimmed.startsWith('### ')) { html += '<h3>' + formatInline(trimmed.slice(4)) + '</h3>'; }
+        else if (trimmed.startsWith('## ')) { html += '<h2>' + formatInline(trimmed.slice(3)) + '</h2>'; }
+        else if (trimmed.startsWith('# ')) { html += '<h1>' + formatInline(trimmed.slice(2)) + '</h1>'; }
+        else if (trimmed === '') { html += '<p><br></p>'; }
+        else { html += '<p>' + formatInline(trimmed) + '</p>'; }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    function formatInline(text) {
+      let h = esc(text);
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
       return h;
     }
 
