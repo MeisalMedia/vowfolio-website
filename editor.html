@@ -265,6 +265,8 @@
       for (const [ph, label] of placeholders) {
         html += '<button class="placeholder-chip" onclick="insertPlaceholder(\'' + ph + '\')">' + label + '</button>';
       }
+      html += '<span style="width:1px;height:16px;background:var(--sand);margin:0 4px"></span>';
+      html += '<button class="placeholder-chip" onclick="insertHR()" title="Skillelinje">― Linje</button>';
       html += '</div>';
       // Quill editor
       html += '<div id="quillEditor"></div>';
@@ -298,6 +300,14 @@
       const range = quillEditor.getSelection(true);
       quillEditor.insertText(range.index, ph);
       quillEditor.setSelection(range.index + ph.length);
+    }
+
+    function insertHR() {
+      if (!quillEditor) return;
+      const range = quillEditor.getSelection(true);
+      quillEditor.insertText(range.index, '\n');
+      quillEditor.clipboard.dangerouslyPasteHTML(range.index + 1, '<hr>');
+      quillEditor.setSelection(range.index + 2);
     }
 
     function getEditorMarkdown() {
