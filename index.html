@@ -46,6 +46,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
     }
     .logo {
       font-family: 'Playfair Display', serif;
@@ -55,6 +56,20 @@
       letter-spacing: 1px;
       text-decoration: none;
     }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-left: auto;
+    }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--espresso);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--taupe); }
     .nav-cta {
       background: var(--espresso);
       color: var(--white);
@@ -248,7 +263,10 @@
   <nav>
     <div class="nav-inner">
       <a href="/" class="logo">VowFolio</a>
-      <a href="https://testflight.apple.com/join/epwEKS8J" class="nav-cta">Last ned beta</a>
+      <div class="nav-links">
+        <a href="/pricing" class="nav-link">Pricing</a>
+        <a href="https://testflight.apple.com/join/epwEKS8J" class="nav-cta">Last ned beta</a>
+      </div>
     </div>
   </nav>
 
