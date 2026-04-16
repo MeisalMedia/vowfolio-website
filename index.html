@@ -457,25 +457,63 @@
       line-height: 1.4;
     }
 
-    /* Story */
-    .story {
-      max-width: 700px;
+    /* Testimonials */
+    .testimonials {
+      max-width: 1000px;
       margin: 0 auto;
       padding: 80px 24px;
+    }
+    .testimonials-header {
       text-align: center;
+      margin-bottom: 48px;
     }
-    .story-quote {
+    .testimonials-header h2 {
       font-family: 'Playfair Display', serif;
-      font-size: 24px;
-      font-style: italic;
-      color: var(--espresso);
-      line-height: 1.5;
-      margin-bottom: 16px;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
     }
-    .story-author {
-      font-size: 14px;
+    .testimonials-header p {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .testimonial-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 30px 26px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.05);
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: "\201C";
+      position: absolute;
+      top: 6px;
+      left: 18px;
+      font-family: 'Playfair Display', serif;
+      font-size: 72px;
       color: var(--taupe);
+      opacity: 0.18;
+      line-height: 1;
+    }
+    .testimonial-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--espresso);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .testimonial-attr {
+      font-size: 13px;
       font-weight: 500;
+      color: var(--taupe);
     }
 
     /* CTA section */
@@ -538,15 +576,6 @@
       line-height: 1.5;
       margin-top: 4px;
       max-width: 240px;
-    }
-
-    /* Story extra line */
-    .story-sub {
-      margin-top: 8px;
-      font-size: 14px;
-      color: var(--muted);
-      font-style: italic;
-      line-height: 1.6;
     }
 
     /* FAQ */
@@ -672,7 +701,8 @@
       .shots-grid { gap: 28px 16px; }
       .mid-cta { padding: 10px 20px 40px; }
       .why { padding: 60px 20px; }
-      .story { padding: 60px 20px; }
+      .testimonials { padding: 60px 20px; }
+      .testimonials-grid { grid-template-columns: 1fr; gap: 16px; }
       .faq { padding: 60px 20px; }
       .cta-section { padding: 60px 20px 120px; }
       .mobile-sticky-cta { display: block; }
@@ -938,14 +968,31 @@
     </div>
   </section>
 
-  <!-- Story + Trust stats -->
-  <section class="story">
-    <p class="story-quote" data-lang="en">"I built VowFolio because I needed it myself. After years of spreadsheets, scattered notes, and five different apps — I wanted everything in one place."</p>
-    <p class="story-quote" data-lang="no">"Jeg bygget VowFolio fordi jeg trengte det selv. Etter år med regneark, notater og fem forskjellige apper — ville jeg ha alt samlet."</p>
-    <p class="story-author" data-lang="en">— Helge, wedding photographer and founder</p>
-    <p class="story-author" data-lang="no">— Helge, bryllupsfotograf og grunnlegger</p>
-    <p class="story-sub" data-lang="en">Built after shooting 16+ weddings and feeling the same chaos every time.</p>
-    <p class="story-sub" data-lang="no">Bygget etter 16+ bryllup — og det samme kaoset hver eneste gang.</p>
+  <!-- Testimonials + Trust stats -->
+  <section class="testimonials">
+    <div class="testimonials-header">
+      <h2 data-lang="en">What photographers say</h2>
+      <h2 data-lang="no">Hva fotografer sier</h2>
+      <p data-lang="en">From the photographers who use it.</p>
+      <p data-lang="no">Fra fotografene som bruker den.</p>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card">
+        <p class="testimonial-quote" data-lang="en">"The day plan alone changed how I shoot weddings. I always know what's next."</p>
+        <p class="testimonial-quote" data-lang="no">"Dagplanen alene endret måten jeg fotograferer bryllup på. Jeg vet alltid hva som kommer neste."</p>
+        <p class="testimonial-attr" data-lang="en">— Second shooter</p>
+        <p class="testimonial-attr" data-lang="no">— Medfotograf</p>
+      </div>
+
+      <div class="testimonial-card">
+        <p class="testimonial-quote" data-lang="en">"I built this after 16+ weddings because I was tired of juggling notes, timelines and messages."</p>
+        <p class="testimonial-quote" data-lang="no">"Jeg bygget dette etter 16+ bryllup fordi jeg var lei av å sjonglere notater, tidslinjer og meldinger."</p>
+        <p class="testimonial-attr" data-lang="en">— Helge, photographer &amp; founder</p>
+        <p class="testimonial-attr" data-lang="no">— Helge, fotograf og grunnlegger</p>
+      </div>
+
+    </div>
     <div class="trust-stats">
       <div class="trust-stat">
         <div class="trust-stat-value">16+</div>
