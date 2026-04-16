@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title>Session Questionnaire — VowFolio</title>
+  <meta name="description" content="Help your photographer prepare for your photo session.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F2;color:#3D3229;min-height:100vh;min-height:100dvh;-webkit-font-smoothing:antialiased}
+    .container{max-width:600px;margin:0 auto;padding:20px 16px 180px}
+    .brand{text-align:center;padding:32px 0 20px}
+    .brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#9B7E5E;letter-spacing:3px;text-transform:uppercase}
+    .brand-sub{font-size:11px;color:#B0A090;margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+    .lang-toggle{margin-top:12px}
+    .lang-btn{padding:4px 12px;border:1px solid #E8DFD1;border-radius:6px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;margin-right:4px;transition:all 0.2s}
+    .lang-btn.active{background:#3D3229;color:#fff;border-color:#3D3229}
+    .lang-btn:not(.active){background:#FAFAF8;color:#8A7D6E}
+    .meta{text-align:center;margin-bottom:28px}
+    .meta h2{font-family:'Playfair Display',serif;font-size:20px;color:#3D3229;margin-bottom:4px}
+    .meta p{font-size:13px;color:#8A7D6E}
+    .progress-wrap{margin-bottom:28px}
+    .progress-bar{height:4px;background:#E8DFD1;border-radius:2px;overflow:hidden}
+    .progress-fill{height:100%;background:#6B8F71;border-radius:2px;transition:width 0.4s ease}
+    .step-counter{text-align:center;font-size:12px;color:#8A7D6E;margin-top:8px}
+    .card{background:#fff;border-radius:16px;box-shadow:0 2px 16px rgba(61,50,41,0.06);padding:28px 24px;margin-bottom:20px}
+    .step-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;margin-bottom:4px}
+    .step-desc{font-size:13px;color:#8A7D6E;margin-bottom:20px;line-height:1.5}
+    .field{margin-bottom:18px}
+    .field:last-child{margin-bottom:0}
+    .field-label{display:block;font-size:13px;font-weight:500;color:#8A7D6E;margin-bottom:6px}
+    .field-label .req{color:#C2685A;margin-left:2px}
+    input[type="text"],input[type="time"],textarea{
+      width:100%;padding:14px 14px;border:1px solid #E8DFD1;border-radius:10px;font-size:16px;
+      font-family:'Inter',sans-serif;color:#3D3229;background:#FAFAF8;outline:none;transition:border-color 0.2s;
+      -webkit-appearance:none;appearance:none
+    }
+    input:focus,textarea:focus{border-color:#9B7E5E}
+    textarea{resize:vertical;min-height:90px}
+    input::placeholder,textarea::placeholder{color:#B0A090}
+    .field-error input,.field-error textarea{border-color:#C2685A}
+    .field-error .error-msg{display:block}
+    .error-msg{display:none;font-size:12px;color:#C2685A;margin-top:4px}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+    .chip{padding:12px 20px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;
+      border:1px solid #E8DFD1;border-radius:24px;font-size:14px;cursor:pointer;
+      background:#FAFAF8;color:#3D3229;transition:all 0.2s;font-family:'Inter',sans-serif;
+      -webkit-tap-highlight-color:transparent;user-select:none}
+    .chip.selected{background:#6B8F71;color:#fff;border-color:#6B8F71}
+    .chip:hover{border-color:#9B7E5E}
+    .chip:active{transform:scale(0.97)}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F0EBE4}
+    .toggle-row:last-child{border-bottom:none}
+    .toggle-label{font-size:14px;color:#3D3229}
+    .toggle{position:relative;width:48px;height:28px;cursor:pointer;flex-shrink:0;margin-left:12px}
+    .toggle input{opacity:0;width:0;height:0;position:absolute}
+    .toggle .slider{position:absolute;top:0;left:0;right:0;bottom:0;background:#E8DFD1;border-radius:14px;transition:0.2s}
+    .toggle .slider:before{content:"";position:absolute;height:22px;width:22px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:0.2s}
+    .toggle input:checked+.slider{background:#6B8F71}
+    .toggle input:checked+.slider:before{transform:translateX(20px)}
+    .sticky-nav{position:fixed;bottom:0;left:0;right:0;background:#FAF7F2;border-top:1px solid #E8DFD1;padding:12px 16px;
+      padding-bottom:max(12px,env(safe-area-inset-bottom));z-index:100}
+    .sticky-nav-inner{max-width:600px;margin:0 auto;display:flex;gap:12px}
+    .btn{flex:1;padding:16px;border:none;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;
+      font-family:'Inter',sans-serif;transition:all 0.2s;-webkit-tap-highlight-color:transparent}
+    .btn-back{background:#F0EBE4;color:#8A7D6E}
+    .btn-back:active{background:#E8DFD1}
+    .btn-next{background:#6B8F71;color:#fff}
+    .btn-next:hover{background:#5E8062}
+    .btn-next:active{background:#527152}
+    .btn-submit{background:#3D3229;color:#fff}
+    .btn-submit:hover{background:#2C2420}
+    .btn-submit:active{background:#1E1916}
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    .loading,.error-state,.success-state{text-align:center;padding:64px 24px}
+    .spinner{width:36px;height:36px;border:3px solid #E8DFD1;border-top-color:#6B8F71;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .success-icon{font-size:56px;margin-bottom:16px}
+    .state-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px}
+    .state-text{font-size:14px;color:#8A7D6E;line-height:1.6;max-width:360px;margin:0 auto}
+    .footer{text-align:center;padding:20px 0;font-size:11px;color:#B0A090}
+    .hidden{display:none}
+    @media(max-width:480px){
+      .container{padding:16px 12px 180px}
+      .card{padding:24px 18px}
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-name">VowFolio</div>
+    <div class="brand-sub" id="brand-sub">Photo Session</div>
+    <div class="lang-toggle">
+      <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" id="lang-no" onclick="setLang('no')">NO</button>
+    </div>
+  </div>
+  <div id="app">
+    <div class="loading"><div class="spinner"></div><p style="margin-top:16px;color:#8A7D6E" id="loading-text">Loading questionnaire...</p></div>
+  </div>
+  <div class="footer">Powered by VowFolio</div>
+</div>
+
+<div class="sticky-nav hidden" id="sticky-nav">
+  <div class="sticky-nav-inner">
+    <button class="btn btn-back" id="btn-back" onclick="goBack()">Back</button>
+    <button class="btn btn-next" id="btn-next" onclick="goNext()">Next</button>
+  </div>
+</div>
+
+<script>
+const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal';
+const app = document.getElementById('app');
+const stickyNav = document.getElementById('sticky-nav');
+
+/* ── i18n ── */
+let lang = localStorage.getItem('vf_lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
+
+const ui = {
+  en: {
+    loading: 'Loading questionnaire...',
+    brandSub: 'Photo Session',
+    step: 'Step', of: 'of',
+    back: 'Back', next: 'Next', submit: 'Submit', submitting: 'Submitting...',
+    required: 'This field is required',
+    requiredChip: 'Please select an option',
+    missingLink: 'Missing Link', missingLinkDesc: 'Please use the link from your photographer.',
+    invalidLink: 'Invalid Link', invalidLinkDesc: 'This link is not valid. Please contact your photographer.',
+    connError: 'Connection Error', connErrorDesc: 'Could not reach the server. Please try again.',
+    thankYou: 'Thank You!',
+    thankYouDesc: 'Your answers have been received.<br>PHOTOGRAPHER will review them and be in touch.',
+    alreadySubmitted: 'Already Submitted',
+    alreadySubmittedDesc: 'You have already completed this questionnaire.<br>If you need to make changes, please contact your photographer.',
+  },
+  no: {
+    loading: 'Laster spørreskjema...',
+    brandSub: 'Fotosesjon',
+    step: 'Steg', of: 'av',
+    back: 'Tilbake', next: 'Neste', submit: 'Send inn', submitting: 'Sender...',
+    required: 'Dette feltet er påkrevd',
+    requiredChip: 'Velg et alternativ',
+    missingLink: 'Manglende lenke', missingLinkDesc: 'Bruk lenken fra fotografen din.',
+    invalidLink: 'Ugyldig lenke', invalidLinkDesc: 'Denne lenken er ikke gyldig. Kontakt fotografen din.',
+    connError: 'Tilkoblingsfeil', connErrorDesc: 'Kunne ikke nå serveren. Prøv igjen.',
+    thankYou: 'Takk!',
+    thankYouDesc: 'Svarene dine er mottatt.<br>PHOTOGRAPHER vil gjennomgå dem og ta kontakt.',
+    alreadySubmitted: 'Allerede sendt inn',
+    alreadySubmittedDesc: 'Du har allerede fylt ut dette spørreskjemaet.<br>Kontakt fotografen din hvis du trenger å gjøre endringer.',
+  }
+};
+
+function L(key) { return (ui[lang] && ui[lang][key]) || ui.en[key] || key; }
+function localized(obj) {
+  if (!obj) return '';
+  return obj[lang] || obj.en || obj.no || '';
+}
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('vf_lang', l);
+  document.getElementById('lang-en').className = 'lang-btn' + (l === 'en' ? ' active' : '');
+  document.getElementById('lang-no').className = 'lang-btn' + (l === 'no' ? ' active' : '');
+  document.getElementById('brand-sub').textContent = L('brandSub');
+  if (slides && slides.length > 0) renderSlide();
+  else {
+    const lt = document.getElementById('loading-text');
+    if (lt) lt.textContent = L('loading');
+  }
+}
+
+/* ── State ── */
+let token = null;
+let templateId = null;
+let slides = [];
+let responses = {};
+let currentSlide = 0;
+let photographerName = '';
+let projectName = '';
+let submitted = false;
+
+const STORAGE_KEY = () => 'vf_sq_' + (token || 'none');
+
+function saveLocal() {
+  try { localStorage.setItem(STORAGE_KEY(), JSON.stringify({ responses, currentSlide })); } catch(e) {}
+}
+function loadLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE_KEY()));
+    if (d && d.responses) { responses = d.responses; currentSlide = d.currentSlide || 0; }
+  } catch(e) {}
+}
+function clearLocal() {
+  try { localStorage.removeItem(STORAGE_KEY()); } catch(e) {}
+}
+
+/* ── Init ── */
+setLang(lang);
+
+(function resolveToken() {
+  const path = location.pathname;
+  // /q/TOKEN pattern
+  const pathMatch = path.match(/^\/q\/([a-f0-9-]+)\/?$/i);
+  if (pathMatch) {
+    token = pathMatch[1];
+  }
+  // Fallback: ?token= query param
+  if (!token) {
+    const params = new URLSearchParams(location.search);
+    token = params.get('token');
+  }
+  // Fallback: sessionStorage
+  if (!token) {
+    token = sessionStorage.getItem('vf_sq_token');
+  }
+  // Template ID from query
+  const params = new URLSearchParams(location.search);
+  templateId = params.get('t') || params.get('template_id');
+
+  if (!token) {
+    showError(L('missingLink'), L('missingLinkDesc'));
+    return;
+  }
+  sessionStorage.setItem('vf_sq_token', token);
+  loadLocal();
+  loadQuiz();
+})();
+
+async function loadQuiz() {
+  try {
+    let url = API + '?action=session-quiz&token=' + encodeURIComponent(token);
+    if (templateId) url += '&template_id=' + encodeURIComponent(templateId);
+    const res = await fetch(url);
+    if (!res.ok) {
+      if (res.status === 404 || res.status === 401) {
+        showError(L('invalidLink'), L('invalidLinkDesc'));
+      } else {
+        showError(L('connError'), L('connErrorDesc'));
+      }
+      return;
+    }
+    const data = await res.json();
+    if (!data.template || !data.template.slides) {
+      showError(L('invalidLink'), L('invalidLinkDesc'));
+      return;
+    }
+    slides = data.template.slides;
+    photographerName = data.photographerName || '';
+    projectName = data.projectName || '';
+
+    // If server returned existing responses, pre-fill and show submitted state
+    if (data.response && data.response.responses && Object.keys(data.response.responses).length > 0) {
+      responses = data.response.responses;
+      submitted = true;
+      showSuccess();
+      return;
+    }
+
+    // Clamp currentSlide
+    if (currentSlide >= slides.length) currentSlide = 0;
+    renderSlide();
+  } catch(e) {
+    showError(L('connError'), L('connErrorDesc'));
+  }
+}
+
+/* ── Rendering ── */
+function renderSlide() {
+  if (!slides.length) return;
+  const slide = slides[currentSlide];
+  const isLast = currentSlide === slides.length - 1;
+
+  let html = '';
+  // Progress
+  const pct = ((currentSlide + 1) / slides.length) * 100;
+  html += '<div class="progress-wrap">';
+  html += '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%"></div></div>';
+  html += '<div class="step-counter">' + L('step') + ' ' + (currentSlide + 1) + ' ' + L('of') + ' ' + slides.length + '</div>';
+  html += '</div>';
+
+  // Meta
+  if (projectName) {
+    html += '<div class="meta"><p>' + esc(projectName) + '</p></div>';
+  }
+
+  // Card
+  html += '<div class="card">';
+  html += '<h2 class="step-title">' + esc(localized(slide.title)) + '</h2>';
+  if (slide.desc) {
+    html += '<p class="step-desc">' + esc(localized(slide.desc)) + '</p>';
+  }
+
+  // Fields
+  if (slide.fields && slide.fields.length) {
+    slide.fields.forEach(function(f) {
+      html += renderField(f);
+    });
+  }
+  html += '</div>';
+
+  app.innerHTML = html;
+
+  // Restore values into DOM
+  if (slide.fields) {
+    slide.fields.forEach(function(f) {
+      restoreFieldValue(f);
+    });
+  }
+
+  // Nav
+  stickyNav.classList.remove('hidden');
+  const btnBack = document.getElementById('btn-back');
+  const btnNext = document.getElementById('btn-next');
+  btnBack.textContent = L('back');
+  btnBack.style.display = currentSlide === 0 ? 'none' : '';
+  if (isLast) {
+    btnNext.textContent = L('submit');
+    btnNext.className = 'btn btn-submit';
+    btnNext.onclick = doSubmit;
+  } else {
+    btnNext.textContent = L('next');
+    btnNext.className = 'btn btn-next';
+    btnNext.onclick = goNext;
+  }
+  btnNext.disabled = false;
+
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderField(f) {
+  const label = localized(f.label) || f.key;
+  const placeholder = localized(f.placeholder) || '';
+  const req = f.required ? '<span class="req">*</span>' : '';
+  let html = '<div class="field" id="field-' + f.key + '">';
+
+  switch (f.type) {
+    case 'text':
+      html += '<label class="field-label">' + esc(label) + req + '</label>';
+      html += '<input type="text" id="input-' + f.key + '" data-key="' + f.key + '" placeholder="' + esc(placeholder) + '" oninput="onInput(this)" onfocus="scrollField(this)">';
+      html += '<span class="error-msg">' + L('required') + '</span>';
+      break;
+
+    case 'textarea':
+      html += '<label class="field-label">' + esc(label) + req + '</label>';
+      html += '<textarea id="input-' + f.key + '" data-key="' + f.key + '" placeholder="' + esc(placeholder) + '" oninput="onInput(this)" onfocus="scrollField(this)"></textarea>';
+      html += '<span class="error-msg">' + L('required') + '</span>';
+      break;
+
+    case 'time':
+      html += '<label class="field-label">' + esc(label) + req + '</label>';
+      html += '<input type="time" id="input-' + f.key + '" data-key="' + f.key + '" onchange="onInput(this)" onfocus="scrollField(this)">';
+      html += '<span class="error-msg">' + L('required') + '</span>';
+      break;
+
+    case 'chips':
+      html += '<label class="field-label">' + esc(label) + req + '</label>';
+      html += '<div class="chips" id="chips-' + f.key + '">';
+      if (f.options) {
+        f.options.forEach(function(opt) {
+          html += '<div class="chip" data-key="' + f.key + '" data-value="' + esc(opt.value) + '" onclick="selectChip(this,false)">' + esc(localized(opt.label)) + '</div>';
+        });
+      }
+      html += '</div>';
+      html += '<span class="error-msg">' + L('requiredChip') + '</span>';
+      break;
+
+    case 'multi_chips':
+      html += '<label class="field-label">' + esc(label) + req + '</label>';
+      html += '<div class="chips" id="chips-' + f.key + '">';
+      if (f.options) {
+        f.options.forEach(function(opt) {
+          html += '<div class="chip" data-key="' + f.key + '" data-value="' + esc(opt.value) + '" onclick="selectChip(this,true)">' + esc(localized(opt.label)) + '</div>';
+        });
+      }
+      html += '</div>';
+      html += '<span class="error-msg">' + L('requiredChip') + '</span>';
+      break;
+
+    case 'toggle':
+      html += '<div class="toggle-row">';
+      html += '<span class="toggle-label">' + esc(label) + '</span>';
+      html += '<label class="toggle"><input type="checkbox" id="input-' + f.key + '" data-key="' + f.key + '" onchange="onToggle(this)"><span class="slider"></span></label>';
+      html += '</div>';
+      break;
+
+    default:
+      html += '<label class="field-label">' + esc(label) + '</label>';
+      html += '<input type="text" id="input-' + f.key + '" data-key="' + f.key + '" placeholder="' + esc(placeholder) + '" oninput="onInput(this)">';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function restoreFieldValue(f) {
+  const val = responses[f.key];
+  if (val === undefined || val === null) return;
+
+  if (f.type === 'chips') {
+    const container = document.getElementById('chips-' + f.key);
+    if (!container) return;
+    container.querySelectorAll('.chip').forEach(function(c) {
+      if (c.dataset.value === val) c.classList.add('selected');
+    });
+  } else if (f.type === 'multi_chips') {
+    const container = document.getElementById('chips-' + f.key);
+    if (!container) return;
+    const arr = Array.isArray(val) ? val : [val];
+    container.querySelectorAll('.chip').forEach(function(c) {
+      if (arr.indexOf(c.dataset.value) !== -1) c.classList.add('selected');
+    });
+  } else if (f.type === 'toggle') {
+    const el = document.getElementById('input-' + f.key);
+    if (el) el.checked = !!val;
+  } else {
+    const el = document.getElementById('input-' + f.key);
+    if (el) el.value = val;
+  }
+}
+
+/* ── Interactions ── */
+function onInput(el) {
+  responses[el.dataset.key] = el.value;
+  el.closest('.field').classList.remove('field-error');
+}
+
+function onToggle(el) {
+  responses[el.dataset.key] = el.checked;
+}
+
+function selectChip(el, multi) {
+  const key = el.dataset.key;
+  const value = el.dataset.value;
+  const container = el.parentElement;
+
+  if (multi) {
+    el.classList.toggle('selected');
+    const selected = [];
+    container.querySelectorAll('.chip.selected').forEach(function(c) { selected.push(c.dataset.value); });
+    responses[key] = selected;
+  } else {
+    container.querySelectorAll('.chip').forEach(function(c) { c.classList.remove('selected'); });
+    el.classList.add('selected');
+    responses[key] = value;
+  }
+  el.closest('.field').classList.remove('field-error');
+}
+
+function scrollField(el) {
+  // On mobile, ensure the field is visible above the keyboard
+  setTimeout(function() {
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
+}
+
+/* ── Validation ── */
+function validateCurrentSlide() {
+  const slide = slides[currentSlide];
+  if (!slide.fields) return true;
+  let valid = true;
+  slide.fields.forEach(function(f) {
+    if (!f.required) return;
+    const val = responses[f.key];
+    const fieldEl = document.getElementById('field-' + f.key);
+    if (!fieldEl) return;
+
+    let empty = false;
+    if (f.type === 'chips') {
+      empty = !val;
+    } else if (f.type === 'multi_chips') {
+      empty = !val || (Array.isArray(val) && val.length === 0);
+    } else if (f.type === 'toggle') {
+      // toggles always have a value
+      empty = false;
+    } else {
+      empty = !val || (typeof val === 'string' && val.trim() === '');
+    }
+
+    if (empty) {
+      fieldEl.classList.add('field-error');
+      valid = false;
+    } else {
+      fieldEl.classList.remove('field-error');
+    }
+  });
+  return valid;
+}
+
+function validateAll() {
+  let valid = true;
+  let firstBadSlide = -1;
+  slides.forEach(function(slide, i) {
+    if (!slide.fields) return;
+    slide.fields.forEach(function(f) {
+      if (!f.required) return;
+      const val = responses[f.key];
+      let empty = false;
+      if (f.type === 'chips') {
+        empty = !val;
+      } else if (f.type === 'multi_chips') {
+        empty = !val || (Array.isArray(val) && val.length === 0);
+      } else if (f.type === 'toggle') {
+        empty = false;
+      } else {
+        empty = !val || (typeof val === 'string' && val.trim() === '');
+      }
+      if (empty) {
+        valid = false;
+        if (firstBadSlide === -1) firstBadSlide = i;
+      }
+    });
+  });
+  return { valid, firstBadSlide };
+}
+
+/* ── Navigation ── */
+function goNext() {
+  if (!validateCurrentSlide()) return;
+  // Collect any remaining input values from DOM
+  collectCurrentValues();
+  saveLocal();
+  if (currentSlide < slides.length - 1) {
+    currentSlide++;
+    renderSlide();
+  }
+}
+
+function goBack() {
+  collectCurrentValues();
+  saveLocal();
+  if (currentSlide > 0) {
+    currentSlide--;
+    renderSlide();
+  }
+}
+
+function collectCurrentValues() {
+  const slide = slides[currentSlide];
+  if (!slide.fields) return;
+  slide.fields.forEach(function(f) {
+    if (f.type === 'chips' || f.type === 'multi_chips') return; // already handled by click
+    if (f.type === 'toggle') {
+      const el = document.getElementById('input-' + f.key);
+      if (el) responses[f.key] = el.checked;
+      return;
+    }
+    const el = document.getElementById('input-' + f.key);
+    if (el) responses[f.key] = el.value;
+  });
+}
+
+/* ── Submit ── */
+async function doSubmit() {
+  if (!validateCurrentSlide()) return;
+  collectCurrentValues();
+
+  // Global validation
+  const check = validateAll();
+  if (!check.valid) {
+    currentSlide = check.firstBadSlide;
+    renderSlide();
+    // Re-validate to show errors
+    setTimeout(function() { validateCurrentSlide(); }, 50);
+    return;
+  }
+
+  const btnNext = document.getElementById('btn-next');
+  btnNext.disabled = true;
+  btnNext.textContent = L('submitting');
+
+  try {
+    const res = await fetch(API + '?action=session-quiz-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token, responses: responses })
+    });
+    if (!res.ok) throw new Error('Submit failed');
+    clearLocal();
+    submitted = true;
+    showSuccess();
+  } catch(e) {
+    btnNext.disabled = false;
+    btnNext.textContent = L('submit');
+    showError(L('connError'), L('connErrorDesc'));
+  }
+}
+
+/* ── States ── */
+function showSuccess() {
+  stickyNav.classList.add('hidden');
+  let desc = L('thankYouDesc');
+  if (photographerName) {
+    desc = desc.replace('PHOTOGRAPHER', esc(photographerName));
+  } else {
+    desc = desc.replace('PHOTOGRAPHER', lang === 'no' ? 'Fotografen din' : 'Your photographer');
+  }
+  app.innerHTML =
+    '<div class="success-state">' +
+      '<div class="success-icon">&#10024;</div>' +
+      '<h2 class="state-title">' + L('thankYou') + '</h2>' +
+      '<p class="state-text">' + desc + '</p>' +
+    '</div>';
+}
+
+function showError(title, desc) {
+  stickyNav.classList.add('hidden');
+  app.innerHTML =
+    '<div class="error-state">' +
+      '<h2 class="state-title">' + esc(title) + '</h2>' +
+      '<p class="state-text">' + esc(desc) + '</p>' +
+    '</div>';
+}
+
+function esc(s) {
+  if (!s) return '';
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

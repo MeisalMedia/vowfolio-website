@@ -110,8 +110,7 @@ const t = {
     // Steps
     s0title: "Who's getting married?", s0desc: 'Tell us about the couple.',
     partner1: 'Partner 1', partner2: 'Partner 2', firstName: 'First name',
-    s1title: 'Contact Details', s1desc: 'How can we reach you?',
-    email: 'Email', phone: 'Phone',
+    phonePh1: 'Phone number (optional)',
     s2title: 'Guest Count', s2desc: 'Approximate number of guests expected.', guests: 'Number of guests',
     s3title: 'Ceremony Type', s3desc: 'What type of ceremony are you having?',
     church: 'Church', civil: 'Civil', outdoor: 'Outdoor',
@@ -153,8 +152,7 @@ const t = {
     thankYou: 'Takk!', thankYouDesc: 'Spørreskjemaet ditt er sendt inn.<br>Fotografen din vil gjennomgå svarene og ta kontakt.',
     s0title: 'Hvem skal gifte seg?', s0desc: 'Fortell oss om paret.',
     partner1: 'Partner 1', partner2: 'Partner 2', firstName: 'Fornavn',
-    s1title: 'Kontaktinformasjon', s1desc: 'Hvordan kan vi nå dere?',
-    email: 'E-post', phone: 'Telefon',
+    phonePh1: 'Telefonnummer (valgfritt)',
     s2title: 'Antall gjester', s2desc: 'Omtrentlig antall gjester.', guests: 'Antall gjester',
     s3title: 'Seremonitype', s3desc: 'Hva slags seremoni blir det?',
     church: 'Kirke', civil: 'Sivil', outdoor: 'Utendørs',
@@ -198,14 +196,14 @@ function setLang(l) {
   if (token) renderStep();
 }
 
-// Set initial toggle state
-if (lang === 'no') { setLang('no'); }
-
 let step = 0;
-const totalSteps = 14;
+const totalSteps = 13;
 let formData = {};
 let weddingInfo = {};
 let token = null;
+
+// Set initial toggle state
+if (lang === 'no') { setLang('no'); }
 
 // Token resolution: support /i/{token} path, ?token= query, and sessionStorage
 (function resolveToken() {
@@ -285,19 +283,18 @@ function renderStep() {
 
   switch(step) {
     case 0: h += stepNames(); break;
-    case 1: h += stepContact(); break;
-    case 2: h += stepGuests(); break;
-    case 3: h += stepCeremony(); break;
-    case 4: h += stepTiming(); break;
-    case 5: h += stepLocations(); break;
-    case 6: h += stepFirstLook(); break;
-    case 7: h += stepPhotoStyle(); break;
-    case 8: h += stepMustHaves(); break;
-    case 9: h += stepVIP(); break;
-    case 10: h += stepExtras(); break;
-    case 11: h += stepLogistics(); break;
-    case 12: h += stepPractical(); break;
-    case 13: h += stepFinal(); break;
+    case 1: h += stepGuests(); break;
+    case 2: h += stepCeremony(); break;
+    case 3: h += stepTiming(); break;
+    case 4: h += stepLocations(); break;
+    case 5: h += stepFirstLook(); break;
+    case 6: h += stepPhotoStyle(); break;
+    case 7: h += stepMustHaves(); break;
+    case 8: h += stepVIP(); break;
+    case 9: h += stepExtras(); break;
+    case 10: h += stepLogistics(); break;
+    case 11: h += stepPractical(); break;
+    case 12: h += stepFinal(); break;
   }
 
   h += '</div>';
@@ -361,12 +358,9 @@ function addSuggestion(key, text) {
 function stepNames() {
   return '<div class="step-title">' + L('s0title') + '</div><div class="step-desc">' + L('s0desc') + '</div>'
     + field('partner1Name', L('partner1'), 'text', L('firstName'))
-    + field('partner2Name', L('partner2'), 'text', L('firstName'));
-}
-function stepContact() {
-  return '<div class="step-title">' + L('s1title') + '</div><div class="step-desc">' + L('s1desc') + '</div>'
-    + field('email', L('email'), 'email', 'your@email.com')
-    + field('phone', L('phone'), 'tel', '+47 xxx xx xxx');
+    + field('partner1Phone', '', 'tel', L('phonePh1'))
+    + field('partner2Name', L('partner2'), 'text', L('firstName'))
+    + field('partner2Phone', '', 'tel', L('phonePh1'));
 }
 function stepGuests() {
   return '<div class="step-title">' + L('s2title') + '</div><div class="step-desc">' + L('s2desc') + '</div>'
