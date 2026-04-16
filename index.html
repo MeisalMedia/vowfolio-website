@@ -189,6 +189,81 @@
       color: var(--faint);
     }
 
+    /* Hero microcopy strip */
+    .hero-micro {
+      margin-top: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 13px;
+      color: var(--faint);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hero-micro span { white-space: nowrap; }
+    .hero-micro svg {
+      width: 14px;
+      height: 14px;
+      color: var(--sage);
+      margin-right: 4px;
+      vertical-align: -2px;
+    }
+
+    /* How it works */
+    .howto {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .howto-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .howto-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .howto-header p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .howto-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .howto-step {
+      position: relative;
+      padding: 28px 24px;
+      background: var(--white);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.05);
+    }
+    .howto-step-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 40px;
+      font-weight: 700;
+      color: var(--taupe);
+      line-height: 1;
+      margin-bottom: 14px;
+      opacity: 0.85;
+    }
+    .howto-step h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+    .howto-step p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
     /* Features */
     .features {
       max-width: 1100px;
@@ -248,6 +323,140 @@
       line-height: 1.6;
     }
 
+    /* Screenshots */
+    .shots {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+    }
+    .shots-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .shots-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .shots-header p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .shots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 32px 24px;
+    }
+    .shot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .shot-frame {
+      background: var(--white);
+      border-radius: 28px;
+      padding: 10px;
+      box-shadow: 0 10px 32px rgba(61,50,41,0.12);
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+    .shot-frame img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 20px;
+    }
+    .shot-caption {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--espresso);
+      letter-spacing: 0.4px;
+    }
+
+    /* Why VowFolio */
+    .why {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 24px;
+      text-align: center;
+    }
+    .why-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--taupe);
+      margin-bottom: 14px;
+    }
+    .why h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .why-lede {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .why-points {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: left;
+    }
+    .why-point {
+      padding: 24px 22px;
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--sand);
+    }
+    .why-point-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 6px;
+    }
+    .why-point-body {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Trust stats */
+    .trust-stats {
+      max-width: 900px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      text-align: center;
+    }
+    .trust-stat {
+      padding: 8px;
+    }
+    .trust-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--taupe);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .trust-stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
     /* Story */
     .story {
       max-width: 700px;
@@ -301,12 +510,23 @@
     footer a { color: var(--taupe); text-decoration: none; }
 
     /* Responsive */
+    @media (max-width: 900px) {
+      .howto-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-points { grid-template-columns: 1fr; }
+      .trust-stats { grid-template-columns: 1fr; gap: 20px; }
+    }
     @media (max-width: 640px) {
       .nav-links { gap: 12px; }
       .nav-link { display: none; }
       .hero { padding: 120px 20px 60px; }
+      .hero-micro { gap: 14px; font-size: 12px; }
+      .howto { padding: 60px 20px; }
+      .howto-grid { grid-template-columns: 1fr; }
       .features { padding: 60px 20px; }
       .features-grid { grid-template-columns: 1fr; }
+      .shots { padding: 20px 20px 60px; }
+      .shots-grid { gap: 28px 16px; }
+      .why { padding: 60px 20px; }
       .story { padding: 60px 20px; }
       .cta-section { padding: 60px 20px; }
     }
@@ -346,8 +566,61 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
       Last ned fra TestFlight
     </a>
-    <p class="hero-sub" data-lang="en">Free during beta · iOS 17+</p>
-    <p class="hero-sub" data-lang="no">Gratis under beta · iOS 17+</p>
+    <div class="hero-micro" data-lang="en">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Free during beta</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>No credit card</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>2 min to get started</span>
+    </div>
+    <div class="hero-micro" data-lang="no">
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Gratis under beta</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Ingen betalingsinfo</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>2 minutter å komme i gang</span>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="howto">
+    <div class="howto-header">
+      <h2 data-lang="en">How it works</h2>
+      <h2 data-lang="no">Slik fungerer det</h2>
+      <p data-lang="en">From the first inquiry to the final delivery — without the chaos in between.</p>
+      <p data-lang="no">Fra første henvendelse til ferdig leveranse — uten kaoset mellom.</p>
+    </div>
+    <div class="howto-grid">
+
+      <div class="howto-step">
+        <div class="howto-step-num">1</div>
+        <h3 data-lang="en">Get your first inquiry</h3>
+        <h3 data-lang="no">Få første henvendelse</h3>
+        <p data-lang="en">The client fills out your form. Everything lands in the app — automatically.</p>
+        <p data-lang="no">Klienten fyller ut skjemaet ditt. Alt havner i appen — automatisk.</p>
+      </div>
+
+      <div class="howto-step">
+        <div class="howto-step-num">2</div>
+        <h3 data-lang="en">Plan the wedding</h3>
+        <h3 data-lang="no">Planlegg bryllupet</h3>
+        <p data-lang="en">Shotlist, timeline and notes in one place. Share with your crew in a tap.</p>
+        <p data-lang="no">Shotliste, timeline og notater på ett sted. Del med crewet ditt med ett trykk.</p>
+      </div>
+
+      <div class="howto-step">
+        <div class="howto-step-num">3</div>
+        <h3 data-lang="en">Run the day with confidence</h3>
+        <h3 data-lang="no">Gjennomfør dagen med ro</h3>
+        <p data-lang="en">Always know what's next. Day plan, shotlist and timing — right in your pocket.</p>
+        <p data-lang="no">Alltid vite hva som kommer neste. Dagplan, shotliste og timing — rett i lomma.</p>
+      </div>
+
+      <div class="howto-step">
+        <div class="howto-step-num">4</div>
+        <h3 data-lang="en">Deliver and wrap up</h3>
+        <h3 data-lang="no">Lever og avslutt</h3>
+        <p data-lang="en">Tasks, payments and feedback forms — no chaos after the wedding.</p>
+        <p data-lang="no">Oppgaver, betalinger og tilbakemeldingsskjema — ingen kaos etter bryllupet.</p>
+      </div>
+
+    </div>
   </section>
 
   <!-- Features -->
@@ -411,12 +684,116 @@
     </div>
   </section>
 
-  <!-- Story -->
+  <!-- Screenshots -->
+  <section class="shots">
+    <div class="shots-header">
+      <h2 data-lang="en">See it in action</h2>
+      <h2 data-lang="no">Se det i bruk</h2>
+      <p data-lang="en">A quick look at the views you'll live in.</p>
+      <p data-lang="no">Et raskt innblikk i visningene du kommer til å bo i.</p>
+    </div>
+    <div class="shots-grid">
+
+      <div class="shot">
+        <div class="shot-frame">
+          <img src="/screenshots/wedding.png" alt="Wedding detail view" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Wedding detail</div>
+        <div class="shot-caption" data-lang="no">Bryllupsdetaljer</div>
+      </div>
+
+      <div class="shot">
+        <div class="shot-frame">
+          <img src="/screenshots/dayplan.png" alt="Day plan view" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Day plan</div>
+        <div class="shot-caption" data-lang="no">Dagplan</div>
+      </div>
+
+      <div class="shot">
+        <div class="shot-frame">
+          <img src="/screenshots/shotlist.png" alt="Shotlist view" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Shotlist</div>
+        <div class="shot-caption" data-lang="no">Shotliste</div>
+      </div>
+
+      <div class="shot">
+        <div class="shot-frame">
+          <img src="/screenshots/client-portal.png" alt="Client portal" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Client portal</div>
+        <div class="shot-caption" data-lang="no">Klientportal</div>
+      </div>
+
+      <div class="shot">
+        <div class="shot-frame">
+          <img src="/screenshots/find-crew.png" alt="Find crew view" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Find crew</div>
+        <div class="shot-caption" data-lang="no">Finn crew</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Why VowFolio -->
+  <section class="why">
+    <div class="why-eyebrow" data-lang="en">Why VowFolio</div>
+    <div class="why-eyebrow" data-lang="no">Hvorfor VowFolio</div>
+    <h2 data-lang="en">Built for wedding days.<br>Not generic workflows.</h2>
+    <h2 data-lang="no">Laget for bryllupsdager.<br>Ikke generiske arbeidsflyter.</h2>
+    <p class="why-lede" data-lang="en">Most tools are built for any kind of business. VowFolio is built for the exact way you actually work.</p>
+    <p class="why-lede" data-lang="no">De fleste verktøy er laget for alle typer bedrifter. VowFolio er laget for måten du faktisk jobber på.</p>
+    <div class="why-points">
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">Wedding-specific</div>
+        <div class="why-point-title" data-lang="no">Laget for bryllup</div>
+        <div class="why-point-body" data-lang="en">Shotlists, day plans, getting-ready and first look — built in. Not bolted on.</div>
+        <div class="why-point-body" data-lang="no">Shotlister, dagplan, getting-ready og first look — bygget inn. Ikke skrudd på etterpå.</div>
+      </div>
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">No bloated CRM</div>
+        <div class="why-point-title" data-lang="no">Ingen overfylt CRM</div>
+        <div class="why-point-body" data-lang="en">No pipelines you'll never use, no settings you'll never touch. Just the parts that actually matter.</div>
+        <div class="why-point-body" data-lang="no">Ingen pipelines du aldri bruker, ingen innstillinger du aldri rører. Bare delene som faktisk teller.</div>
+      </div>
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">Made on wedding days</div>
+        <div class="why-point-title" data-lang="no">Laget på bryllupsdager</div>
+        <div class="why-point-body" data-lang="en">Every feature has been tested at real weddings — not just designed in a boardroom.</div>
+        <div class="why-point-body" data-lang="no">Hver funksjon er testet på ekte bryllup — ikke bare tegnet opp i et møterom.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Story + Trust stats -->
   <section class="story">
     <p class="story-quote" data-lang="en">"I built VowFolio because I needed it myself. After years of spreadsheets, scattered notes, and five different apps — I wanted everything in one place."</p>
     <p class="story-quote" data-lang="no">"Jeg bygget VowFolio fordi jeg trengte det selv. Etter år med regneark, notater og fem forskjellige apper — ville jeg ha alt samlet."</p>
     <p class="story-author" data-lang="en">— Helge, wedding photographer and founder</p>
     <p class="story-author" data-lang="no">— Helge, bryllupsfotograf og grunnlegger</p>
+    <div class="trust-stats">
+      <div class="trust-stat">
+        <div class="trust-stat-value">16+</div>
+        <div class="trust-stat-label" data-lang="en">Real weddings shot</div>
+        <div class="trust-stat-label" data-lang="no">Ekte bryllup fotografert</div>
+      </div>
+      <div class="trust-stat">
+        <div class="trust-stat-value">1</div>
+        <div class="trust-stat-label" data-lang="en">Photographer building it</div>
+        <div class="trust-stat-label" data-lang="no">Fotograf som bygger det</div>
+      </div>
+      <div class="trust-stat">
+        <div class="trust-stat-value">0</div>
+        <div class="trust-stat-label" data-lang="en">Generic templates</div>
+        <div class="trust-stat-label" data-lang="no">Generiske maler</div>
+      </div>
+    </div>
   </section>
 
   <!-- CTA -->
