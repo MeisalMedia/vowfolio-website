@@ -329,8 +329,40 @@
       box-shadow: 0 8px 40px rgba(61,50,41,0.12);
     }
 
+    /* Studio card = "preview" treatment: softer, less finished-looking */
     .plan-studio {
-      opacity: 0.88;
+      background: linear-gradient(180deg, rgba(232,224,214,0.35) 0%, rgba(250,247,242,0.85) 100%);
+      border: 1.5px dashed rgba(155,126,94,0.35);
+      box-shadow: none;
+    }
+    .plan-studio:hover {
+      transform: none;
+      box-shadow: 0 4px 20px rgba(61,50,41,0.05);
+    }
+    .plan-studio .plan-name {
+      color: var(--faint);
+    }
+    .plan-studio .plan-title {
+      color: var(--muted);
+    }
+    .plan-studio .plan-price .amount {
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .plan-studio .plan-features li {
+      color: var(--muted);
+    }
+    .plan-studio .plan-features li::before {
+      border-color: var(--faint);
+    }
+    .plan-studio-eta {
+      font-size: 11px;
+      color: var(--faint);
+      font-style: italic;
+      text-align: left;
+      margin-top: -18px;
+      margin-bottom: 22px;
+      letter-spacing: 0.2px;
     }
 
     /* Mid-section */
@@ -648,10 +680,10 @@
           <li data-lang="no">Alt i Starter</li>
           <li data-lang="en"><strong>Automations</strong></li>
           <li data-lang="no"><strong>Automatiseringer</strong></li>
-          <li data-lang="en">Full client portal (data flows automatically into app)</li>
-          <li data-lang="no">Full klientportal (data flyter rett inn i appen)</li>
+          <li data-lang="en">A client portal worth showing off</li>
+          <li data-lang="no">En klientportal verdt å vise frem</li>
           <li data-lang="en">Invite second shooters</li>
-          <li data-lang="no">Inviter andreskyttere</li>
+          <li data-lang="no">Inviter medfotografer</li>
           <li data-lang="en">Advanced day plan (notes, flow, timing)</li>
           <li data-lang="no">Avansert dagplan (notater, flyt, timing)</li>
           <li data-lang="en">Priority support</li>
@@ -673,10 +705,12 @@
         <p class="plan-desc" data-lang="en">More power, more control, more growth.</p>
         <p class="plan-desc" data-lang="no">Mer kraft, mer kontroll, mer vekst.</p>
         <div class="plan-price">
-          <span class="amount">$399</span>
+          <span class="amount">~$399</span>
           <span class="period" data-lang="en">/ year</span>
           <span class="period" data-lang="no">/ år</span>
         </div>
+        <div class="plan-studio-eta" data-lang="en">Estimated — final pricing set at launch</div>
+        <div class="plan-studio-eta" data-lang="no">Anslått — endelig pris bestemmes ved lansering</div>
         <ul class="plan-features">
           <li data-lang="en">Everything in Pro</li>
           <li data-lang="no">Alt i Pro</li>
@@ -699,7 +733,7 @@
   <!-- Mid-section -->
   <section class="mid">
     <h2 data-lang="en">Stop juggling tools.<br>Start running your business.</h2>
-    <h2 data-lang="no">Slutt å sjonglere verktøy.<br>Start å drive bedriften.</h2>
+    <h2 data-lang="no">Slutt å sjonglere verktøy.<br>Driv bedriften enklere.</h2>
     <ul class="mid-bullets">
       <li data-lang="en">No more spreadsheets and scattered notes</li>
       <li data-lang="no">Slutt med regneark og spredte notater</li>
