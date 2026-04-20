@@ -141,6 +141,28 @@
     .chat-send:disabled{background:#DFD5C6;cursor:not-allowed}
     .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
     .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
+
+    /* Intake summary (expandable when submitted) */
+    .tile.expanded + .tile-expand.intake-expand{max-height:640px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .intake-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .intake-scroll{overflow-y:auto;max-height:480px;padding:4px 0 4px;-webkit-overflow-scrolling:touch}
+    .intake-loading{padding:20px;text-align:center;color:#B0A090;font-size:13px}
+    .intake-section{margin-top:14px}
+    .intake-section:first-child{margin-top:4px}
+    .intake-section-title{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#9B8D7E;font-weight:600;margin-bottom:4px;padding:0 2px}
+    .intake-row{display:flex;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px solid #F4EFE6;font-size:13.5px;align-items:baseline}
+    .intake-row:last-child{border-bottom:none}
+    .intake-row .intake-label{color:#8A7D6E;flex-shrink:0}
+    .intake-row .intake-value{color:#3D3229;text-align:right;word-break:break-word;flex:1;font-weight:500}
+    .intake-row.yn .intake-value.yes{color:#6B8F71}
+    .intake-row.yn .intake-value.no{color:#B07A3E}
+    .intake-note{padding:8px 2px;border-bottom:1px solid #F4EFE6}
+    .intake-note:last-child{border-bottom:none}
+    .intake-note-label{font-size:12px;color:#8A7D6E;margin-bottom:4px}
+    .intake-note-value{font-size:13.5px;color:#3D3229;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+    .intake-actions{margin-top:12px;padding-top:10px;border-top:1px solid #EFE7DA;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#8A7D6E}
+    .intake-edit-btn{background:#FAFAF8;border:1px solid #E8DFD1;color:#6B5E4F;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color 0.15s,color 0.15s}
+    .intake-edit-btn:hover{border-color:#9B7E5E;color:#3D3229}
   </style>
 </head>
 <body>
@@ -215,6 +237,56 @@ const t = {
     nextIntake: 'Questionnaire pending',
     nextDeposit: 'Deposit pending',
     nextAllSet: 'All set — see you on the day',
+
+    intakeSummary: 'Submitted — tap to review your answers',
+    intakeEdit: 'Edit answers',
+    intakeSubmittedOn: 'Submitted',
+    intakeUpdatedOn: 'Updated',
+    intakeLoading: 'Loading your answers…',
+    intakeError: 'Could not load — please try again.',
+    intakeYes: 'Yes',
+    intakeNo: 'No',
+    sContact: 'Contact',
+    sDay: 'The day',
+    sTimeline: 'Timeline',
+    sLocations: 'Locations',
+    sDetails: 'Details',
+    sNotes: 'Notes',
+    lPartner1: 'Partner 1',
+    lPartner2: 'Partner 2',
+    lPartner1Phone: 'Partner 1 phone',
+    lPartner2Phone: 'Partner 2 phone',
+    lEmail: 'Email',
+    lPhone: 'Phone',
+    lAddress: 'Address',
+    lGuests: 'Guests',
+    lCeremonyType: 'Ceremony type',
+    lPackage: 'Package',
+    lPhotoStyle: 'Photo style',
+    lCoordinator: 'Coordinator',
+    lVendors: 'Other vendors',
+    lGettingReady: 'Getting ready',
+    lPhotographerArrives: 'Photographer arrives',
+    lFirstLook: 'First look',
+    lFirstLookTime: 'First look time',
+    lCeremony: 'Ceremony',
+    lGuestArrival: 'Guest arrival',
+    lReception: 'Reception',
+    lSpeechesTime: 'Speeches',
+    lCakeCutting: 'Cake cutting',
+    lFirstDance: 'First dance',
+    lGettingReadyLocation: 'Getting ready',
+    lCeremonyAddress: 'Ceremony',
+    lReceptionAddress: 'Reception',
+    lHasSpeeches: 'Speeches planned',
+    lRingBearer: 'Ring bearer',
+    lDrone: 'Drone',
+    lPets: 'Pets',
+    lFlash: 'Flash allowed',
+    lMustHave: 'Must-have shots',
+    lVip: 'VIPs',
+    lFamily: 'Family notes',
+    lExtra: 'Anything else',
 
     faqTitle: 'Questions couples often ask',
     faq1q: 'When will I receive my photos?',
@@ -302,6 +374,56 @@ const t = {
     nextDeposit: 'Depositum gjenstår',
     nextAllSet: 'Alt er klart — vi sees på dagen',
 
+    intakeSummary: 'Innsendt — trykk for å se svarene',
+    intakeEdit: 'Rediger svar',
+    intakeSubmittedOn: 'Sendt inn',
+    intakeUpdatedOn: 'Oppdatert',
+    intakeLoading: 'Laster svarene deres…',
+    intakeError: 'Kunne ikke laste — prøv igjen.',
+    intakeYes: 'Ja',
+    intakeNo: 'Nei',
+    sContact: 'Kontakt',
+    sDay: 'Dagen',
+    sTimeline: 'Tidslinje',
+    sLocations: 'Steder',
+    sDetails: 'Detaljer',
+    sNotes: 'Notater',
+    lPartner1: 'Partner 1',
+    lPartner2: 'Partner 2',
+    lPartner1Phone: 'Telefon partner 1',
+    lPartner2Phone: 'Telefon partner 2',
+    lEmail: 'E-post',
+    lPhone: 'Telefon',
+    lAddress: 'Adresse',
+    lGuests: 'Gjester',
+    lCeremonyType: 'Type seremoni',
+    lPackage: 'Pakke',
+    lPhotoStyle: 'Fotostil',
+    lCoordinator: 'Koordinator',
+    lVendors: 'Andre leverandører',
+    lGettingReady: 'Klargjøring',
+    lPhotographerArrives: 'Fotograf ankommer',
+    lFirstLook: 'First look',
+    lFirstLookTime: 'First look-tidspunkt',
+    lCeremony: 'Seremoni',
+    lGuestArrival: 'Gjester ankommer',
+    lReception: 'Middag / fest',
+    lSpeechesTime: 'Taler',
+    lCakeCutting: 'Kakeskjæring',
+    lFirstDance: 'Første dans',
+    lGettingReadyLocation: 'Klargjøring',
+    lCeremonyAddress: 'Seremoni',
+    lReceptionAddress: 'Middag / fest',
+    lHasSpeeches: 'Taler planlagt',
+    lRingBearer: 'Ringbærer',
+    lDrone: 'Drone',
+    lPets: 'Kjæledyr',
+    lFlash: 'Blits tillatt',
+    lMustHave: 'Må-ha-bilder',
+    lVip: 'Viktige personer',
+    lFamily: 'Familienotater',
+    lExtra: 'Noe annet',
+
     faqTitle: 'Spørsmål par ofte stiller',
     faq1q: 'Når får vi bildene?',
     faq1a: 'Fotografen deler det ferdige galleriet når redigeringen er klar. Vanlig leveringstid er 4–8 uker etter bryllupet, men sjekk kontrakten for nøyaktig tidslinje.',
@@ -355,6 +477,13 @@ function setLang(newLang) {
       if (tile) tile.classList.add('expanded');
       bindChatInput();
       renderChatMessages();
+    }
+    if (localStorage.getItem(INTAKE_STATE_KEY) === '1') {
+      const itile = document.getElementById('intake-tile');
+      if (itile) {
+        itile.classList.add('expanded');
+        if (intakeData) renderIntake(intakeData);
+      }
     }
   }
 }
@@ -543,6 +672,27 @@ function render(data) {
 
     <div class="section-title">${tr('nextSteps')}</div>
 
+    ${intake.submitted ? `
+    <button class="tile" id="intake-tile" onclick="toggleIntake(this)">
+      <div class="tile-icon sage">📋</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('quizTitle')}</div>
+        <div class="tile-status ok">${intakeCheck}${tr('intakeSummary')}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand intake-expand">
+      <div class="intake-body">
+        <div class="intake-scroll" id="intake-scroll">
+          <div class="intake-loading">${escapeHtml(tr('intakeLoading'))}</div>
+        </div>
+        <div class="intake-actions">
+          <div id="intake-meta"></div>
+          <button class="intake-edit-btn" onclick="openIntake()">${escapeHtml(tr('intakeEdit'))}</button>
+        </div>
+      </div>
+    </div>
+    ` : `
     <button class="tile" onclick="openIntake()">
       <div class="tile-icon sage">📋</div>
       <div class="tile-body">
@@ -551,6 +701,7 @@ function render(data) {
       </div>
       <div class="tile-arrow">›</div>
     </button>
+    `}
 
     <button class="tile" ${contractDisabled ? 'disabled' : ''} onclick="openContract(${contract.toSign ? `'${contract.toSign.id}'` : 'null'})">
       <div class="tile-icon gold">📝</div>
@@ -887,7 +1038,134 @@ async function sendChat() {
   }
 }
 
+// ---- Intake (submitted questionnaire summary) ----
+const INTAKE_STATE_KEY = 'vf_intake_expanded';
+let intakeLoaded = false;
+let intakeData = null;
+
+const intakeSections = [
+  { key: 'sContact', rows: [
+    ['lPartner1', 'partner1Name'], ['lPartner2', 'partner2Name'],
+    ['lPartner1Phone', 'partner1Phone'], ['lPartner2Phone', 'partner2Phone'],
+    ['lEmail', 'email'], ['lPhone', 'phone'], ['lAddress', 'address'],
+  ]},
+  { key: 'sDay', rows: [
+    ['lGuests', 'guestCount'], ['lCeremonyType', 'ceremonyType'],
+    ['lPackage', 'bookedPackage'], ['lPhotoStyle', 'photoStyle'],
+    ['lCoordinator', 'coordinator'], ['lVendors', 'vendors'],
+  ]},
+  { key: 'sTimeline', rows: [
+    ['lGettingReady', 'gettingReadyTime'], ['lPhotographerArrives', 'photographerArrivalTime'],
+    ['lFirstLook', 'firstLook', 'yn'], ['lFirstLookTime', 'firstLookTime'],
+    ['lCeremony', 'ceremonyTime'], ['lGuestArrival', 'guestArrivalTime'],
+    ['lReception', 'receptionTime'], ['lSpeechesTime', 'speechesTime'],
+    ['lCakeCutting', 'cakeCuttingTime'], ['lFirstDance', 'firstDanceTime'],
+  ]},
+  { key: 'sLocations', rows: [
+    ['lGettingReadyLocation', 'gettingReadyLocation'],
+    ['lCeremonyAddress', 'ceremonyAddress'],
+    ['lReceptionAddress', 'receptionAddress'],
+  ]},
+  { key: 'sDetails', rows: [
+    ['lHasSpeeches', 'hasSpeeches', 'yn'], ['lRingBearer', 'hasRingBearer', 'yn'],
+    ['lDrone', 'wantsDrone', 'yn'], ['lPets', 'hasPets', 'yn'],
+    ['lFlash', 'flashAllowed', 'yn'],
+  ]},
+];
+const intakeNoteFields = [
+  ['lMustHave', 'mustHaveShots'], ['lVip', 'vipList'],
+  ['lFamily', 'familyNotes'], ['lExtra', 'extraNotes'],
+];
+
+function renderIntake(data) {
+  const scroll = document.getElementById('intake-scroll');
+  const meta = document.getElementById('intake-meta');
+  if (!scroll) return;
+  const form = data.form || {};
+  const parts = [];
+  for (const section of intakeSections) {
+    const rowsHtml = section.rows.map(([labelKey, fieldKey, kind]) => {
+      const v = form[fieldKey];
+      if (v === null || v === undefined || v === '') return '';
+      if (kind === 'yn') {
+        if (v === null) return '';
+        const yes = v === true;
+        const cls = yes ? 'yes' : 'no';
+        const text = yes ? tr('intakeYes') : tr('intakeNo');
+        return `<div class="intake-row yn"><span class="intake-label">${escapeHtml(tr(labelKey))}</span><span class="intake-value ${cls}">${escapeHtml(text)}</span></div>`;
+      }
+      return `<div class="intake-row"><span class="intake-label">${escapeHtml(tr(labelKey))}</span><span class="intake-value">${escapeHtml(String(v))}</span></div>`;
+    }).filter(Boolean).join('');
+    if (rowsHtml) {
+      parts.push(`<div class="intake-section"><div class="intake-section-title">${escapeHtml(tr(section.key))}</div>${rowsHtml}</div>`);
+    }
+  }
+  const notesHtml = intakeNoteFields.map(([labelKey, fieldKey]) => {
+    const v = form[fieldKey];
+    if (!v) return '';
+    return `<div class="intake-note"><div class="intake-note-label">${escapeHtml(tr(labelKey))}</div><div class="intake-note-value">${escapeHtml(String(v))}</div></div>`;
+  }).filter(Boolean).join('');
+  if (notesHtml) {
+    parts.push(`<div class="intake-section"><div class="intake-section-title">${escapeHtml(tr('sNotes'))}</div>${notesHtml}</div>`);
+  }
+  scroll.innerHTML = parts.join('') || `<div class="intake-loading">—</div>`;
+
+  if (meta && data.submittedAt) {
+    const submitted = new Date(data.submittedAt);
+    const updated = data.updatedAt ? new Date(data.updatedAt) : null;
+    const wasUpdated = updated && Math.abs(updated - submitted) > 5000;
+    const label = wasUpdated ? tr('intakeUpdatedOn') : tr('intakeSubmittedOn');
+    const when = wasUpdated ? updated : submitted;
+    meta.textContent = `${label} ${formatDate(when.toISOString())}`;
+  }
+}
+
+async function fetchIntake() {
+  if (!token) return;
+  const scroll = document.getElementById('intake-scroll');
+  try {
+    const res = await fetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    intakeData = data;
+    intakeLoaded = true;
+    renderIntake(data);
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandIntake(tile) {
+  if (!tile) tile = document.getElementById('intake-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(INTAKE_STATE_KEY, '1');
+  if (intakeLoaded && intakeData) {
+    renderIntake(intakeData);
+  } else {
+    await fetchIntake();
+  }
+}
+
+function collapseIntake(tile) {
+  if (!tile) tile = document.getElementById('intake-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(INTAKE_STATE_KEY);
+}
+
+function toggleIntake(tile) {
+  if (tile.classList.contains('expanded')) collapseIntake(tile);
+  else expandIntake(tile);
+}
+
 async function restoreChatState() {
+  if (localStorage.getItem(INTAKE_STATE_KEY) === '1' && document.getElementById('intake-tile')) {
+    expandIntake();
+  }
   if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
     await expandChat();
   } else {
