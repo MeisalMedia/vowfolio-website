@@ -96,12 +96,20 @@
     .chat-intro{background:#F4ECDD;border-radius:12px;padding:12px 14px;margin:4px 0 10px;text-align:center}
     .chat-intro p{font-size:12.5px;color:#6B5E4F;line-height:1.5}
     .chat-intro p + p{margin-top:4px;color:#8A7D6E;font-size:11.5px}
-    .chat-scroll{overflow-y:auto;max-height:360px;padding:4px 2px;display:flex;flex-direction:column;gap:6px;-webkit-overflow-scrolling:touch}
+    .chat-scroll{overflow-y:auto;max-height:360px;padding:4px 2px;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch}
     .chat-scroll.empty{max-height:0;padding:0}
+    .msg-group{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+    .msg-group:first-child{margin-top:0}
     .msg{max-width:84%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap}
     .msg.them{align-self:flex-start;background:#FAFAF8;color:#3D3229;border-bottom-left-radius:4px;border:1px solid #EFE7DA}
     .msg.me{align-self:flex-end;background:#6B8F71;color:#fff;border-bottom-right-radius:4px}
-    .msg-time{font-size:10px;color:#B0A090;margin-top:-2px;padding:0 6px}
+    .msg.me.first{border-bottom-right-radius:4px;border-top-right-radius:14px}
+    .msg.me.middle{border-top-right-radius:4px;border-bottom-right-radius:4px}
+    .msg.me.last{border-top-right-radius:4px;border-bottom-right-radius:4px}
+    .msg.them.first{border-bottom-left-radius:4px;border-top-left-radius:14px}
+    .msg.them.middle{border-top-left-radius:4px;border-bottom-left-radius:4px}
+    .msg.them.last{border-top-left-radius:4px;border-bottom-left-radius:4px}
+    .msg-time{font-size:10px;color:#B0A090;margin-top:1px;padding:0 6px}
     .msg-time.me{align-self:flex-end}
     .msg-time.them{align-self:flex-start}
     .chat-input-inline{margin-top:10px;display:flex;gap:8px;align-items:flex-end}
@@ -577,6 +585,29 @@ function formatTime(iso) {
   return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
+function buildChatGroups() {
+  // Match iOS grouping: same sender + within 5 min of previous in group
+  const groups = [];
+  let current = [];
+  for (const m of chatMessages) {
+    const prev = current[current.length - 1];
+    if (prev) {
+      const sameSender = prev.senderRole === m.senderRole;
+      const diff = (new Date(m.createdAt) - new Date(prev.createdAt)) / 1000;
+      if (sameSender && diff < 300) {
+        current.push(m);
+        continue;
+      }
+      groups.push(current);
+      current = [m];
+    } else {
+      current = [m];
+    }
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
+
 function renderChatMessages() {
   const scroll = document.getElementById('chat-scroll');
   if (!scroll) return;
@@ -586,12 +617,23 @@ function renderChatMessages() {
     return;
   }
   scroll.classList.remove('empty');
-  scroll.innerHTML = chatMessages.map(m => {
-    const mine = m.senderRole === 'client';
-    return `
-      <div class="msg ${mine ? 'me' : 'them'}">${escapeHtml(m.body)}</div>
-      <div class="msg-time ${mine ? 'me' : 'them'}">${formatTime(m.createdAt)}</div>
-    `;
+  const groups = buildChatGroups();
+  scroll.innerHTML = groups.map(group => {
+    const mine = group[0].senderRole === 'client';
+    const side = mine ? 'me' : 'them';
+    const solo = group.length === 1;
+    const bubbles = group.map((m, idx) => {
+      let pos = '';
+      if (!solo) {
+        if (idx === 0) pos = 'first';
+        else if (idx === group.length - 1) pos = 'last';
+        else pos = 'middle';
+      }
+      return `<div class="msg ${side}${pos ? ' ' + pos : ''}">${escapeHtml(m.body)}</div>`;
+    }).join('');
+    const last = group[group.length - 1];
+    const time = `<div class="msg-time ${side}">${formatTime(last.createdAt)}</div>`;
+    return `<div class="msg-group">${bubbles}${time}</div>`;
   }).join('');
   scroll.scrollTop = scroll.scrollHeight;
 }
