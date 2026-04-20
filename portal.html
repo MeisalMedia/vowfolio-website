@@ -142,6 +142,26 @@
     .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
     .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
 
+    /* Deliveries (expandable when photographer has added any) */
+    .tile.expanded + .tile-expand.deliveries-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .deliveries-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .deliveries-scroll{overflow-y:auto;max-height:380px;padding:4px 0;-webkit-overflow-scrolling:touch}
+    .delivery-item{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid #F4EFE6}
+    .delivery-item:last-child{border-bottom:none}
+    .delivery-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:10px;line-height:1;color:#fff}
+    .delivery-dot.delivered{background:#6B8F71}
+    .delivery-dot.inprogress{background:#E4B96F;color:#3D3229}
+    .delivery-dot.notstarted{background:#E8DFD1;color:#8A7D6E}
+    .delivery-body{flex:1;min-width:0}
+    .delivery-title{font-size:14px;font-weight:500;color:#3D3229;line-height:1.3}
+    .delivery-meta{font-size:11.5px;color:#8A7D6E;margin-top:3px}
+    .delivery-meta.delivered{color:#6B8F71;font-weight:500}
+    .delivery-empty{padding:18px;text-align:center;color:#B0A090;font-size:13px}
+    .delivery-progress{display:flex;align-items:center;gap:10px;padding:2px 2px 10px;margin-bottom:4px;border-bottom:1px solid #F0EBE4}
+    .delivery-bar-outer{flex:1;height:6px;background:#F4EFE6;border-radius:3px;overflow:hidden}
+    .delivery-bar-inner{height:100%;background:#6B8F71;border-radius:3px;transition:width 0.4s ease}
+    .delivery-bar-label{font-size:11px;color:#8A7D6E;flex-shrink:0;font-weight:500}
+
     /* Meetings (expandable when summaries exist) */
     .tile.expanded + .tile-expand.meetings-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
     .meetings-body{padding:2px 14px 12px;display:flex;flex-direction:column}
@@ -250,6 +270,18 @@ const t = {
     nextIntake: 'Questionnaire pending',
     nextDeposit: 'Deposit pending',
     nextAllSet: 'All set — see you on the day',
+
+    deliveriesTitle: 'Deliveries',
+    deliveriesStatusAll: 'All delivered',
+    deliveriesStatusPartial: 'delivered',
+    deliveriesStatusNone: 'Coming up',
+    deliveriesStatusDelivered: 'Delivered',
+    deliveriesStatusInProgress: 'Underway',
+    deliveriesStatusNotStarted: 'Coming',
+    deliveriesDeliveredOn: 'Delivered',
+    deliveriesExpected: 'Expected',
+    deliveriesEmpty: 'No deliveries shared yet.',
+    deliveriesLoading: 'Loading deliveries…',
 
     meetingsTitle: 'Planning Recaps',
     meetingsItem: 'Meeting summary',
@@ -394,6 +426,18 @@ const t = {
     nextDeposit: 'Depositum gjenstår',
     nextAllSet: 'Alt er klart — vi sees på dagen',
 
+    deliveriesTitle: 'Leveranser',
+    deliveriesStatusAll: 'Alt er levert',
+    deliveriesStatusPartial: 'levert',
+    deliveriesStatusNone: 'Kommer',
+    deliveriesStatusDelivered: 'Levert',
+    deliveriesStatusInProgress: 'Underveis',
+    deliveriesStatusNotStarted: 'Kommer',
+    deliveriesDeliveredOn: 'Levert',
+    deliveriesExpected: 'Forventet',
+    deliveriesEmpty: 'Ingen leveranser ennå.',
+    deliveriesLoading: 'Laster leveranser…',
+
     meetingsTitle: 'Møteoppsummeringer',
     meetingsItem: 'Møteoppsummering',
     meetingsStatus1: '1 oppsummering',
@@ -517,6 +561,13 @@ function setLang(newLang) {
       if (mtile) {
         mtile.classList.add('expanded');
         if (meetingsData) renderMeetings();
+      }
+    }
+    if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1') {
+      const dtile = document.getElementById('deliveries-tile');
+      if (dtile) {
+        dtile.classList.add('expanded');
+        if (deliveriesData) renderDeliveries();
       }
     }
   }
@@ -659,6 +710,24 @@ function render(data) {
 
   const meetingsStatus = s.meetings || { count: 0 };
   const meetingsCount = meetingsStatus.count || 0;
+
+  const delivStatus = s.deliverables || { total: 0, delivered: 0 };
+  const delivTotal = delivStatus.total || 0;
+  const delivDone = delivStatus.delivered || 0;
+  let delivStatusText = '';
+  let delivStatusClass = '';
+  if (delivTotal > 0) {
+    if (delivDone === delivTotal) {
+      delivStatusText = tr('deliveriesStatusAll');
+      delivStatusClass = 'ok';
+    } else if (delivDone > 0) {
+      delivStatusText = `${delivDone}/${delivTotal} ${tr('deliveriesStatusPartial')}`;
+      delivStatusClass = 'preview';
+    } else {
+      delivStatusText = tr('deliveriesStatusNone');
+      delivStatusClass = '';
+    }
+  }
 
   const msgs = s.messages || { unread: 0 };
   const chatUnread = msgs.unread || 0;
@@ -821,6 +890,28 @@ function render(data) {
       </div>
       ${photogLinks.length ? `<div class="photog-divider"></div><div class="photog-meta">${tr('contactDetails')}</div><div class="photog-links">${photogLinks.join('')}</div>` : ''}
     </div>
+
+    ${delivTotal > 0 ? `
+    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
+      <div class="tile-icon sage">📦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('deliveriesTitle')}</div>
+        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand deliveries-expand">
+      <div class="deliveries-body">
+        <div class="delivery-progress">
+          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${delivTotal > 0 ? Math.round(delivDone/delivTotal*100) : 0}%"></div></div>
+          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
+        </div>
+        <div class="deliveries-scroll" id="deliveries-scroll">
+          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
 
     <div class="section-title">${tr('faqTitle')}</div>
     ${faqs}
@@ -1093,6 +1184,98 @@ async function sendChat() {
   }
 }
 
+// ---- Deliveries (photographer-shared) ----
+const DELIVERIES_STATE_KEY = 'vf_deliveries_expanded';
+let deliveriesLoaded = false;
+let deliveriesData = null;
+
+function renderDeliveries() {
+  const scroll = document.getElementById('deliveries-scroll');
+  if (!scroll) return;
+  const items = (deliveriesData && deliveriesData.items) || [];
+  if (!items.length) {
+    scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('deliveriesEmpty'))}</div>`;
+    return;
+  }
+  scroll.innerHTML = items.map(it => {
+    const status = it.status || 'not_started';
+    let dotCls, dotGlyph, metaCls, metaText;
+    if (status === 'delivered') {
+      dotCls = 'delivered';
+      dotGlyph = '✓';
+      metaCls = 'delivered';
+      metaText = it.deliveredDate
+        ? `${tr('deliveriesDeliveredOn')} ${formatDate(it.deliveredDate)}`
+        : tr('deliveriesStatusDelivered');
+    } else if (status === 'in_progress') {
+      dotCls = 'inprogress';
+      dotGlyph = '•';
+      metaCls = '';
+      metaText = it.dueDate
+        ? `${tr('deliveriesStatusInProgress')} · ${tr('deliveriesExpected')} ${formatDate(it.dueDate)}`
+        : tr('deliveriesStatusInProgress');
+    } else {
+      dotCls = 'notstarted';
+      dotGlyph = '';
+      metaCls = '';
+      metaText = it.dueDate
+        ? `${tr('deliveriesStatusNotStarted')} · ${tr('deliveriesExpected')} ${formatDate(it.dueDate)}`
+        : tr('deliveriesStatusNotStarted');
+    }
+    return `
+      <div class="delivery-item">
+        <div class="delivery-dot ${dotCls}">${escapeHtml(dotGlyph)}</div>
+        <div class="delivery-body">
+          <div class="delivery-title">${escapeHtml(it.title || '')}</div>
+          <div class="delivery-meta ${metaCls}">${escapeHtml(metaText)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function fetchDeliveries() {
+  if (!token) return;
+  const scroll = document.getElementById('deliveries-scroll');
+  try {
+    const res = await fetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    deliveriesData = data;
+    deliveriesLoaded = true;
+    renderDeliveries();
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandDeliveries(tile) {
+  if (!tile) tile = document.getElementById('deliveries-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(DELIVERIES_STATE_KEY, '1');
+  if (deliveriesLoaded && deliveriesData) {
+    renderDeliveries();
+  } else {
+    await fetchDeliveries();
+  }
+}
+
+function collapseDeliveries(tile) {
+  if (!tile) tile = document.getElementById('deliveries-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(DELIVERIES_STATE_KEY);
+}
+
+function toggleDeliveries(tile) {
+  if (tile.classList.contains('expanded')) collapseDeliveries(tile);
+  else expandDeliveries(tile);
+}
+
 // ---- Meetings (shared summaries) ----
 const MEETINGS_STATE_KEY = 'vf_meetings_expanded';
 let meetingsLoaded = false;
@@ -1293,6 +1476,9 @@ async function restoreChatState() {
   }
   if (localStorage.getItem(MEETINGS_STATE_KEY) === '1' && document.getElementById('meetings-tile')) {
     expandMeetings();
+  }
+  if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1' && document.getElementById('deliveries-tile')) {
+    expandDeliveries();
   }
   if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
     await expandChat();
