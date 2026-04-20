@@ -146,8 +146,9 @@
     .tile.expanded + .tile-expand.meetings-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
     .meetings-body{padding:2px 14px 12px;display:flex;flex-direction:column}
     .meetings-scroll{overflow-y:auto;max-height:380px;padding:4px 0;-webkit-overflow-scrolling:touch}
-    .meeting-item{padding:12px 0;border-bottom:1px solid #F4EFE6}
+    .meeting-item{padding:14px 0;border-bottom:1px solid #F4EFE6}
     .meeting-item:last-child{border-bottom:none}
+    .meeting-kicker{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#9B7E5E;font-weight:600;margin-bottom:4px}
     .meeting-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;align-items:baseline}
     .meeting-title{font-size:14px;font-weight:600;color:#3D3229;flex:1}
     .meeting-date{font-size:11px;color:#9B8D7E;letter-spacing:0.3px;text-transform:uppercase;flex-shrink:0}
@@ -250,11 +251,12 @@ const t = {
     nextDeposit: 'Deposit pending',
     nextAllSet: 'All set — see you on the day',
 
-    meetingsTitle: 'Meeting notes',
-    meetingsStatus1: '1 shared note',
-    meetingsStatusN: 'shared notes',
-    meetingsEmpty: 'No shared notes yet.',
-    meetingsLoading: 'Loading notes…',
+    meetingsTitle: 'Planning Recaps',
+    meetingsItem: 'Meeting summary',
+    meetingsStatus1: '1 summary',
+    meetingsStatusN: 'summaries',
+    meetingsEmpty: 'No summaries yet.',
+    meetingsLoading: 'Loading summaries…',
 
     intakeSummary: 'Submitted — tap to review your answers',
     intakeEdit: 'Edit answers',
@@ -392,11 +394,12 @@ const t = {
     nextDeposit: 'Depositum gjenstår',
     nextAllSet: 'Alt er klart — vi sees på dagen',
 
-    meetingsTitle: 'Møtenotater',
-    meetingsStatus1: '1 notat',
-    meetingsStatusN: 'notater',
-    meetingsEmpty: 'Ingen notater enda.',
-    meetingsLoading: 'Laster notater…',
+    meetingsTitle: 'Møteoppsummeringer',
+    meetingsItem: 'Møteoppsummering',
+    meetingsStatus1: '1 oppsummering',
+    meetingsStatusN: 'oppsummeringer',
+    meetingsEmpty: 'Ingen oppsummeringer ennå.',
+    meetingsLoading: 'Laster oppsummeringer…',
 
     intakeSummary: 'Innsendt — trykk for å se svarene',
     intakeEdit: 'Rediger svar',
@@ -1107,6 +1110,7 @@ function renderMeetings() {
     const date = m.meetingDate ? formatDate(m.meetingDate) : '';
     return `
       <div class="meeting-item">
+        <div class="meeting-kicker">${escapeHtml(tr('meetingsItem'))}</div>
         <div class="meeting-head">
           <div class="meeting-title">${escapeHtml(m.title || '')}</div>
           <div class="meeting-date">${escapeHtml(date)}</div>
