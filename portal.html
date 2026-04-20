@@ -835,6 +835,28 @@ function render(data) {
       </div>
     </div>
 
+    ${delivTotal > 0 ? `
+    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
+      <div class="tile-icon sage">📦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('deliveriesTitle')}</div>
+        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand deliveries-expand">
+      <div class="deliveries-body">
+        <div class="delivery-progress">
+          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${Math.round(delivDone/delivTotal*100)}%"></div></div>
+          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
+        </div>
+        <div class="deliveries-scroll" id="deliveries-scroll">
+          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
     ${meetingsCount > 0 ? `
     <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
       <div class="tile-icon gold">🗓️</div>
@@ -890,28 +912,6 @@ function render(data) {
       </div>
       ${photogLinks.length ? `<div class="photog-divider"></div><div class="photog-meta">${tr('contactDetails')}</div><div class="photog-links">${photogLinks.join('')}</div>` : ''}
     </div>
-
-    ${delivTotal > 0 ? `
-    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
-      <div class="tile-icon sage">📦</div>
-      <div class="tile-body">
-        <div class="tile-title">${tr('deliveriesTitle')}</div>
-        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
-      </div>
-      <div class="tile-chev">▾</div>
-    </button>
-    <div class="tile-expand deliveries-expand">
-      <div class="deliveries-body">
-        <div class="delivery-progress">
-          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${delivTotal > 0 ? Math.round(delivDone/delivTotal*100) : 0}%"></div></div>
-          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
-        </div>
-        <div class="deliveries-scroll" id="deliveries-scroll">
-          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
-        </div>
-      </div>
-    </div>
-    ` : ''}
 
     <div class="section-title">${tr('faqTitle')}</div>
     ${faqs}
