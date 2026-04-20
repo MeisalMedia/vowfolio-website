@@ -142,6 +142,22 @@
     .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
     .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
 
+    /* Day plan — signature section, always visible */
+    .dayplan-card{background:#fff;border-radius:16px;padding:18px 20px 14px;margin-bottom:14px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .dayplan-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .dayplan-icon{width:36px;height:36px;border-radius:10px;background:#E8F0E6;color:#6B8F71;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .dayplan-header-text{flex:1;min-width:0}
+    .dayplan-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;line-height:1.2;font-weight:600}
+    .dayplan-sub{font-size:11.5px;color:#9B8D7E;margin-top:3px;letter-spacing:0.3px}
+    .dayplan-list{display:flex;flex-direction:column}
+    .dayplan-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #F4EFE6}
+    .dayplan-item:last-child{border-bottom:none;padding-bottom:2px}
+    .dayplan-item:first-child{padding-top:2px}
+    .dayplan-time{flex-shrink:0;min-width:58px;font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:#9B7E5E;letter-spacing:0.3px;padding-top:2px}
+    .dayplan-body{flex:1;min-width:0}
+    .dayplan-event-title{font-size:14px;font-weight:500;color:#3D3229;line-height:1.4}
+    .dayplan-event-notes{font-size:12.5px;color:#8A7D6E;margin-top:3px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+
     /* Deliveries (expandable when photographer has added any) */
     .tile.expanded + .tile-expand.deliveries-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
     .deliveries-body{padding:2px 14px 12px;display:flex;flex-direction:column}
@@ -282,6 +298,10 @@ const t = {
     deliveriesExpected: 'Expected',
     deliveriesEmpty: 'No deliveries shared yet.',
     deliveriesLoading: 'Loading deliveries…',
+
+    dayPlanTitle: 'Your wedding day',
+    dayPlanEvent: 'event',
+    dayPlanEvents: 'events',
 
     meetingsTitle: 'Planning Recaps',
     meetingsItem: 'Meeting summary',
@@ -437,6 +457,10 @@ const t = {
     deliveriesExpected: 'Forventet',
     deliveriesEmpty: 'Ingen leveranser ennå.',
     deliveriesLoading: 'Laster leveranser…',
+
+    dayPlanTitle: 'Bryllupsdagen deres',
+    dayPlanEvent: 'punkt',
+    dayPlanEvents: 'punkter',
 
     meetingsTitle: 'Møteoppsummeringer',
     meetingsItem: 'Møteoppsummering',
@@ -643,6 +667,32 @@ function deriveNextStep(s) {
   return { text: tr('nextAllSet'), ok: true };
 }
 
+function renderDayPlan(items) {
+  if (!items || !items.length) return '';
+  const rows = items.map(it => `
+    <div class="dayplan-item">
+      <div class="dayplan-time">${escapeHtml(it.time || '')}</div>
+      <div class="dayplan-body">
+        <div class="dayplan-event-title">${escapeHtml(it.title || '')}</div>
+        ${it.notes ? `<div class="dayplan-event-notes">${escapeHtml(it.notes)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+  const unit = items.length === 1 ? tr('dayPlanEvent') : tr('dayPlanEvents');
+  return `
+    <div class="dayplan-card">
+      <div class="dayplan-header">
+        <div class="dayplan-icon">⏱️</div>
+        <div class="dayplan-header-text">
+          <div class="dayplan-title">${escapeHtml(tr('dayPlanTitle'))}</div>
+          <div class="dayplan-sub">${items.length} ${escapeHtml(unit)}</div>
+        </div>
+      </div>
+      <div class="dayplan-list">${rows}</div>
+    </div>
+  `;
+}
+
 function renderCountdown(isoDate, status) {
   const days = daysUntil(isoDate);
   const step = deriveNextStep(status);
@@ -775,6 +825,8 @@ function render(data) {
     </div>
 
     ${renderCountdown(w.weddingDate, s)}
+
+    ${renderDayPlan((s.dayPlan && s.dayPlan.items) || [])}
 
     <div class="section-title">${tr('nextSteps')}</div>
 
