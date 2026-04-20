@@ -20,17 +20,23 @@
     .lang-toggle button.active{background:#3D3229;color:#fff}
     .lang-toggle button.inactive{background:#FAFAF8;color:#8A7D6E}
 
-    .hero{border-radius:20px;overflow:hidden;margin-bottom:24px;position:relative;aspect-ratio:3/1;background:linear-gradient(135deg,#D9C9B2,#9B7E5E 60%,#6B8F71);box-shadow:0 4px 20px rgba(61,50,41,0.12)}
+    .hero{border-radius:20px;overflow:hidden;margin-bottom:20px;position:relative;aspect-ratio:3/1;background:linear-gradient(135deg,#D9C9B2,#9B7E5E 60%,#6B8F71);box-shadow:0 4px 20px rgba(61,50,41,0.12)}
+    @media (max-width:640px){.hero{aspect-ratio:3.5/1;border-radius:16px;margin-bottom:16px}}
     .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.45));pointer-events:none}
     .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
     .hero-content{position:absolute;left:0;right:0;bottom:0;padding:20px 22px;color:#fff;z-index:1}
     .hero-couple{font-family:'Playfair Display',serif;font-size:28px;line-height:1.1;margin-bottom:6px;text-shadow:0 1px 8px rgba(0,0,0,0.3)}
     .hero-meta{font-size:13px;opacity:0.92;text-shadow:0 1px 6px rgba(0,0,0,0.3)}
 
-    .countdown{display:flex;justify-content:center;gap:16px;margin-bottom:28px}
+    .countdown{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px}
+    .count-row{display:flex;justify-content:center;gap:16px}
     .count-box{background:#fff;border-radius:14px;padding:14px 16px;min-width:70px;text-align:center;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
     .count-num{font-family:'Playfair Display',serif;font-size:28px;color:#3D3229;font-weight:700;line-height:1}
     .count-label{font-size:10px;color:#8A7D6E;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+    .next-step{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EFE7DA;border-radius:20px;padding:6px 14px;font-size:12px;color:#6B5E4F;box-shadow:0 1px 4px rgba(61,50,41,0.04)}
+    .next-step.ok{color:#6B8F71;border-color:#DCE8DB;background:#F5FAF4}
+    .next-step .dot-mark{width:6px;height:6px;border-radius:50%;background:#C2847A;display:inline-block}
+    .next-step.ok .dot-mark{background:#6B8F71}
 
     .section-title{font-family:'Playfair Display',serif;font-size:16px;color:#3D3229;margin:8px 2px 10px;letter-spacing:0.5px}
     .tile{background:#fff;border-radius:16px;padding:18px 18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform 0.15s ease,box-shadow 0.15s ease;border:none;width:100%;font-family:inherit;text-align:left;color:inherit}
@@ -61,12 +67,16 @@
     .photog-link .icon{font-size:14px;color:#9B7E5E}
 
     .faq-item{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 6px rgba(61,50,41,0.04)}
-    .faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:#3D3229;user-select:none}
-    .faq-q .plus{color:#9B7E5E;font-size:18px;transition:transform 0.2s}
-    .faq-item.open .faq-q .plus{transform:rotate(45deg)}
+    .faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:#3D3229;user-select:none;gap:12px}
+    .faq-q .chev{color:#C4B8A8;transition:transform 0.2s;flex-shrink:0;display:flex;align-items:center}
+    .faq-q .chev svg{width:14px;height:14px}
+    .faq-item.open .faq-q .chev{transform:rotate(180deg);color:#9B7E5E}
     .faq-a{max-height:0;overflow:hidden;transition:max-height 0.25s ease;padding:0 16px}
     .faq-item.open .faq-a{max-height:300px;padding:0 16px 14px}
     .faq-a p{font-size:13px;color:#6B5E4F;line-height:1.55}
+    .photog-sub{font-size:12px;color:#8A7D6E;margin-top:2px}
+    .photog-divider{height:1px;background:#F0EBE4;margin:14px 0 12px}
+    .photog-meta{font-size:11px;color:#9B8D7E;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;font-weight:600}
 
     .loading,.error-state{text-align:center;padding:64px 24px}
     .spinner{width:36px;height:36px;border:3px solid #E8DFD1;border-top-color:#6B8F71;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
@@ -197,10 +207,17 @@ const t = {
     depositAmount: 'Amount',
 
     yourPhotog: 'Your photographer',
+    photogReplies: 'Usually replies within a day',
+    contactDetails: 'Contact details',
     emailUs: 'Email',
     callUs: 'Call',
 
-    faqTitle: 'Frequently asked questions',
+    nextContract: 'Contract awaiting signature',
+    nextIntake: 'Questionnaire pending',
+    nextDeposit: 'Deposit pending',
+    nextAllSet: 'All set — see you on the day',
+
+    faqTitle: 'Questions couples often ask',
     faq1q: 'When will I receive my photos?',
     faq1a: 'Your photographer will share the final gallery once editing is complete. Typical turnaround is 4–8 weeks after the wedding, but check your contract for the exact timeline.',
     faq2q: 'How long is this portal link valid?',
@@ -276,10 +293,17 @@ const t = {
     depositAmount: 'Beløp',
 
     yourPhotog: 'Fotografen deres',
+    photogReplies: 'Svarer vanligvis innen en dag',
+    contactDetails: 'Kontaktinfo',
     emailUs: 'E-post',
     callUs: 'Ring',
 
-    faqTitle: 'Ofte stilte spørsmål',
+    nextContract: 'Kontrakt venter på signatur',
+    nextIntake: 'Spørreskjema gjenstår',
+    nextDeposit: 'Depositum gjenstår',
+    nextAllSet: 'Alt er klart — vi sees på dagen',
+
+    faqTitle: 'Spørsmål par ofte stiller',
     faq1q: 'Når får vi bildene?',
     faq1a: 'Fotografen deler det ferdige galleriet når redigeringen er klar. Vanlig leveringstid er 4–8 uker etter bryllupet, men sjekk kontrakten for nøyaktig tidslinje.',
     faq2q: 'Hvor lenge er denne portal-lenken gyldig?',
@@ -396,16 +420,28 @@ async function loadOverview() {
   }
 }
 
-function renderCountdown(isoDate) {
+function deriveNextStep(s) {
+  const contract = (s && s.contract) || { status: 'none' };
+  const intake = (s && s.intake) || {};
+  const deposit = (s && s.deposit) || {};
+  if (contract.status === 'pending') return { text: tr('nextContract'), ok: false };
+  if (!intake.submitted) return { text: tr('nextIntake'), ok: false };
+  if (!deposit.paid) return { text: tr('nextDeposit'), ok: false };
+  return { text: tr('nextAllSet'), ok: true };
+}
+
+function renderCountdown(isoDate, status) {
   const days = daysUntil(isoDate);
-  if (days === null) return '';
+  const step = deriveNextStep(status);
+  const stepHtml = step ? `<div class="next-step${step.ok ? ' ok' : ''}"><span class="dot-mark"></span>${escapeHtml(step.text)}</div>` : '';
+  if (days === null) return stepHtml ? `<div class="countdown">${stepHtml}</div>` : '';
   if (days === 0) {
-    return `<div class="countdown"><div class="count-box"><div class="count-num">${tr('today')}</div></div></div>`;
+    return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${tr('today')}</div></div></div>${stepHtml}</div>`;
   }
   if (days < 0) {
-    return `<div class="countdown"><div class="count-box"><div class="count-num">${Math.abs(days)}</div><div class="count-label">${tr('daysAgo')}</div></div></div>`;
+    return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${Math.abs(days)}</div><div class="count-label">${tr('daysAgo')}</div></div></div>${stepHtml}</div>`;
   }
-  return `<div class="countdown"><div class="count-box"><div class="count-num">${days}</div><div class="count-label">${tr('countDays')}</div></div></div>`;
+  return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${days}</div><div class="count-label">${tr('countDays')}</div></div></div>${stepHtml}</div>`;
 }
 
 function escapeHtml(s) {
@@ -485,10 +521,11 @@ function render(data) {
   if (p.email) photogLinks.push(`<a class="photog-link" href="mailto:${encodeURIComponent(p.email)}"><span class="icon">✉</span> ${tr('emailUs')}</a>`);
   if (p.phone) photogLinks.push(`<a class="photog-link" href="tel:${encodeURIComponent(p.phone)}"><span class="icon">📞</span> ${tr('callUs')}</a>`);
 
+  const chevronSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
   const faqs = [1,2,3,4,5].map(n => `
     <div class="faq-item">
       <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
-        <span>${tr('faq'+n+'q')}</span><span class="plus">+</span>
+        <span>${tr('faq'+n+'q')}</span><span class="chev">${chevronSvg}</span>
       </div>
       <div class="faq-a"><p>${tr('faq'+n+'a')}</p></div>
     </div>
@@ -503,7 +540,7 @@ function render(data) {
       </div>
     </div>
 
-    ${renderCountdown(w.weddingDate)}
+    ${renderCountdown(w.weddingDate, s)}
 
     <div class="section-title">${tr('nextSteps')}</div>
 
@@ -574,9 +611,10 @@ function render(data) {
         <div class="photog-avatar">${avatarInner}</div>
         <div>
           <div class="photog-name">${escapeHtml(p.name || '')}</div>
+          <div class="photog-sub">${tr('photogReplies')}</div>
         </div>
       </div>
-      <div class="photog-links">${photogLinks.join('')}</div>
+      ${photogLinks.length ? `<div class="photog-divider"></div><div class="photog-meta">${tr('contactDetails')}</div><div class="photog-links">${photogLinks.join('')}</div>` : ''}
     </div>
 
     <div class="section-title">${tr('faqTitle')}</div>
