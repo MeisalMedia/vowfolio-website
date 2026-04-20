@@ -117,7 +117,8 @@
     .chat-scroll{overflow-y:auto;max-height:480px;padding:2px 10px;display:flex;flex-direction:column;gap:1px;-webkit-overflow-scrolling:touch}
     .chat-scroll.empty{max-height:0;padding:0;margin:0}
     @media (max-width:640px){
-      .chat-scroll{padding:2px 8px}
+      .chat-scroll{max-height:280px;padding:2px 8px}
+      .tile.expanded + .tile-expand.chat-expand{max-height:440px}
     }
     .msg-group{display:flex;flex-direction:column;gap:1px;margin-top:10px}
     .msg-group:first-child{margin-top:0}
