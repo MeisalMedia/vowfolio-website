@@ -433,6 +433,10 @@
       gap: 24px;
       text-align: center;
     }
+    .trust-stats.trust-stats-two {
+      max-width: 600px;
+      grid-template-columns: repeat(2, 1fr);
+    }
     .trust-stat {
       padding: 8px;
     }
@@ -766,13 +770,13 @@
     </a>
     <div class="hero-micro" data-lang="en">
       <span>iOS · private preview</span>
+      <span>Invitation only</span>
       <span>Nordic photographers first</span>
-      <span>Early users</span>
     </div>
     <div class="hero-micro" data-lang="no">
       <span>iOS · private preview</span>
+      <span>Invitasjonsbasert tilgang</span>
       <span>Norske fotografer først</span>
-      <span>Tidlige brukere</span>
     </div>
   </section>
 
@@ -849,10 +853,10 @@
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(155,126,94,0.12);">💫</div>
-        <h3 data-lang="en">Share the wedding with your couple</h3>
-        <h3 data-lang="no">Del bryllupet med paret</h3>
-        <p data-lang="en">One warm link where they follow everything along the way — questionnaire, contract, chat, meeting recaps, and gallery progress. Not another app. Not five separate emails.</p>
-        <p data-lang="no">Én varm lenke der paret følger alt underveis — spørreskjema, kontrakt, chat, møteoppsummeringer og leveranser. Ikke en ny app. Ikke fem forskjellige e-poster.</p>
+        <h3 data-lang="en">Share the wedding day plan</h3>
+        <h3 data-lang="no">Del dagplanen med paret</h3>
+        <p data-lang="en">Your couple sees the timeline, contract, chat, and gallery progress in one warm link. Not another app. Not five separate emails.</p>
+        <p data-lang="no">Paret ser dagplanen, kontrakt, chat og leveranser i én varm lenke. Ikke enda en app. Ikke fem forskjellige e-poster.</p>
       </div>
 
       <div class="feature-card">
@@ -924,10 +928,10 @@
         <div class="shot-frame">
           <img src="/screenshots/client-portal.png" alt="Client portal" loading="lazy">
         </div>
-        <div class="shot-caption" data-lang="en">Share the wedding</div>
-        <div class="shot-caption" data-lang="no">Del bryllupet</div>
-        <div class="shot-sub" data-lang="en">Your couple follows along in one warm link — questions, contract, chat, gallery progress</div>
-        <div class="shot-sub" data-lang="no">Paret følger med i én varm lenke — spørsmål, kontrakt, chat, leveranser</div>
+        <div class="shot-caption" data-lang="en">Shared day plan</div>
+        <div class="shot-caption" data-lang="no">Delt dagplan</div>
+        <div class="shot-sub" data-lang="en">See and share the wedding day plan with your couple</div>
+        <div class="shot-sub" data-lang="no">Se og del bryllupsdagens plan med paret</div>
       </div>
 
       <div class="shot">
@@ -1015,23 +1019,18 @@
       </div>
 
       <div class="testimonial-card">
-        <p class="testimonial-quote" data-lang="en">"I built this after 16+ weddings because I was tired of juggling notes, timelines and messages."</p>
-        <p class="testimonial-quote" data-lang="no">"Jeg bygget dette etter 16+ bryllup fordi jeg var lei av å sjonglere notater, tidslinjer og meldinger."</p>
-        <p class="testimonial-attr" data-lang="en">— Helge, photographer &amp; founder</p>
-        <p class="testimonial-attr" data-lang="no">— Helge, fotograf og grunnlegger</p>
+        <p class="testimonial-quote" data-lang="en">"I built this because I was tired of juggling notes, timelines and messages across five apps."</p>
+        <p class="testimonial-quote" data-lang="no">"Jeg bygget dette fordi jeg var lei av å sjonglere notater, tidslinjer og meldinger på tvers av fem apper."</p>
+        <p class="testimonial-attr" data-lang="en">— Helge, working wedding photographer &amp; founder</p>
+        <p class="testimonial-attr" data-lang="no">— Helge, bryllupsfotograf og grunnlegger</p>
       </div>
 
     </div>
-    <div class="trust-stats">
-      <div class="trust-stat">
-        <div class="trust-stat-value">16+</div>
-        <div class="trust-stat-label" data-lang="en">Real weddings shot</div>
-        <div class="trust-stat-label" data-lang="no">Ekte bryllup fotografert</div>
-      </div>
+    <div class="trust-stats trust-stats-two">
       <div class="trust-stat">
         <div class="trust-stat-value">1</div>
-        <div class="trust-stat-label" data-lang="en">Photographer building it</div>
-        <div class="trust-stat-label" data-lang="no">Fotograf som bygger det</div>
+        <div class="trust-stat-label" data-lang="en">Working photographer building it</div>
+        <div class="trust-stat-label" data-lang="no">Fotograf som faktisk skyter bryllup</div>
       </div>
       <div class="trust-stat">
         <div class="trust-stat-value">0</div>
@@ -1077,6 +1076,13 @@
         <summary data-lang="no">Hva er det paret faktisk ser?</summary>
         <div class="faq-answer" data-lang="en">One warm, shared view of their wedding. They fill out the questionnaire, sign the contract, chat with you, read meeting recaps, and follow their gallery progress — all in the same link. No app to install, no account to create.</div>
         <div class="faq-answer" data-lang="no">Én varm, delt oversikt over bryllupet deres. De fyller ut spørreskjema, signerer kontrakt, chatter med deg, leser møteoppsummeringer, og følger leveransene — alt på samme lenke. Ingen app å laste ned, ingen konto å opprette.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary data-lang="en">Can couples see the wedding day timeline?</summary>
+        <summary data-lang="no">Kan paret se dagsplanen?</summary>
+        <div class="faq-answer" data-lang="en">Yes. Once you've added events to the day plan in the app, your couple sees the full timeline right in their portal — time, event, and any notes you've added. Read-only on their side, so the plan stays yours.</div>
+        <div class="faq-answer" data-lang="no">Ja. Når du har lagt inn punkter i dagplanen i appen, ser paret hele tidslinjen direkte i portalen — tidspunkt, punkt og eventuelle notater. Read-only for paret, så planen forblir din.</div>
       </details>
 
       <details class="faq-item">
