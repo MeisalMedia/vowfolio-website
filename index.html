@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VowFolio — The studio app for wedding photographers</title>
-  <meta name="description" content="Everything you need to run your studio. Clients, contracts, payments, day plans, shotlists, and more — in one app.">
+  <meta name="description" content="Built for wedding days, not generic workflows. The studio app for the day itself — day plan, shotlist, crew, and a premium client portal.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -707,6 +707,36 @@
       .cta-section { padding: 60px 20px 120px; }
       .mobile-sticky-cta { display: block; }
     }
+
+    /* Access request modal */
+    .access-backdrop{position:fixed;inset:0;background:rgba(30,25,20,0.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.2s ease;overflow-y:auto}
+    .access-backdrop.show{display:flex;opacity:1}
+    .access-modal{background:var(--cream);border-radius:20px;max-width:460px;width:100%;padding:32px 28px;box-shadow:0 20px 60px rgba(30,25,20,0.4);position:relative;transform:translateY(12px);transition:transform 0.25s ease;margin:auto}
+    .access-backdrop.show .access-modal{transform:translateY(0)}
+    .access-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:22px;color:#B0A090;cursor:pointer;padding:8px 10px;line-height:1;border-radius:8px;font-family:inherit}
+    .access-close:hover{color:var(--espresso);background:rgba(0,0,0,0.04)}
+    .access-eyebrow{display:inline-block;font-size:10.5px;font-weight:700;color:var(--sage);background:rgba(107,143,113,0.12);padding:5px 12px;border-radius:16px;letter-spacing:1px;margin-bottom:14px;text-transform:uppercase}
+    .access-title{font-family:'Playfair Display',serif;font-size:26px;line-height:1.2;color:var(--espresso);margin-bottom:10px;font-weight:700}
+    .access-body{font-size:14.5px;color:#6B5E4F;line-height:1.55;margin-bottom:20px}
+    .access-field{margin-bottom:14px}
+    .access-label{display:block;font-size:12px;font-weight:600;color:#8A7D6E;margin-bottom:5px;letter-spacing:0.3px}
+    .access-optional{font-size:11px;color:#B0A090;font-weight:400;margin-left:6px;text-transform:none;letter-spacing:0}
+    .access-input{width:100%;padding:12px 14px;font-size:16px;border:1px solid #E8DFD1;border-radius:10px;font-family:inherit;color:var(--espresso);background:#fff;outline:none;transition:border-color 0.15s;box-sizing:border-box}
+    .access-input:focus{border-color:var(--taupe)}
+    .access-submit{width:100%;background:var(--espresso);color:#fff;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s,transform 0.1s;margin-top:6px}
+    .access-submit:hover:not(:disabled){background:#2A2118;transform:translateY(-1px)}
+    .access-submit:disabled{background:#C4B8A8;cursor:not-allowed}
+    .access-error{background:#F4E0DC;color:#B06050;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:12px;text-align:center}
+    .access-error.hidden,.access-success.hidden,#access-form-view.hidden{display:none}
+    .access-success{text-align:center;padding:8px 0 4px}
+    .access-success-icon{width:60px;height:60px;border-radius:50%;background:rgba(107,143,113,0.18);color:var(--sage);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;font-weight:600}
+    .access-success-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--espresso);margin-bottom:8px;font-weight:700}
+    .access-success-body{font-size:14.5px;color:#6B5E4F;line-height:1.55}
+    .access-small{font-size:11.5px;color:#B0A090;margin-top:14px;text-align:center;line-height:1.5}
+    @media (max-width:640px){
+      .access-modal{padding:28px 22px}
+      .access-title{font-size:22px}
+    }
   </style>
 </head>
 <body>
@@ -721,8 +751,8 @@
           <button class="lang-btn" data-lang-btn="no" type="button">NO</button>
           <button class="lang-btn" data-lang-btn="en" type="button">EN</button>
         </div>
-        <a href="https://testflight.apple.com/join/epwEKS8J" class="nav-cta" data-lang="en">Download beta</a>
-        <a href="https://testflight.apple.com/join/epwEKS8J" class="nav-cta" data-lang="no">Last ned beta</a>
+        <a href="#" class="nav-cta" data-lang="en" data-open-access>Get early access</a>
+        <a href="#" class="nav-cta" data-lang="no" data-open-access>Få tidlig tilgang</a>
       </div>
     </div>
   </nav>
@@ -731,27 +761,25 @@
   <section class="hero">
     <div class="hero-badge" data-lang="en">Built by a wedding photographer</div>
     <div class="hero-badge" data-lang="no">Bygget av en bryllupsfotograf</div>
-    <h1 data-lang="en">Everything you need<br><span>for your studio</span></h1>
-    <h1 data-lang="no">Alt du trenger for<br><span>studioet ditt</span></h1>
-    <p data-lang="en">Clients, contracts, payments, day plans, shotlists, and contact forms — all in one app. So you can focus on what you do best.</p>
-    <p data-lang="no">Klienter, kontrakter, betalinger, dagplan, shotliste og kontaktskjema — samlet i én app. Slik at du kan fokusere på det du gjør best.</p>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta" data-lang="en">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Download from TestFlight
+    <h1 data-lang="en">Built for wedding days.<br><span>Not generic workflows.</span></h1>
+    <h1 data-lang="no">Bygget for bryllupsdagen.<br><span>Ikke generiske arbeidsflyter.</span></h1>
+    <p data-lang="en">The studio app for the day itself — day plan, shotlist, crew, and a premium portal your couple actually loves.</p>
+    <p data-lang="no">Studioappen for selve dagen — dagplan, shotliste, crew, og en premium portal paret faktisk elsker.</p>
+    <a href="#" class="hero-cta" data-lang="en" data-open-access>
+      Get early access
     </a>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta" data-lang="no">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Last ned fra TestFlight
+    <a href="#" class="hero-cta" data-lang="no" data-open-access>
+      Få tidlig tilgang
     </a>
     <div class="hero-micro" data-lang="en">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Free during beta</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>No credit card</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>2 min to get started</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Founding users</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>iOS · private preview</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Nordic photographers first</span>
     </div>
     <div class="hero-micro" data-lang="no">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Gratis under beta</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Ingen betalingsinfo</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>2 minutter å komme i gang</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Grunnleggerbrukere</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>iOS · private preview</span>
+      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Norske fotografer først</span>
     </div>
   </section>
 
@@ -803,59 +831,67 @@
   <!-- Features -->
   <section class="features">
     <div class="features-header">
-      <h2 data-lang="en">One app. The whole studio.</h2>
-      <h2 data-lang="no">Én app. Hele studioet.</h2>
-      <p data-lang="en">Everything admin — organized, clear, and beautifully built.</p>
-      <p data-lang="no">Alt det administrative — organisert, oversiktlig og vakkert.</p>
+      <h2 data-lang="en">The wedding day, in your pocket.</h2>
+      <h2 data-lang="no">Bryllupsdagen, i lomma di.</h2>
+      <p data-lang="en">Built for the hours that matter — and the weeks around them.</p>
+      <p data-lang="no">Bygget for timene som betyr noe — og ukene rundt dem.</p>
     </div>
     <div class="features-grid">
 
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(155,126,94,0.1);">📋</div>
-        <h3 data-lang="en">Contact form</h3>
-        <h3 data-lang="no">Kontaktskjema</h3>
-        <p data-lang="en">Embed a form on your website. New inquiries land right in the app with push notifications and email.</p>
-        <p data-lang="no">Legg et skjema på nettsiden din. Nye henvendelser havner rett i appen med push-varsling og e-post.</p>
+        <div class="feature-icon" style="background:rgba(107,143,113,0.12);">⏱️</div>
+        <h3 data-lang="en">Day plan</h3>
+        <h3 data-lang="no">Dagplan</h3>
+        <p data-lang="en">The wedding day, minute by minute. Always know what's next — getting ready, first look, ceremony, speeches, last dance.</p>
+        <p data-lang="no">Bryllupsdagen, minutt for minutt. Alltid vite hva som kommer — klargjøring, first look, seremoni, taler, siste dans.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.12);">📸</div>
+        <h3 data-lang="en">Shotlist</h3>
+        <h3 data-lang="no">Shotliste</h3>
+        <p data-lang="en">Every shot you need, in your pocket. Share with your crew in a tap — reference images, groupings, must-haves.</p>
+        <p data-lang="no">Hvert bilde du trenger, i lomma. Del med crewet med ett trykk — referansebilder, gruppebilder, må-ha.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(155,126,94,0.12);">💫</div>
+        <h3 data-lang="en">Client portal</h3>
+        <h3 data-lang="no">Klientportal</h3>
+        <p data-lang="en">One beautiful link for the couple. Questionnaire, contract, chat, meeting recaps, and gallery progress — all in one place they actually want to open.</p>
+        <p data-lang="no">Én vakker lenke for paret. Spørreskjema, kontrakt, chat, møtenotater og leveranser — på ett sted de faktisk har lyst til å åpne.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(194,132,122,0.12);">👥</div>
+        <h3 data-lang="en">Crew</h3>
+        <h3 data-lang="no">Crew</h3>
+        <p data-lang="en">Plan the day with your second shooter and videographer. Share the day plan and shotlist. Everyone reads from the same page.</p>
+        <p data-lang="no">Planlegg dagen med andrefotograf og videograf. Del dagplan og shotliste. Alle leser fra samme side.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(107,143,113,0.1);">📝</div>
         <h3 data-lang="en">Contracts</h3>
         <h3 data-lang="no">Kontrakter</h3>
-        <p data-lang="en">Create, send, and sign contracts digitally. Your couple signs on mobile — you sign in the app.</p>
-        <p data-lang="no">Opprett, send og signer kontrakter digitalt. Kunden signerer på mobilen — du signerer i appen.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(194,132,122,0.1);">📸</div>
-        <h3 data-lang="en">Day plan &amp; Shotlist</h3>
-        <h3 data-lang="no">Dagplan &amp; Shotliste</h3>
-        <p data-lang="en">Plan the wedding day minute by minute. Share the shotlist with your second shooter and crew.</p>
-        <p data-lang="no">Planlegg bryllupsdagen minutt for minutt. Del shotlisten med medfotografer og crew.</p>
+        <p data-lang="en">Send, sign, and track on mobile. Deposits and payments live next to the contract — one view for all the money bits.</p>
+        <p data-lang="no">Send, signer og hold oversikt på mobilen. Depositum og betalinger lever ved siden av kontrakten — én oversikt for økonomien.</p>
       </div>
 
       <div class="feature-card">
         <div class="feature-icon" style="background:rgba(61,50,41,0.08);">💬</div>
         <h3 data-lang="en">Messages</h3>
         <h3 data-lang="no">Meldinger</h3>
-        <p data-lang="en">Chat with clients and crew right in the app. All in one place — no more WhatsApp chaos.</p>
-        <p data-lang="no">Chat med klienter og crew direkte i appen. Alt på ett sted — ingen WhatsApp-kaos.</p>
+        <p data-lang="en">Chat with the couple and your crew right in the app. No more SMS chaos across five threads.</p>
+        <p data-lang="no">Chat med paret og crewet direkte i appen. Ingen flere SMS-tråder på tvers av fem kanaler.</p>
       </div>
 
       <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(155,126,94,0.1);">💰</div>
-        <h3 data-lang="en">Payments</h3>
-        <h3 data-lang="no">Betalinger</h3>
-        <p data-lang="en">Track contracts, deposits, and outstanding balances. See your revenue on the dashboard.</p>
-        <p data-lang="no">Hold oversikt over kontrakter, deposita og utestående beløp. Se inntektene dine på dashboardet.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon" style="background:rgba(107,143,113,0.1);">⭐</div>
-        <h3 data-lang="en">Feedback</h3>
-        <h3 data-lang="no">Tilbakemeldinger</h3>
-        <p data-lang="en">Send a form after the wedding. Get curated testimonials and insights — no stars, no ratings.</p>
-        <p data-lang="no">Send et skjema etter bryllupet. Få kuraterte testimonials og innsikt — uten stjerner og ratings.</p>
+        <div class="feature-icon" style="background:rgba(155,126,94,0.1);">📨</div>
+        <h3 data-lang="en">Contact form</h3>
+        <h3 data-lang="no">Kontaktskjema</h3>
+        <p data-lang="en">Embed on your site. New inquiries land in the app with push notification and email — the moment they hit submit.</p>
+        <p data-lang="no">Legg på siden din. Nye henvendelser havner i appen med push-varsling og e-post — i samme øyeblikk de trykker send.</p>
       </div>
 
     </div>
@@ -928,18 +964,18 @@
   <section class="mid-cta">
     <h3 data-lang="en">Try it on your next wedding</h3>
     <h3 data-lang="no">Prøv det på neste bryllup</h3>
-    <p data-lang="en">Start free — takes 2 minutes</p>
-    <p data-lang="no">Start gratis — tar 2 minutter</p>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="mid-cta-btn" data-lang="en">Start free</a>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="mid-cta-btn" data-lang="no">Start gratis</a>
+    <p data-lang="en">Private preview — invitation only</p>
+    <p data-lang="no">Private preview — kun via invitasjon</p>
+    <a href="#" class="mid-cta-btn" data-lang="en" data-open-access>Request access</a>
+    <a href="#" class="mid-cta-btn" data-lang="no" data-open-access>Be om tilgang</a>
   </section>
 
   <!-- Why VowFolio -->
   <section class="why">
     <div class="why-eyebrow" data-lang="en">Why VowFolio</div>
     <div class="why-eyebrow" data-lang="no">Hvorfor VowFolio</div>
-    <h2 data-lang="en">Built for wedding days.<br>Not generic workflows.</h2>
-    <h2 data-lang="no">Laget for bryllupsdager.<br>Ikke generiske arbeidsflyter.</h2>
+    <h2 data-lang="en">Because wedding days<br>aren't generic.</h2>
+    <h2 data-lang="no">Fordi bryllupsdager<br>ikke er generiske.</h2>
     <p class="why-lede" data-lang="en">Most tools are built for any kind of business. VowFolio is built for the exact way you actually work.</p>
     <p class="why-lede" data-lang="no">De fleste verktøy er laget for alle typer bedrifter. VowFolio er laget for måten du faktisk jobber på.</p>
     <div class="why-points">
@@ -1064,23 +1100,66 @@
   <section class="cta-section">
     <h2 data-lang="en">Ready to try it?</h2>
     <h2 data-lang="no">Klar til å prøve?</h2>
-    <p data-lang="en">VowFolio is free during beta. Download via TestFlight and send us your feedback.</p>
-    <p data-lang="no">VowFolio er gratis under beta. Last ned via TestFlight og gi oss tilbakemelding.</p>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta" data-lang="en">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Download from TestFlight
+    <p data-lang="en">VowFolio is in private preview. Request access and I'll send you a TestFlight invitation personally.</p>
+    <p data-lang="no">VowFolio er i private preview. Be om tilgang, så sender jeg en TestFlight-invitasjon personlig.</p>
+    <a href="#" class="hero-cta" data-lang="en" data-open-access>
+      Get early access
     </a>
-    <a href="https://testflight.apple.com/join/epwEKS8J" class="hero-cta" data-lang="no">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Last ned fra TestFlight
+    <a href="#" class="hero-cta" data-lang="no" data-open-access>
+      Få tidlig tilgang
     </a>
   </section>
 
   <!-- Sticky mobile CTA -->
-  <a href="https://testflight.apple.com/join/epwEKS8J" class="mobile-sticky-cta" id="mobileStickyCta">
-    <span data-lang="en">Start free — takes 2 minutes</span>
-    <span data-lang="no">Start gratis — tar 2 minutter</span>
+  <a href="#" class="mobile-sticky-cta" id="mobileStickyCta" data-open-access>
+    <span data-lang="en">Get early access</span>
+    <span data-lang="no">Få tidlig tilgang</span>
   </a>
+
+  <!-- Access Request Modal -->
+  <div class="access-backdrop" id="access-backdrop" role="dialog" aria-modal="true" aria-labelledby="access-title" onclick="if(event.target.id==='access-backdrop')closeAccessModal()">
+    <div class="access-modal">
+      <button class="access-close" onclick="closeAccessModal()" aria-label="Close" type="button">×</button>
+      <div id="access-form-view">
+        <div class="access-eyebrow" data-lang="en">Private preview</div>
+        <div class="access-eyebrow" data-lang="no">Private preview</div>
+        <h3 class="access-title" id="access-title" data-lang="en">Get early access to VowFolio</h3>
+        <h3 class="access-title" data-lang="no">Få tidlig tilgang til VowFolio</h3>
+        <p class="access-body" data-lang="en">We're inviting a small number of wedding photographers before launch. Enter the email connected to your Apple ID and I'll send you an invitation.</p>
+        <p class="access-body" data-lang="no">Vi inviterer et lite antall bryllupsfotografer før lansering. Legg inn e-posten knyttet til Apple ID-en din, så sender jeg deg en invitasjon.</p>
+        <form onsubmit="submitAccessRequest(event)">
+          <div class="access-field">
+            <label class="access-label" for="access-email">
+              <span data-lang="en">Apple ID email</span>
+              <span data-lang="no">Apple ID-epost</span>
+            </label>
+            <input class="access-input" type="email" id="access-email" required autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="access-field">
+            <label class="access-label" for="access-instagram">
+              <span data-lang="en">Instagram handle <span class="access-optional">optional</span></span>
+              <span data-lang="no">Instagram-handle <span class="access-optional">valgfritt</span></span>
+            </label>
+            <input class="access-input" type="text" id="access-instagram" autocomplete="off" placeholder="@yourstudio" maxlength="40">
+          </div>
+          <button class="access-submit" type="submit" id="access-submit">
+            <span data-lang="en">Request access</span>
+            <span data-lang="no">Be om tilgang</span>
+          </button>
+          <div class="access-error hidden" id="access-error"></div>
+        </form>
+        <div class="access-small" data-lang="en">Only Helge sees this. Not shared, not added to any list.</div>
+        <div class="access-small" data-lang="no">Kun Helge ser dette. Deles ikke, legges ikke til på noen liste.</div>
+      </div>
+      <div id="access-success-view" class="access-success hidden">
+        <div class="access-success-icon">✓</div>
+        <div class="access-success-title" data-lang="en">On the list</div>
+        <div class="access-success-title" data-lang="no">Du er på listen</div>
+        <div class="access-success-body" data-lang="en">Thanks — I'll send your TestFlight invite soon.</div>
+        <div class="access-success-body" data-lang="no">Takk — jeg sender TestFlight-invitasjon snart.</div>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer>
@@ -1095,8 +1174,8 @@
         no: 'VowFolio — Studioappen for bryllupsfotografer'
       };
       var descriptions = {
-        en: 'Everything you need to run your studio. Clients, contracts, payments, day plans, shotlists, and more — in one app.',
-        no: 'Alt du trenger for å drive studioet ditt. Klienter, kontrakter, betalinger, dagplan, shotliste og mer — i én app.'
+        en: 'Built for wedding days, not generic workflows. The studio app for the day itself — day plan, shotlist, crew, and a premium client portal.',
+        no: 'Bygget for bryllupsdagen, ikke generiske arbeidsflyter. Studioappen for selve dagen — dagplan, shotliste, crew og en premium klientportal.'
       };
 
       function setLang(lang) {
@@ -1120,6 +1199,76 @@
         });
       });
     })();
+  </script>
+
+  <!-- Access request modal -->
+  <script>
+    const ACCESS_API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/request-access';
+
+    function openAccessModal() {
+      const backdrop = document.getElementById('access-backdrop');
+      document.getElementById('access-form-view').classList.remove('hidden');
+      document.getElementById('access-success-view').classList.add('hidden');
+      document.getElementById('access-error').classList.add('hidden');
+      backdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        const emailInput = document.getElementById('access-email');
+        if (emailInput) emailInput.focus();
+      }, 200);
+    }
+
+    function closeAccessModal() {
+      document.getElementById('access-backdrop').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    async function submitAccessRequest(e) {
+      e.preventDefault();
+      const email = document.getElementById('access-email').value.trim();
+      const instagram = document.getElementById('access-instagram').value.trim();
+      const submitBtn = document.getElementById('access-submit');
+      const errEl = document.getElementById('access-error');
+      errEl.classList.add('hidden');
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch(ACCESS_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, instagram }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.message || 'Something went wrong. Please try again.');
+        }
+        document.getElementById('access-form-view').classList.add('hidden');
+        document.getElementById('access-success-view').classList.remove('hidden');
+        document.getElementById('access-email').value = '';
+        document.getElementById('access-instagram').value = '';
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const backdrop = document.getElementById('access-backdrop');
+        if (backdrop && backdrop.classList.contains('show')) closeAccessModal();
+      }
+    });
+
+    // Intercept all [data-open-access] elements so CTAs trigger the modal
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('[data-open-access]');
+      if (trigger) {
+        e.preventDefault();
+        openAccessModal();
+      }
+    });
   </script>
 
   <!-- Sticky mobile CTA show/hide -->
