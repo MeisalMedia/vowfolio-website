@@ -143,6 +143,18 @@
     .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
     .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
 
+    /* Meetings (expandable when summaries exist) */
+    .tile.expanded + .tile-expand.meetings-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .meetings-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .meetings-scroll{overflow-y:auto;max-height:380px;padding:4px 0;-webkit-overflow-scrolling:touch}
+    .meeting-item{padding:12px 0;border-bottom:1px solid #F4EFE6}
+    .meeting-item:last-child{border-bottom:none}
+    .meeting-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;align-items:baseline}
+    .meeting-title{font-size:14px;font-weight:600;color:#3D3229;flex:1}
+    .meeting-date{font-size:11px;color:#9B8D7E;letter-spacing:0.3px;text-transform:uppercase;flex-shrink:0}
+    .meeting-summary{font-size:13.5px;color:#3D3229;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+    .meetings-loading{padding:20px;text-align:center;color:#B0A090;font-size:13px}
+
     /* Intake summary (expandable when submitted) */
     .tile.expanded + .tile-expand.intake-expand{max-height:640px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
     .intake-body{padding:2px 14px 12px;display:flex;flex-direction:column}
@@ -238,6 +250,12 @@ const t = {
     nextIntake: 'Questionnaire pending',
     nextDeposit: 'Deposit pending',
     nextAllSet: 'All set — see you on the day',
+
+    meetingsTitle: 'Meeting notes',
+    meetingsStatus1: '1 shared note',
+    meetingsStatusN: 'shared notes',
+    meetingsEmpty: 'No shared notes yet.',
+    meetingsLoading: 'Loading notes…',
 
     intakeSummary: 'Submitted — tap to review your answers',
     intakeEdit: 'Edit answers',
@@ -375,6 +393,12 @@ const t = {
     nextDeposit: 'Depositum gjenstår',
     nextAllSet: 'Alt er klart — vi sees på dagen',
 
+    meetingsTitle: 'Møtenotater',
+    meetingsStatus1: '1 notat',
+    meetingsStatusN: 'notater',
+    meetingsEmpty: 'Ingen notater enda.',
+    meetingsLoading: 'Laster notater…',
+
     intakeSummary: 'Innsendt — trykk for å se svarene',
     intakeEdit: 'Rediger svar',
     intakeSubmittedOn: 'Sendt inn',
@@ -484,6 +508,13 @@ function setLang(newLang) {
       if (itile) {
         itile.classList.add('expanded');
         if (intakeData) renderIntake(intakeData);
+      }
+    }
+    if (localStorage.getItem(MEETINGS_STATE_KEY) === '1') {
+      const mtile = document.getElementById('meetings-tile');
+      if (mtile) {
+        mtile.classList.add('expanded');
+        if (meetingsData) renderMeetings();
       }
     }
   }
@@ -624,6 +655,9 @@ function render(data) {
   const depositCheck = deposit.paid ? '<span class="check">✓</span>' : '';
   const depositClass = deposit.paid ? 'ok' : 'warn';
 
+  const meetingsStatus = s.meetings || { count: 0 };
+  const meetingsCount = meetingsStatus.count || 0;
+
   const msgs = s.messages || { unread: 0 };
   const chatUnread = msgs.unread || 0;
   const chatBadge = chatUnread > 0 ? `<span class="tile-badge">${chatUnread}</span>` : '';
@@ -729,6 +763,24 @@ function render(data) {
         ${deposit.finalPaymentDueDate ? `<div class="expand-row"><span>${tr('finalDue')}</span><strong>${formatDate(deposit.finalPaymentDueDate)}</strong></div>` : ''}
       </div>
     </div>
+
+    ${meetingsCount > 0 ? `
+    <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
+      <div class="tile-icon gold">🗓️</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('meetingsTitle')}</div>
+        <div class="tile-status">${meetingsCount === 1 ? tr('meetingsStatus1') : `${meetingsCount} ${tr('meetingsStatusN')}`}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand meetings-expand">
+      <div class="meetings-body">
+        <div class="meetings-scroll" id="meetings-scroll">
+          <div class="meetings-loading">${escapeHtml(tr('meetingsLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
 
     <button class="tile" id="chat-tile" onclick="toggleChat(this)">
       <div class="tile-icon sage">💬</div>
@@ -1039,6 +1091,75 @@ async function sendChat() {
   }
 }
 
+// ---- Meetings (shared summaries) ----
+const MEETINGS_STATE_KEY = 'vf_meetings_expanded';
+let meetingsLoaded = false;
+let meetingsData = null;
+
+function renderMeetings() {
+  const scroll = document.getElementById('meetings-scroll');
+  if (!scroll) return;
+  const list = (meetingsData && meetingsData.meetings) || [];
+  if (!list.length) {
+    scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('meetingsEmpty'))}</div>`;
+    return;
+  }
+  scroll.innerHTML = list.map(m => {
+    const date = m.meetingDate ? formatDate(m.meetingDate) : '';
+    return `
+      <div class="meeting-item">
+        <div class="meeting-head">
+          <div class="meeting-title">${escapeHtml(m.title || '')}</div>
+          <div class="meeting-date">${escapeHtml(date)}</div>
+        </div>
+        <div class="meeting-summary">${escapeHtml(m.summary || '')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function fetchMeetings() {
+  if (!token) return;
+  const scroll = document.getElementById('meetings-scroll');
+  try {
+    const res = await fetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    meetingsData = data;
+    meetingsLoaded = true;
+    renderMeetings();
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandMeetings(tile) {
+  if (!tile) tile = document.getElementById('meetings-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(MEETINGS_STATE_KEY, '1');
+  if (meetingsLoaded && meetingsData) {
+    renderMeetings();
+  } else {
+    await fetchMeetings();
+  }
+}
+
+function collapseMeetings(tile) {
+  if (!tile) tile = document.getElementById('meetings-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(MEETINGS_STATE_KEY);
+}
+
+function toggleMeetings(tile) {
+  if (tile.classList.contains('expanded')) collapseMeetings(tile);
+  else expandMeetings(tile);
+}
+
 // ---- Intake (submitted questionnaire summary) ----
 const INTAKE_STATE_KEY = 'vf_intake_expanded';
 let intakeLoaded = false;
@@ -1166,6 +1287,9 @@ function toggleIntake(tile) {
 async function restoreChatState() {
   if (localStorage.getItem(INTAKE_STATE_KEY) === '1' && document.getElementById('intake-tile')) {
     expandIntake();
+  }
+  if (localStorage.getItem(MEETINGS_STATE_KEY) === '1' && document.getElementById('meetings-tile')) {
+    expandMeetings();
   }
   if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
     await expandChat();
