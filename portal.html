@@ -114,15 +114,15 @@
     .chat-intro p + p{margin-top:2px;color:#8A7D6E;font-size:11.5px}
     .chat-intro-close{position:absolute;top:4px;right:4px;background:none;border:none;color:#B0A090;font-size:16px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:6px;font-family:inherit}
     .chat-intro-close:hover{color:#6B5E4F;background:rgba(0,0,0,0.04)}
-    .chat-scroll{overflow-y:auto;max-height:300px;padding:2px 2px;display:flex;flex-direction:column;gap:1px;-webkit-overflow-scrolling:touch}
+    .chat-scroll{overflow-y:auto;max-height:300px;padding:2px 10px;display:flex;flex-direction:column;gap:1px;-webkit-overflow-scrolling:touch}
     .chat-scroll.empty{max-height:0;padding:0;margin:0}
     @media (max-width:640px){
-      .chat-scroll{max-height:240px}
+      .chat-scroll{max-height:240px;padding:2px 8px}
       .tile.expanded + .tile-expand.chat-expand{max-height:440px}
     }
     .msg-group{display:flex;flex-direction:column;gap:1px;margin-top:10px}
     .msg-group:first-child{margin-top:0}
-    .msg{max-width:84%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap}
+    .msg{min-width:56px;max-width:82%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap;text-align:left}
     .msg.them{align-self:flex-start;background:#FAFAF8;color:#3D3229;border-bottom-left-radius:5px;border:1px solid #EFE7DA}
     .msg.me{align-self:flex-end;background:#6B8F71;color:#fff;border-bottom-right-radius:5px}
     .msg.me.first{border-top-right-radius:16px;border-bottom-right-radius:3px}
