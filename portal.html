@@ -237,29 +237,18 @@ function daysUntil(iso) {
   return Math.round((d - today) / (1000 * 60 * 60 * 24));
 }
 
-// Token resolution: /p/{token} path, ?token= query, or sessionStorage
+// Token resolution: /p/{token} path or ?token= query. URL stays intact so bookmarks work.
 let token = null;
 (function resolveToken() {
   const path = location.pathname;
-  const m = path.match(/^\/p\/([a-f0-9]{16,128})\/?$/);
+  const m = path.match(/^\/p\/([a-f0-9]{8,128})\/?$/);
   if (m) {
     token = m[1];
-    sessionStorage.setItem('vf_portal_token', token);
-    history.replaceState(null, '', '/portal');
     return;
   }
   const qs = new URLSearchParams(location.search);
   const qt = qs.get('token');
-  if (qt) {
-    token = qt;
-    sessionStorage.setItem('vf_portal_token', token);
-    history.replaceState(null, '', '/portal');
-    return;
-  }
-  const stored = sessionStorage.getItem('vf_portal_token');
-  if (stored && (path === '/portal' || path === '/portal/')) {
-    token = stored;
-  }
+  if (qt) token = qt;
 })();
 
 let lastData = null;
