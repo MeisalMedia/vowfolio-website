@@ -90,34 +90,41 @@
     .expand-row.total strong{color:#6B8F71}
 
     .tile-badge{background:#C2847A;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;flex-shrink:0}
+    .tile-status.preview{color:#6B5E4F}
+    .tile-status .who{color:#9B7E5E;font-weight:600}
+    .tile-status .dot{color:#C4B8A8;margin:0 5px}
 
-    .tile.expanded + .tile-expand.chat-expand{max-height:640px}
-    .chat-body{padding:4px 14px 14px;display:flex;flex-direction:column}
-    .chat-intro{background:#F4ECDD;border-radius:12px;padding:12px 14px;margin:4px 0 10px;text-align:center}
-    .chat-intro p{font-size:12.5px;color:#6B5E4F;line-height:1.5}
-    .chat-intro p + p{margin-top:4px;color:#8A7D6E;font-size:11.5px}
-    .chat-scroll{overflow-y:auto;max-height:360px;padding:4px 2px;display:flex;flex-direction:column;gap:2px;-webkit-overflow-scrolling:touch}
+    .tile.expanded + .tile-expand.chat-expand{max-height:600px}
+    .chat-body{padding:2px 12px 12px;display:flex;flex-direction:column}
+    .chat-intro{position:relative;background:#F4ECDD;border-radius:12px;padding:10px 32px 10px 14px;margin:2px 0 8px;text-align:left}
+    .chat-intro.hidden{display:none}
+    .chat-intro p{font-size:12.5px;color:#6B5E4F;line-height:1.45}
+    .chat-intro p + p{margin-top:2px;color:#8A7D6E;font-size:11.5px}
+    .chat-intro-close{position:absolute;top:6px;right:6px;background:none;border:none;color:#B0A090;font-size:16px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:6px;font-family:inherit}
+    .chat-intro-close:hover{color:#6B5E4F;background:rgba(0,0,0,0.04)}
+    .chat-scroll{overflow-y:auto;max-height:340px;padding:2px 2px;display:flex;flex-direction:column;gap:1px;-webkit-overflow-scrolling:touch}
     .chat-scroll.empty{max-height:0;padding:0}
-    .msg-group{display:flex;flex-direction:column;gap:2px;margin-top:8px}
+    .msg-group{display:flex;flex-direction:column;gap:1px;margin-top:10px}
     .msg-group:first-child{margin-top:0}
-    .msg{max-width:84%;padding:9px 13px;border-radius:14px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap}
-    .msg.them{align-self:flex-start;background:#FAFAF8;color:#3D3229;border-bottom-left-radius:4px;border:1px solid #EFE7DA}
-    .msg.me{align-self:flex-end;background:#6B8F71;color:#fff;border-bottom-right-radius:4px}
-    .msg.me.first{border-bottom-right-radius:4px;border-top-right-radius:14px}
-    .msg.me.middle{border-top-right-radius:4px;border-bottom-right-radius:4px}
-    .msg.me.last{border-top-right-radius:4px;border-bottom-right-radius:4px}
-    .msg.them.first{border-bottom-left-radius:4px;border-top-left-radius:14px}
-    .msg.them.middle{border-top-left-radius:4px;border-bottom-left-radius:4px}
-    .msg.them.last{border-top-left-radius:4px;border-bottom-left-radius:4px}
-    .msg-time{font-size:10px;color:#B0A090;margin-top:1px;padding:0 6px}
+    .msg{max-width:84%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap}
+    .msg.them{align-self:flex-start;background:#FAFAF8;color:#3D3229;border-bottom-left-radius:5px;border:1px solid #EFE7DA}
+    .msg.me{align-self:flex-end;background:#6B8F71;color:#fff;border-bottom-right-radius:5px}
+    .msg.me.first{border-top-right-radius:16px;border-bottom-right-radius:3px}
+    .msg.me.middle{border-top-right-radius:3px;border-bottom-right-radius:3px}
+    .msg.me.last{border-top-right-radius:3px;border-bottom-right-radius:5px}
+    .msg.them.first{border-top-left-radius:16px;border-bottom-left-radius:3px}
+    .msg.them.middle{border-top-left-radius:3px;border-bottom-left-radius:3px}
+    .msg.them.last{border-top-left-radius:3px;border-bottom-left-radius:5px}
+    .msg-time{font-size:10px;color:#B0A090;margin-top:3px;padding:0 6px}
     .msg-time.me{align-self:flex-end}
     .msg-time.them{align-self:flex-start}
-    .chat-input-inline{margin-top:10px;display:flex;gap:8px;align-items:flex-end}
-    .chat-input-inline textarea{flex:1;border:1px solid #E8DFD1;border-radius:14px;padding:9px 12px;font-size:14px;font-family:inherit;resize:none;max-height:100px;line-height:1.4;color:#3D3229;background:#FAFAF8;outline:none}
+    .chat-input-inline{margin-top:10px;display:flex;gap:6px;align-items:flex-end}
+    .chat-input-inline textarea{flex:1;border:1px solid #E8DFD1;border-radius:18px;padding:9px 14px;font-size:14px;font-family:inherit;resize:none;max-height:100px;line-height:1.4;color:#3D3229;background:#FAFAF8;outline:none}
     .chat-input-inline textarea:focus{border-color:#9B7E5E;background:#fff}
-    .chat-send{background:#3D3229;color:#fff;border:none;border-radius:14px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s}
-    .chat-send:disabled{background:#C4B8A8;cursor:not-allowed}
-    .chat-send:not(:disabled):hover{background:#2A2118}
+    .chat-send{width:36px;height:36px;border-radius:50%;background:#6B8F71;color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:background 0.15s,transform 0.1s;flex-shrink:0;padding:0}
+    .chat-send svg{width:16px;height:16px}
+    .chat-send:disabled{background:#DFD5C6;cursor:not-allowed}
+    .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
     .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
   </style>
 </head>
@@ -207,13 +214,22 @@ const t = {
     chatTitle: 'Chat with your photographer',
     chatStatus: 'Questions? Send a message',
     chatStatusUnread: 'new',
+    chatStatusNewMsg: 'new message',
+    chatStatusNewMsgs: 'new messages',
     chatHeaderSub: 'Usually replies within a day',
     chatIntro1: 'Send a message here if you have any questions about the day.',
     chatIntro2: 'This keeps everything in one place.',
+    chatIntroClose: 'Dismiss',
     chatPlaceholder: 'Type a message…',
     chatSend: 'Send',
     chatSendErr: 'Could not send — please try again.',
     chatEmpty: 'No messages yet.',
+    chatYou: 'You',
+    timeNow: 'now',
+    timeMin: 'm',
+    timeHour: 'h',
+    timeDay: 'd',
+    timeYesterday: 'yesterday',
   },
   no: {
     loading: 'Laster portalen din...',
@@ -277,13 +293,22 @@ const t = {
     chatTitle: 'Chat med fotografen',
     chatStatus: 'Spørsmål? Send en melding',
     chatStatusUnread: 'ny',
+    chatStatusNewMsg: 'ny melding',
+    chatStatusNewMsgs: 'nye meldinger',
     chatHeaderSub: 'Svarer vanligvis innen en dag',
     chatIntro1: 'Send en melding her hvis dere har spørsmål om dagen.',
     chatIntro2: 'Da ligger alt samlet på ett sted.',
+    chatIntroClose: 'Skjul',
     chatPlaceholder: 'Skriv en melding…',
     chatSend: 'Send',
     chatSendErr: 'Kunne ikke sende — prøv igjen.',
     chatEmpty: 'Ingen meldinger ennå.',
+    chatYou: 'Dere',
+    timeNow: 'nå',
+    timeMin: 'm',
+    timeHour: 't',
+    timeDay: 'd',
+    timeYesterday: 'i går',
   },
 };
 
@@ -428,10 +453,24 @@ function render(data) {
   const depositCheck = deposit.paid ? '<span class="check">✓</span>' : '';
   const depositClass = deposit.paid ? 'ok' : 'warn';
 
-  const chatUnread = (s.messages && s.messages.unread) || 0;
-  const chatStatusText = chatUnread > 0 ? `${chatUnread} ${tr('chatStatusUnread')}` : tr('chatStatus');
-  const chatStatusClass = chatUnread > 0 ? 'warn' : '';
+  const msgs = s.messages || { unread: 0 };
+  const chatUnread = msgs.unread || 0;
   const chatBadge = chatUnread > 0 ? `<span class="tile-badge">${chatUnread}</span>` : '';
+  let chatStatusText, chatStatusClass;
+  if (chatUnread > 0) {
+    chatStatusText = `${chatUnread} ${chatUnread === 1 ? tr('chatStatusNewMsg') : tr('chatStatusNewMsgs')}`;
+    chatStatusClass = 'warn';
+  } else if (msgs.lastAt && msgs.lastPreview) {
+    const who = msgs.lastRole === 'client' ? tr('chatYou') : (p.name || tr('chatTitle'));
+    const preview = msgs.lastPreview.length > 48 ? msgs.lastPreview.slice(0, 48) + '…' : msgs.lastPreview;
+    chatStatusText = `<span class="who">${escapeHtml(who)}:</span> ${escapeHtml(preview)} <span class="dot">·</span> ${relativeTime(msgs.lastAt)}`;
+    chatStatusClass = 'preview';
+  } else {
+    chatStatusText = tr('chatStatus');
+    chatStatusClass = '';
+  }
+  const chatIntroDismissKey = token ? `vf_chat_intro_${token.slice(0, 12)}` : null;
+  const chatIntroDismissed = chatIntroDismissKey && localStorage.getItem(chatIntroDismissKey) === '1';
 
   const photogInitial = p.name ? p.name.charAt(0).toUpperCase() : 'V';
   const avatarInner = p.logoUrl ? `<img src="${escapeHtml(p.logoUrl)}" alt="">` : escapeHtml(photogInitial);
@@ -507,7 +546,8 @@ function render(data) {
     </button>
     <div class="tile-expand chat-expand">
       <div class="chat-body">
-        <div class="chat-intro">
+        <div class="chat-intro${chatIntroDismissed ? ' hidden' : ''}" id="chat-intro">
+          <button class="chat-intro-close" onclick="dismissChatIntro(event)" aria-label="${escapeHtml(tr('chatIntroClose'))}">×</button>
           <p>${escapeHtml(tr('chatIntro1'))}</p>
           <p>${escapeHtml(tr('chatIntro2'))}</p>
         </div>
@@ -515,7 +555,9 @@ function render(data) {
         <div class="chat-error hidden" id="chat-error"></div>
         <div class="chat-input-inline">
           <textarea id="chat-text" rows="1" placeholder="${escapeHtml(tr('chatPlaceholder'))}"></textarea>
-          <button class="chat-send" id="chat-send" onclick="sendChat()" disabled>${escapeHtml(tr('chatSend'))}</button>
+          <button class="chat-send" id="chat-send" onclick="sendChat()" disabled aria-label="${escapeHtml(tr('chatSend'))}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -583,6 +625,31 @@ function formatTime(iso) {
   const d = new Date(iso);
   const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
   return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
+function relativeTime(iso) {
+  if (!iso) return '';
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const sec = Math.max(0, Math.round((now - then) / 1000));
+  if (sec < 60) return tr('timeNow');
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}${tr('timeMin')}`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}${tr('timeHour')}`;
+  const day = Math.round(hr / 24);
+  if (day === 1) return tr('timeYesterday');
+  if (day < 7) return `${day}${tr('timeDay')}`;
+  const d = new Date(iso);
+  const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+}
+
+function dismissChatIntro(e) {
+  if (e) e.stopPropagation();
+  const intro = document.getElementById('chat-intro');
+  if (intro) intro.classList.add('hidden');
+  if (token) localStorage.setItem(`vf_chat_intro_${token.slice(0, 12)}`, '1');
 }
 
 function buildChatGroups() {
