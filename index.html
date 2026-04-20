@@ -189,25 +189,18 @@
       color: var(--faint);
     }
 
-    /* Hero microcopy strip */
+    /* Hero microcopy — vertical stack, editorial, no icons */
     .hero-micro {
-      margin-top: 18px;
-      display: inline-flex;
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 20px;
+      gap: 5px;
       font-size: 13px;
       color: var(--faint);
-      flex-wrap: wrap;
-      justify-content: center;
+      letter-spacing: 0.2px;
     }
     .hero-micro span { white-space: nowrap; }
-    .hero-micro svg {
-      width: 14px;
-      height: 14px;
-      color: var(--sage);
-      margin-right: 4px;
-      vertical-align: -2px;
-    }
 
     /* How it works */
     .howto {
@@ -772,14 +765,14 @@
       Få tidlig tilgang
     </a>
     <div class="hero-micro" data-lang="en">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Founding users</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>iOS · private preview</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Nordic photographers first</span>
+      <span>iOS · private preview</span>
+      <span>Nordic photographers first</span>
+      <span>Early users</span>
     </div>
     <div class="hero-micro" data-lang="no">
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Grunnleggerbrukere</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>iOS · private preview</span>
-      <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>Norske fotografer først</span>
+      <span>iOS · private preview</span>
+      <span>Norske fotografer først</span>
+      <span>Tidlige brukere</span>
     </div>
   </section>
 
