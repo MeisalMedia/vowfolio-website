@@ -338,36 +338,72 @@
       max-width: 480px;
       margin: 0 auto;
     }
-    .shots-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 32px 24px;
+    /* Phone showcase — 3 mockups, center largest, side phones smaller.
+       Each image has different phone-to-canvas ratio, so we normalize via
+       per-image CSS vars (phone-w/h/cx/cy in canvas pixels). The container
+       is sized to the PHONE, not the outer PNG — excess transparent area
+       is cropped via overflow: hidden. All three phones come out at the
+       same visual scale per given --display-w. */
+    .phone-showcase {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 8px;
+      max-width: 1000px;
+      margin: 0 auto;
+      flex-wrap: nowrap;
     }
-    .shot {
+    .phone-card {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
+      flex-shrink: 0;
     }
-    .shot-frame {
-      background: var(--white);
-      border-radius: 28px;
-      padding: 10px;
-      box-shadow: 0 10px 32px rgba(61,50,41,0.12);
-      margin-bottom: 14px;
+    .phone {
+      --canvas-w: 688;
+      --canvas-h: 1504;
+      position: relative;
       overflow: hidden;
+      flex-shrink: 0;
+      width: var(--display-w);
+      height: calc(var(--phone-h) / var(--phone-w) * var(--display-w));
+      filter: drop-shadow(0 18px 40px rgba(61,50,41,0.18));
     }
-    .shot-frame img {
+    .phone img {
+      position: absolute;
       display: block;
-      width: 100%;
+      width: calc(var(--canvas-w) / var(--phone-w) * var(--display-w));
       height: auto;
-      border-radius: 20px;
+      left: calc(50% - var(--phone-cx) / var(--phone-w) * var(--display-w));
+      top: calc(var(--phone-h) / var(--phone-w) * var(--display-w) / 2 - var(--phone-cy) / var(--phone-w) * var(--display-w));
     }
     .shot-caption {
       font-size: 13px;
       font-weight: 600;
       color: var(--espresso);
       letter-spacing: 0.4px;
+      margin-top: 16px;
+    }
+    .shot-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+      max-width: 200px;
+    }
+    .phone-card.center { --display-w: 280px; }
+    .phone-card.side   { --display-w: 220px; padding-bottom: 18px; }
+    @media (max-width: 720px) {
+      .phone-showcase { gap: 4px; }
+      .phone-card.center { --display-w: 200px; }
+      .phone-card.side   { --display-w: 150px; padding-bottom: 12px; }
+      .shot-sub { font-size: 11px; max-width: 140px; }
+    }
+    @media (max-width: 480px) {
+      .phone-card.center { --display-w: 160px; }
+      .phone-card.side   { --display-w: 118px; padding-bottom: 8px; }
+      .shot-caption { font-size: 12px; margin-top: 12px; }
+      .shot-sub { display: none; }
     }
 
     /* Why VowFolio */
@@ -902,20 +938,11 @@
       <p data-lang="en">A quick look at the views you'll live in.</p>
       <p data-lang="no">Et raskt innblikk i visningene du kommer til å bo i.</p>
     </div>
-    <div class="shots-grid">
+    <div class="phone-showcase">
 
-      <div class="shot">
-        <div class="shot-frame">
-          <img src="/screenshots/dayplan.png" alt="Day plan view" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Day plan</div>
-        <div class="shot-caption" data-lang="no">Dagplan</div>
-        <div class="shot-sub" data-lang="en">Always know what's next</div>
-        <div class="shot-sub" data-lang="no">Alltid vite hva som kommer neste</div>
-      </div>
-
-      <div class="shot">
-        <div class="shot-frame">
+      <!-- Side: Shotlist (smallest phone in canvas → biggest scale up) -->
+      <div class="phone-card side">
+        <div class="phone" style="--phone-w:444; --phone-h:949; --phone-cx:344; --phone-cy:846.5;">
           <img src="/screenshots/shotlist.png" alt="Shotlist view" loading="lazy">
         </div>
         <div class="shot-caption" data-lang="en">Shotlist</div>
@@ -924,34 +951,26 @@
         <div class="shot-sub" data-lang="no">Aldri glem øyeblikkene som teller</div>
       </div>
 
-      <div class="shot">
-        <div class="shot-frame">
+      <!-- Center: Day plan — hero/largest -->
+      <div class="phone-card center">
+        <div class="phone" style="--phone-w:483; --phone-h:1001; --phone-cx:349.5; --phone-cy:729.5;">
+          <img src="/screenshots/dayplan.png" alt="Day plan view" loading="lazy">
+        </div>
+        <div class="shot-caption" data-lang="en">Day plan</div>
+        <div class="shot-caption" data-lang="no">Dagplan</div>
+        <div class="shot-sub" data-lang="en">Always know what's next</div>
+        <div class="shot-sub" data-lang="no">Alltid vite hva som kommer neste</div>
+      </div>
+
+      <!-- Side: Client portal -->
+      <div class="phone-card side">
+        <div class="phone" style="--phone-w:551; --phone-h:1163; --phone-cx:344.5; --phone-cy:752.5;">
           <img src="/screenshots/client-portal.png" alt="Client portal" loading="lazy">
         </div>
         <div class="shot-caption" data-lang="en">Shared day plan</div>
         <div class="shot-caption" data-lang="no">Delt dagplan</div>
-        <div class="shot-sub" data-lang="en">See and share the wedding day plan with your couple</div>
-        <div class="shot-sub" data-lang="no">Se og del bryllupsdagens plan med paret</div>
-      </div>
-
-      <div class="shot">
-        <div class="shot-frame">
-          <img src="/screenshots/wedding.png" alt="Wedding detail view" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Wedding detail</div>
-        <div class="shot-caption" data-lang="no">Bryllupsdetaljer</div>
-        <div class="shot-sub" data-lang="en">Everything about a wedding in one place</div>
-        <div class="shot-sub" data-lang="no">Alt om et bryllup på ett sted</div>
-      </div>
-
-      <div class="shot">
-        <div class="shot-frame">
-          <img src="/screenshots/find-crew.png" alt="Find crew view" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Find crew</div>
-        <div class="shot-caption" data-lang="no">Finn crew</div>
-        <div class="shot-sub" data-lang="en">Book second shooters in seconds</div>
-        <div class="shot-sub" data-lang="no">Book medfotografer på sekunder</div>
+        <div class="shot-sub" data-lang="en">See the plan with your couple</div>
+        <div class="shot-sub" data-lang="no">Se planen sammen med paret</div>
       </div>
 
     </div>
