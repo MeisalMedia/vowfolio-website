@@ -173,14 +173,19 @@
     .dayplan-header-text{flex:1;min-width:0}
     .dayplan-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;line-height:1.2;font-weight:600}
     .dayplan-sub{font-size:11.5px;color:#9B8D7E;margin-top:3px;letter-spacing:0.3px}
-    .dayplan-list{display:flex;flex-direction:column}
-    .dayplan-item{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #F4EFE6}
-    .dayplan-item:last-child{border-bottom:none;padding-bottom:2px}
-    .dayplan-item:first-child{padding-top:2px}
-    .dayplan-time{flex-shrink:0;min-width:58px;font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:#9B7E5E;letter-spacing:0.3px;padding-top:2px}
-    .dayplan-body{flex:1;min-width:0}
-    .dayplan-event-title{font-size:14px;font-weight:500;color:#3D3229;line-height:1.4}
-    .dayplan-event-notes{font-size:12.5px;color:#8A7D6E;margin-top:3px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+    .dayplan-list{display:flex;flex-direction:column;margin-top:2px}
+    .dayplan-item{display:flex;align-items:stretch;position:relative;min-height:52px}
+    .dayplan-time{flex-shrink:0;width:52px;padding-top:18px;font-family:'SF Mono','Menlo','Courier New',monospace;font-size:13px;font-weight:700;color:#C2847A;letter-spacing:0.3px}
+    .dayplan-rail{flex-shrink:0;width:20px;position:relative}
+    .dayplan-rail::before{content:'';position:absolute;top:22px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#C2847A;z-index:1}
+    .dayplan-rail::after{content:'';position:absolute;top:34px;bottom:0;left:50%;width:2px;margin-left:-1px;background:rgba(194,132,122,0.40)}
+    .dayplan-item:last-child .dayplan-rail::after{display:none}
+    .dayplan-item:first-child .dayplan-rail::before{width:13px;height:13px;margin-left:-6.5px;top:20px;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(194,132,122,0.45)}
+    .dayplan-item:first-child .dayplan-rail::after{top:35px}
+    .dayplan-body{flex:1;min-width:0;padding:16px 0 22px 14px}
+    .dayplan-event-title{font-size:15px;font-weight:600;color:#3D3229;line-height:1.35}
+    .dayplan-item:first-child .dayplan-event-title{font-size:16px;font-weight:700}
+    .dayplan-event-notes{font-size:13px;color:rgba(194,132,122,0.88);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
 
     /* Deliveries (expandable when photographer has added any) */
     .tile.expanded + .tile-expand.deliveries-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
@@ -735,6 +740,7 @@ function renderDayPlan(items) {
   const rows = items.map(it => `
     <div class="dayplan-item">
       <div class="dayplan-time">${escapeHtml(it.time || '')}</div>
+      <div class="dayplan-rail"></div>
       <div class="dayplan-body">
         <div class="dayplan-event-title">${escapeHtml(it.title || '')}</div>
         ${it.notes ? `<div class="dayplan-event-notes">${escapeHtml(it.notes)}</div>` : ''}
