@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pricing — VowFolio</title>
-  <meta name="description" content="Run your wedding business without the chaos. Simple, honest pricing for wedding photographers.">
+  <meta name="description" content="The studio app built for real shoots. From inquiry to delivery — one workflow, one price.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -191,23 +191,22 @@
 
     .plan-badge {
       position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.8px;
+      top: 18px;
+      right: 18px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 3px 9px;
+      border-radius: 12px;
       white-space: nowrap;
     }
     .badge-popular {
-      background: var(--espresso);
-      color: var(--white);
+      background: rgba(155,126,94,0.12);
+      color: var(--taupe);
     }
     .badge-soon {
-      background: var(--sand);
+      background: rgba(155,126,94,0.12);
       color: var(--taupe);
     }
 
@@ -329,40 +328,24 @@
       box-shadow: 0 8px 40px rgba(61,50,41,0.12);
     }
 
-    /* Studio card = "preview" treatment: softer, less finished-looking */
-    .plan-studio {
-      background: linear-gradient(180deg, rgba(232,224,214,0.35) 0%, rgba(250,247,242,0.85) 100%);
-      border: 1.5px dashed rgba(155,126,94,0.35);
-      box-shadow: none;
-    }
-    .plan-studio:hover {
-      transform: none;
-      box-shadow: 0 4px 20px rgba(61,50,41,0.05);
-    }
-    .plan-studio .plan-name {
-      color: var(--faint);
-    }
-    .plan-studio .plan-title {
-      color: var(--muted);
-    }
-    .plan-studio .plan-price .amount {
-      color: var(--muted);
+    /* Founder pricing signal */
+    .founder-note {
+      display: inline-block;
+      margin-top: 20px;
+      font-size: 12px;
       font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--taupe);
+      background: rgba(155,126,94,0.1);
+      padding: 6px 14px;
+      border-radius: 20px;
     }
-    .plan-studio .plan-features li {
-      color: var(--muted);
-    }
-    .plan-studio .plan-features li::before {
-      border-color: var(--faint);
-    }
-    .plan-studio-eta {
-      font-size: 11px;
+    .price-period-note {
+      font-size: 12px;
       color: var(--faint);
-      font-style: italic;
-      text-align: left;
-      margin-top: -18px;
+      margin-top: -20px;
       margin-bottom: 22px;
-      letter-spacing: 0.2px;
     }
 
     /* Mid-section */
@@ -615,10 +598,12 @@
 
   <!-- Section header -->
   <section class="header">
-    <h1 data-lang="en">Run your wedding business<br><span>without the chaos</span></h1>
-    <h1 data-lang="no">Driv bryllupsbedriften<br><span>uten kaos</span></h1>
-    <p data-lang="en">Everything you need — from first inquiry to final delivery.</p>
-    <p data-lang="no">Alt du trenger — fra første henvendelse til ferdig leveranse.</p>
+    <h1 data-lang="en">The studio app<br><span>built for real shoots</span></h1>
+    <h1 data-lang="no">Studioappen<br><span>bygget for ekte shoots</span></h1>
+    <p data-lang="en">From inquiry to delivery — one workflow for every shoot.</p>
+    <p data-lang="no">Fra henvendelse til leveranse — én arbeidsflyt for hvert oppdrag.</p>
+    <div class="founder-note" data-lang="en">Early access pricing — prices increase after launch</div>
+    <div class="founder-note" data-lang="no">Early access-priser — prisene øker etter lansering</div>
   </section>
 
   <!-- Pricing cards -->
@@ -630,101 +615,92 @@
         <div class="plan-name">Starter</div>
         <div class="plan-title" data-lang="en">Get organized.<br>Stay in control.</div>
         <div class="plan-title" data-lang="no">Få orden.<br>Behold kontrollen.</div>
-        <p class="plan-desc" data-lang="en">Perfect for photographers who want structure without complexity.</p>
-        <p class="plan-desc" data-lang="no">For fotografer som vil ha struktur — uten kompleksitet.</p>
+        <p class="plan-desc" data-lang="en">For solo photographers who want structure — nothing more.</p>
+        <p class="plan-desc" data-lang="no">For solo-fotografer som vil ha struktur — ikke mer.</p>
         <div class="plan-price">
-          <span class="amount">$139</span>
-          <span class="period" data-lang="en">/ year</span>
-          <span class="period" data-lang="no">/ år</span>
+          <span class="amount">$12</span>
+          <span class="period">/ mo</span>
         </div>
+        <p class="price-period-note" data-lang="en">Billed annually. $144/year.</p>
+        <p class="price-period-note" data-lang="no">Faktureres årlig. $144/år.</p>
         <ul class="plan-features">
-          <li data-lang="en">Unlimited weddings</li>
-          <li data-lang="no">Ubegrenset antall bryllup</li>
-          <li data-lang="en">Day plan</li>
-          <li data-lang="no">Dagplan</li>
-          <li data-lang="en">Shotlists</li>
-          <li data-lang="no">Shotlister</li>
-          <li data-lang="en">Tasks</li>
-          <li data-lang="no">Oppgaver</li>
-          <li data-lang="en">Contacts</li>
-          <li data-lang="no">Kontakter</li>
-          <li data-lang="en">Simple client questionnaire (shareable link)</li>
-          <li data-lang="no">Enkelt klientskjema (delbar lenke)</li>
+          <li data-lang="en">Unlimited projects</li>
+          <li data-lang="no">Ubegrenset antall prosjekter</li>
+          <li data-lang="en">Day plan built for shoot days</li>
+          <li data-lang="no">Dagplan bygget for shoot-dagen</li>
+          <li data-lang="en">Shotlists you actually use</li>
+          <li data-lang="no">Shotlister du faktisk bruker</li>
+          <li data-lang="en">Tasks and reminders</li>
+          <li data-lang="no">Oppgaver og påminnelser</li>
+          <li data-lang="en">Simple client questionnaire</li>
+          <li data-lang="no">Enkelt klientskjema</li>
         </ul>
-        <div class="plan-limits">
-          <div data-lang="en">No automations</div>
-          <div data-lang="no">Ingen automatiseringer</div>
-          <div data-lang="en">No crew collaboration</div>
-          <div data-lang="no">Ingen crew-samarbeid</div>
-        </div>
         <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-secondary" data-lang="en">Start free</a>
         <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-secondary" data-lang="no">Start gratis</a>
       </div>
 
       <!-- PRO -->
       <div class="plan plan-pro">
-        <div class="plan-badge badge-popular" data-lang="en">Most Popular</div>
+        <div class="plan-badge badge-popular" data-lang="en">Most popular</div>
         <div class="plan-badge badge-popular" data-lang="no">Mest valgt</div>
         <div class="plan-name">Pro</div>
-        <div class="plan-title" data-lang="en">Run your business<br>like a pro</div>
-        <div class="plan-title" data-lang="no">Driv studioet<br>som en proff</div>
-        <p class="plan-desc" data-lang="en">Save time, stay ahead, and deliver a better client experience.</p>
-        <p class="plan-desc" data-lang="no">Spar tid, ligg i forkant, og gi kundene en bedre opplevelse.</p>
+        <div class="plan-title" data-lang="en">Run shoots<br>like a pro</div>
+        <div class="plan-title" data-lang="no">Driv shoots<br>som en proff</div>
+        <p class="plan-desc" data-lang="en">Save time, stay ahead, and give clients a better experience.</p>
+        <p class="plan-desc" data-lang="no">Spar tid, ligg i forkant, og gi klientene en bedre opplevelse.</p>
         <div class="plan-price">
-          <span class="amount">$259</span>
-          <span class="period" data-lang="en">/ year</span>
-          <span class="period" data-lang="no">/ år</span>
+          <span class="amount">$24</span>
+          <span class="period">/ mo</span>
         </div>
+        <p class="price-period-note" data-lang="en">Billed annually. $288/year.</p>
+        <p class="price-period-note" data-lang="no">Faktureres årlig. $288/år.</p>
         <ul class="plan-features">
           <li data-lang="en">Everything in Starter</li>
           <li data-lang="no">Alt i Starter</li>
-          <li data-lang="en"><strong>Automations</strong></li>
-          <li data-lang="no"><strong>Automatiseringer</strong></li>
           <li data-lang="en">A client portal worth showing off</li>
           <li data-lang="no">En klientportal verdt å vise frem</li>
           <li data-lang="en">Invite second shooters</li>
           <li data-lang="no">Inviter medfotografer</li>
           <li data-lang="en">Advanced day plan (notes, flow, timing)</li>
           <li data-lang="no">Avansert dagplan (notater, flyt, timing)</li>
+          <li data-lang="en">Automations that remove busywork</li>
+          <li data-lang="no">Automatiseringer som fjerner tidstyver</li>
           <li data-lang="en">Priority support</li>
           <li data-lang="no">Prioritert support</li>
         </ul>
-        <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-primary" data-lang="en">Upgrade to Pro</a>
-        <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-primary" data-lang="no">Oppgrader til Pro</a>
-        <p class="plan-note" data-lang="en">Most photographers upgrade after their first booking</p>
-        <p class="plan-note" data-lang="no">De fleste oppgraderer etter første booking</p>
+        <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-primary" data-lang="en">Start Pro</a>
+        <a href="https://testflight.apple.com/join/epwEKS8J" class="plan-cta cta-primary" data-lang="no">Start Pro</a>
+        <p class="plan-note" data-lang="en">Most people upgrade after their first shoot</p>
+        <p class="plan-note" data-lang="no">De fleste oppgraderer etter første shoot</p>
       </div>
 
-      <!-- STUDIO -->
-      <div class="plan plan-studio">
-        <div class="plan-badge badge-soon" data-lang="en">Coming soon</div>
-        <div class="plan-badge badge-soon" data-lang="no">Kommer snart</div>
-        <div class="plan-name">Studio</div>
-        <div class="plan-title" data-lang="en">Built for studios<br>and teams</div>
-        <div class="plan-title" data-lang="no">Bygget for studioer<br>og team</div>
-        <p class="plan-desc" data-lang="en">More power, more control, more growth.</p>
-        <p class="plan-desc" data-lang="no">Mer kraft, mer kontroll, mer vekst.</p>
+      <!-- TEAMS -->
+      <div class="plan">
+        <div class="plan-name">Teams</div>
+        <div class="plan-title" data-lang="en">For studios with<br>multiple shooters</div>
+        <div class="plan-title" data-lang="no">For studioer med<br>flere fotografer</div>
+        <p class="plan-desc" data-lang="en">One shared workspace for the whole team.</p>
+        <p class="plan-desc" data-lang="no">Ett felles arbeidsrom for hele teamet.</p>
         <div class="plan-price">
-          <span class="amount">~$399</span>
-          <span class="period" data-lang="en">/ year</span>
-          <span class="period" data-lang="no">/ år</span>
+          <span class="amount">$39</span>
+          <span class="period">/ mo</span>
         </div>
-        <div class="plan-studio-eta" data-lang="en">Estimated — final pricing set at launch</div>
-        <div class="plan-studio-eta" data-lang="no">Anslått — endelig pris bestemmes ved lansering</div>
+        <p class="price-period-note" data-lang="en">Billed annually. $468/year.</p>
+        <p class="price-period-note" data-lang="no">Faktureres årlig. $468/år.</p>
         <ul class="plan-features">
           <li data-lang="en">Everything in Pro</li>
           <li data-lang="no">Alt i Pro</li>
-          <li data-lang="en">Multiple users</li>
-          <li data-lang="no">Flere brukere</li>
-          <li data-lang="en">Financial overview (income, expenses, profit)</li>
-          <li data-lang="no">Økonomisk oversikt (inntekter, utgifter, resultat)</li>
-          <li data-lang="en">Contracts</li>
-          <li data-lang="no">Kontrakter</li>
-          <li data-lang="en">Insights</li>
-          <li data-lang="no">Innsikt</li>
+          <li data-lang="en">Work together across shoots</li>
+          <li data-lang="no">Jobb sammen på tvers av oppdrag</li>
+          <li data-lang="en">See payments in one place</li>
+          <li data-lang="no">Se betalinger på ett sted</li>
+          <li data-lang="en">Keep contracts tied to every project</li>
+          <li data-lang="no">Hold kontrakter knyttet til hvert prosjekt</li>
+          <li data-lang="en">Insights across the studio</li>
+          <li data-lang="no">Innsikt på tvers av studioet</li>
         </ul>
-        <button type="button" class="plan-cta cta-waitlist" data-waitlist="studio" data-lang="en">Join waitlist</button>
-        <button type="button" class="plan-cta cta-waitlist" data-waitlist="studio" data-lang="no">Bli med på venteliste</button>
+        <button type="button" class="plan-cta cta-waitlist" data-waitlist="teams" data-lang="en">Join waitlist</button>
+        <button type="button" class="plan-cta cta-waitlist" data-waitlist="teams" data-lang="no">Bli med på venteliste</button>
       </div>
 
     </div>
@@ -732,33 +708,31 @@
 
   <!-- Mid-section -->
   <section class="mid">
-    <h2 data-lang="en">Stop juggling tools.<br>Start running your business.</h2>
-    <h2 data-lang="no">Slutt å sjonglere verktøy.<br>Driv bedriften enklere.</h2>
+    <h2 data-lang="en">From inquiry to delivery,<br>in one flow</h2>
+    <h2 data-lang="no">Fra henvendelse til leveranse,<br>i én flyt</h2>
     <ul class="mid-bullets">
-      <li data-lang="en">No more spreadsheets and scattered notes</li>
-      <li data-lang="no">Slutt med regneark og spredte notater</li>
-      <li data-lang="en">No more "what's next?" on wedding days</li>
-      <li data-lang="no">Slutt med «hva er neste?» på bryllupsdagen</li>
-      <li data-lang="en">No more manual work after inquiries</li>
-      <li data-lang="no">Slutt med manuelt arbeid etter henvendelser</li>
+      <li data-lang="en">No scattered notes</li>
+      <li data-lang="no">Ingen spredte notater</li>
+      <li data-lang="en">No five-app workflows</li>
+      <li data-lang="no">Ingen workflow i fem apper</li>
+      <li data-lang="en">No losing track on shoot day</li>
+      <li data-lang="no">Ikke miste kontrollen på shoot-dagen</li>
     </ul>
-    <p class="mid-close" data-lang="en">Everything flows automatically.</p>
-    <p class="mid-close" data-lang="no">Alt flyter automatisk.</p>
   </section>
 
   <!-- Final CTA -->
   <section class="cta-section">
-    <h2 data-lang="en">Try it on your next wedding</h2>
-    <h2 data-lang="no">Prøv det på neste bryllup</h2>
-    <p data-lang="en">No risk. No commitment.<br>If it doesn't make your workflow easier, don't use it.</p>
-    <p data-lang="no">Ingen risiko. Ingen binding.<br>Hvis det ikke gjør hverdagen enklere, så la være.</p>
+    <h2 data-lang="en">Start with your next shoot</h2>
+    <h2 data-lang="no">Start med neste shoot</h2>
+    <p data-lang="en">Private preview. Invitation only.<br>No credit card required.</p>
+    <p data-lang="no">Private preview. Kun via invitasjon.<br>Ingen kredittkort nødvendig.</p>
     <a href="https://testflight.apple.com/join/epwEKS8J" class="cta-big" data-lang="en">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Start free trial
+      Request access
     </a>
     <a href="https://testflight.apple.com/join/epwEKS8J" class="cta-big" data-lang="no">
       <svg viewBox="0 0 24 24" fill="currentColor" style="width:20px;height:20px;"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.99 2.97 12.5 4.7 9.56C5.55 8.1 7.13 7.17 8.82 7.15C10.1 7.13 11.32 8.02 12.11 8.02C12.89 8.02 14.37 6.94 15.92 7.11C16.57 7.14 18.39 7.38 19.56 9.07C19.47 9.13 17.29 10.39 17.31 13.01C17.34 16.14 20.08 17.17 20.11 17.18C20.08 17.26 19.67 18.7 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.36 4.26 13 3.5Z"/></svg>
-      Start gratis
+      Be om early access
     </a>
   </section>
 
@@ -769,10 +743,10 @@
 
       <!-- Form state -->
       <div id="waitlistForm">
-        <h3 id="waitlistTitle" data-lang="en">Join the Studio waitlist</h3>
-        <h3 data-lang="no">Bli med på Studio-ventelisten</h3>
-        <p class="modal-sub" data-lang="en">We'll email you the moment Studio is ready. No spam, no marketing noise.</p>
-        <p class="modal-sub" data-lang="no">Vi sender deg en e-post så snart Studio er klar. Ingen spam, ingen markedsføringsstøy.</p>
+        <h3 id="waitlistTitle" data-lang="en">Join the Teams waitlist</h3>
+        <h3 data-lang="no">Bli med på Teams-ventelisten</h3>
+        <p class="modal-sub" data-lang="en">We'll email you the moment Teams is ready. No spam, no marketing noise.</p>
+        <p class="modal-sub" data-lang="no">Vi sender deg en e-post så snart Teams er klar. Ingen spam, ingen markedsføringsstøy.</p>
         <form class="modal-form" id="waitlistFormEl" novalidate>
           <input
             type="email"
@@ -797,8 +771,8 @@
         </div>
         <h3 data-lang="en">You're on the list</h3>
         <h3 data-lang="no">Du er på listen</h3>
-        <p data-lang="en">We'll email you when Studio is ready.</p>
-        <p data-lang="no">Vi sender deg en e-post når Studio er klar.</p>
+        <p data-lang="en">We'll email you when Teams is ready.</p>
+        <p data-lang="no">Vi sender deg en e-post når Teams er klar.</p>
       </div>
     </div>
   </div>
@@ -816,8 +790,8 @@
         no: 'Priser — VowFolio'
       };
       var descriptions = {
-        en: 'Run your wedding business without the chaos. Simple, honest pricing for wedding photographers.',
-        no: 'Driv bryllupsbedriften uten kaos. Enkel og ærlig prising for bryllupsfotografer.'
+        en: 'The studio app built for real shoots. From inquiry to delivery — one workflow, one price.',
+        no: 'Studioappen bygget for ekte shoots. Fra henvendelse til leveranse — én arbeidsflyt, én pris.'
       };
 
       function setLang(lang) {
