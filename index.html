@@ -338,64 +338,19 @@
       max-width: 480px;
       margin: 0 auto;
     }
-    /* Phone showcase — each image has a different phone-to-canvas ratio.
-       We scale each IMG so the phone inside comes out at --display-w.
-       No cropping — the surrounding transparent area just shows through.
-       Result: all three phones appear at the same visual width regardless
-       of how much padding the PNG has. */
-    .phone-showcase {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .phone-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      flex: 0 0 auto;
-    }
-    .phone {
-      --canvas-w: 688;
+    /* Hero devices — single composed mockup replacing the 3-phone layout */
+    .hero-devices {
       display: block;
-      /* Canvas rendered at: display-phone-w × (canvas-w / phone-w) */
-      width: calc(var(--display-w) * var(--canvas-w) / var(--phone-w));
-      flex-shrink: 0;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
     }
-    .phone img {
+    .hero-devices img {
       display: block;
       width: 100%;
       height: auto;
-    }
-    .shot-caption {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--espresso);
-      letter-spacing: 0.4px;
-      margin-top: 8px;
-    }
-    .shot-sub {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-      max-width: 200px;
-    }
-    .phone-card.center { --display-w: 260px; }
-    .phone-card.side   { --display-w: 200px; }
-    @media (max-width: 820px) {
-      .phone-card.center { --display-w: 200px; }
-      .phone-card.side   { --display-w: 150px; }
-      .shot-sub { font-size: 11px; max-width: 140px; }
-    }
-    @media (max-width: 520px) {
-      .phone-showcase { gap: 6px; }
-      .phone-card.center { --display-w: 150px; }
-      .phone-card.side   { --display-w: 112px; }
-      .shot-caption { font-size: 12px; margin-top: 6px; }
-      .shot-sub { display: none; }
     }
 
     /* Why VowFolio */
@@ -930,41 +885,8 @@
       <p data-lang="en">A quick look at the views you'll live in.</p>
       <p data-lang="no">Et raskt innblikk i visningene du kommer til å bo i.</p>
     </div>
-    <div class="phone-showcase">
-
-      <!-- Side: Shotlist (smallest phone in canvas → biggest scale up) -->
-      <div class="phone-card side">
-        <div class="phone" style="--phone-w:444; --phone-h:949; --phone-cx:344; --phone-cy:846.5;">
-          <img src="/app-screens/shotlist.png" alt="Shotlist view" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Shotlist</div>
-        <div class="shot-caption" data-lang="no">Shotliste</div>
-        <div class="shot-sub" data-lang="en">Never miss the moments that matter</div>
-        <div class="shot-sub" data-lang="no">Aldri glem øyeblikkene som teller</div>
-      </div>
-
-      <!-- Center: Day plan — hero/largest -->
-      <div class="phone-card center">
-        <div class="phone" style="--phone-w:483; --phone-h:1001; --phone-cx:349.5; --phone-cy:729.5;">
-          <img src="/app-screens/dayplan.png" alt="Day plan view" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Day plan</div>
-        <div class="shot-caption" data-lang="no">Dagplan</div>
-        <div class="shot-sub" data-lang="en">Always know what's next</div>
-        <div class="shot-sub" data-lang="no">Alltid vite hva som kommer neste</div>
-      </div>
-
-      <!-- Side: Client portal -->
-      <div class="phone-card side">
-        <div class="phone" style="--phone-w:551; --phone-h:1163; --phone-cx:344.5; --phone-cy:752.5;">
-          <img src="/app-screens/client-portal.png" alt="Client portal" loading="lazy">
-        </div>
-        <div class="shot-caption" data-lang="en">Shared day plan</div>
-        <div class="shot-caption" data-lang="no">Delt dagplan</div>
-        <div class="shot-sub" data-lang="en">See the plan with your couple</div>
-        <div class="shot-sub" data-lang="no">Se planen sammen med paret</div>
-      </div>
-
+    <div class="hero-devices">
+      <img src="/app-screens/hero-devices.png" alt="VowFolio day plan, client portal and shotlist on iPhone" loading="lazy">
     </div>
   </section>
 
