@@ -1,0 +1,1790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Din fotoportal — VowFolio</title>
+  <meta name="description" content="Din fotoportal.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',-apple-system,sans-serif;background:#FAF7F2;color:#3D3229;min-height:100vh;-webkit-font-smoothing:antialiased}
+    .container{max-width:600px;margin:0 auto;padding:20px 16px 100px}
+    .brand{text-align:center;padding:24px 0 12px}
+    .brand-name{font-family:'Playfair Display',serif;font-size:22px;color:#9B7E5E;letter-spacing:3px;text-transform:uppercase}
+    .brand-sub{font-size:11px;color:#B0A090;margin-top:2px;letter-spacing:1px;text-transform:uppercase}
+    .lang-toggle{margin-top:12px;text-align:center}
+    .lang-toggle button{padding:4px 12px;border:1px solid #E8DFD1;border-radius:6px;font-size:12px;cursor:pointer;font-family:Inter,sans-serif;margin:0 2px}
+    .lang-toggle button.active{background:#3D3229;color:#fff}
+    .lang-toggle button.inactive{background:#FAFAF8;color:#8A7D6E}
+
+    .hero{border-radius:20px;overflow:hidden;margin-bottom:20px;position:relative;aspect-ratio:3/1;background:linear-gradient(135deg,#D9C9B2,#9B7E5E 60%,#6B8F71);box-shadow:0 4px 20px rgba(61,50,41,0.12)}
+    @media (max-width:640px){.hero{aspect-ratio:3.5/1;border-radius:16px;margin-bottom:16px}}
+    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.45));pointer-events:none}
+    .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hero-content{position:absolute;left:0;right:0;bottom:0;padding:20px 22px;color:#fff;z-index:1}
+    .hero-couple{font-family:'Playfair Display',serif;font-size:28px;line-height:1.1;margin-bottom:6px;text-shadow:0 1px 8px rgba(0,0,0,0.3)}
+    .hero-meta{font-size:13px;opacity:0.92;text-shadow:0 1px 6px rgba(0,0,0,0.3)}
+
+    .countdown{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px}
+    .count-row{display:flex;justify-content:center;gap:16px}
+    .count-box{background:#fff;border-radius:14px;padding:14px 16px;min-width:70px;text-align:center;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .count-num{font-family:'Playfair Display',serif;font-size:28px;color:#3D3229;font-weight:700;line-height:1}
+    .count-label{font-size:10px;color:#8A7D6E;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+    .next-step{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid #EFE7DA;border-radius:20px;padding:6px 14px;font-size:12px;color:#6B5E4F;box-shadow:0 1px 4px rgba(61,50,41,0.04)}
+    .next-step.ok{color:#6B8F71;border-color:#DCE8DB;background:#F5FAF4}
+    .next-step .dot-mark{width:6px;height:6px;border-radius:50%;background:#C2847A;display:inline-block}
+    .next-step.ok .dot-mark{background:#6B8F71}
+
+    .section-title{font-family:'Playfair Display',serif;font-size:16px;color:#3D3229;margin:8px 2px 10px;letter-spacing:0.5px}
+    .tile{background:#fff;border-radius:16px;padding:18px 18px;margin-bottom:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform 0.15s ease,box-shadow 0.15s ease;border:none;width:100%;font-family:inherit;text-align:left;color:inherit}
+    .tile:not(:disabled):hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(61,50,41,0.1)}
+    .tile:disabled{cursor:default;opacity:0.75}
+    .tile-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .tile-icon.sage{background:#E8F0E6;color:#6B8F71}
+    .tile-icon.gold{background:#F4ECDD;color:#9B7E5E}
+    .tile-icon.muted{background:#F0EBE4;color:#8A7D6E}
+    .tile-body{flex:1;min-width:0}
+    .tile-title{font-size:15px;font-weight:600;color:#3D3229;margin-bottom:2px}
+    .tile-status{font-size:12px;color:#8A7D6E}
+    .tile-status.ok{color:#6B8F71;font-weight:500}
+    .tile-status.warn{color:#B07A3E;font-weight:500}
+    .tile-arrow{color:#C4B8A8;font-size:18px;flex-shrink:0}
+    .tile:disabled .tile-arrow{visibility:hidden}
+    .check{display:inline-block;margin-right:4px}
+
+    .photog-card{background:#fff;border-radius:16px;padding:20px;margin-top:16px;margin-bottom:20px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .photog-row{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+    .photog-avatar{width:48px;height:48px;border-radius:50%;background:#F4ECDD;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;color:#9B7E5E;font-size:20px;font-weight:600;flex-shrink:0;overflow:hidden}
+    .photog-avatar img{width:100%;height:100%;object-fit:cover}
+    .photog-name{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229}
+    .photog-sub{font-size:12px;color:#8A7D6E;margin-top:2px}
+    .photog-links{display:flex;gap:8px;flex-wrap:wrap}
+    .photog-link{flex:1;min-width:120px;padding:10px 14px;background:#FAFAF8;border:1px solid #E8DFD1;border-radius:10px;text-decoration:none;color:#3D3229;font-size:13px;display:flex;align-items:center;gap:8px;transition:border-color 0.2s}
+    .photog-link:hover{border-color:#9B7E5E}
+    .photog-link .icon{font-size:14px;color:#9B7E5E}
+
+    .faq-item{background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 6px rgba(61,50,41,0.04)}
+    .faq-q{padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:500;color:#3D3229;user-select:none;gap:12px}
+    .faq-q .chev{color:#C4B8A8;transition:transform 0.2s;flex-shrink:0;display:flex;align-items:center}
+    .faq-q .chev svg{width:14px;height:14px}
+    .faq-item.open .faq-q .chev{transform:rotate(180deg);color:#9B7E5E}
+    .faq-a{max-height:0;overflow:hidden;transition:max-height 0.25s ease;padding:0 16px}
+    .faq-item.open .faq-a{max-height:300px;padding:0 16px 14px}
+    .faq-a p{font-size:13px;color:#6B5E4F;line-height:1.55}
+    .photog-sub{font-size:12px;color:#8A7D6E;margin-top:2px}
+    .photog-divider{height:1px;background:#F0EBE4;margin:14px 0 12px}
+    .photog-meta{font-size:11px;color:#9B8D7E;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;font-weight:600}
+
+    .loading,.error-state{text-align:center;padding:64px 24px}
+    .spinner{width:36px;height:36px;border:3px solid #E8DFD1;border-top-color:#6B8F71;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .state-title{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:8px}
+    .state-text{font-size:14px;color:#8A7D6E;line-height:1.6}
+
+    .footer{text-align:center;padding:32px 0 12px;font-size:11px;color:#B0A090}
+    .footer a{color:#9B7E5E;text-decoration:none}
+    .hidden{display:none}
+
+    .tile-chev{color:#C4B8A8;font-size:14px;flex-shrink:0;transition:transform 0.2s}
+    .tile.expanded .tile-chev{transform:rotate(180deg)}
+    .tile-expand{max-height:0;overflow:hidden;transition:max-height 0.25s ease;background:#fff;border-radius:16px;margin-top:-4px;margin-bottom:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .tile.expanded + .tile-expand{max-height:300px}
+    .expand-inner{padding:4px 18px 16px}
+    .expand-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F0EBE4;font-size:14px}
+    .expand-row:last-child{border-bottom:none}
+    .expand-row span{color:#8A7D6E}
+    .expand-row strong{color:#3D3229;font-weight:600}
+    .expand-row.total strong{color:#6B8F71}
+
+    .tile-badge{background:#C2847A;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;flex-shrink:0}
+    .tile-status.preview{color:#6B5E4F}
+    .tile-status .who{color:#9B7E5E;font-weight:600}
+    .tile-status .dot{color:#C4B8A8;margin:0 5px}
+
+    /* Merge chat tile and expand into one visual card when open */
+    .tile.expanded{margin-bottom:0;border-bottom-left-radius:0;border-bottom-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 -2px 12px rgba(61,50,41,0.04)}
+    .tile.expanded + .tile-expand.chat-expand{max-height:440px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .chat-body{padding:0 12px 10px;display:flex;flex-direction:column}
+    .chat-intro{position:relative;background:#F4ECDD;border-radius:10px;padding:9px 30px 9px 12px;margin:2px 0 6px;text-align:left}
+    .chat-intro.hidden{display:none}
+    .chat-intro p{font-size:12.5px;color:#6B5E4F;line-height:1.4}
+    .chat-intro p + p{margin-top:2px;color:#8A7D6E;font-size:11.5px}
+    .chat-intro-close{position:absolute;top:4px;right:4px;background:none;border:none;color:#B0A090;font-size:16px;line-height:1;cursor:pointer;padding:4px 8px;border-radius:6px;font-family:inherit}
+    .chat-intro-close:hover{color:#6B5E4F;background:rgba(0,0,0,0.04)}
+    .chat-scroll{overflow-y:auto;max-height:280px;padding:2px 10px;display:flex;flex-direction:column;gap:1px;-webkit-overflow-scrolling:touch}
+    .chat-scroll.empty{max-height:0;padding:0;margin:0}
+    @media (max-width:640px){
+      .chat-scroll{padding:2px 8px}
+    }
+    .msg-group{display:flex;flex-direction:column;gap:1px;margin-top:10px}
+    .msg-group:first-child{margin-top:0}
+    .msg{min-width:56px;max-width:82%;padding:9px 13px;border-radius:16px;font-size:14px;line-height:1.45;word-wrap:break-word;white-space:pre-wrap;text-align:left}
+    .msg.them{align-self:flex-start;background:#FAFAF8;color:#3D3229;border-bottom-left-radius:5px;border:1px solid #EFE7DA}
+    .msg.me{align-self:flex-end;background:#6B8F71;color:#fff;border-bottom-right-radius:5px}
+    .msg.me.first{border-top-right-radius:16px;border-bottom-right-radius:3px}
+    .msg.me.middle{border-top-right-radius:3px;border-bottom-right-radius:3px}
+    .msg.me.last{border-top-right-radius:3px;border-bottom-right-radius:5px}
+    .msg.them.first{border-top-left-radius:16px;border-bottom-left-radius:3px}
+    .msg.them.middle{border-top-left-radius:3px;border-bottom-left-radius:3px}
+    .msg.them.last{border-top-left-radius:3px;border-bottom-left-radius:5px}
+    .msg-time{font-size:10px;color:#B0A090;margin-top:3px;padding:0 6px}
+    .msg-time.me{align-self:flex-end}
+    .msg-time.them{align-self:flex-start}
+    .chat-input-inline{margin-top:8px;display:flex;gap:6px;align-items:flex-end}
+    .chat-input-inline textarea{flex:1;border:1px solid #E8DFD1;border-radius:18px;padding:9px 14px;font-size:16px;font-family:inherit;resize:none;max-height:100px;line-height:1.4;color:#3D3229;background:#FAFAF8;outline:none}
+    .chat-input-inline textarea:focus{border-color:#9B7E5E;background:#fff}
+    .chat-send{width:36px;height:36px;border-radius:50%;background:#6B8F71;color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;transition:background 0.15s,transform 0.1s;flex-shrink:0;padding:0}
+    .chat-send svg{width:16px;height:16px}
+    .chat-send:disabled{background:#DFD5C6;cursor:not-allowed}
+    .chat-send:not(:disabled):hover{background:#597A5E;transform:translateY(-1px)}
+    .chat-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:6px 10px;border-radius:8px;margin-top:8px;text-align:center}
+
+    /* Moodboard — shared inspiration, client can upload */
+    .tile.expanded + .tile-expand.moodboard-expand{max-height:640px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .moodboard-body{padding:2px 12px 12px;display:flex;flex-direction:column}
+    .moodboard-intro{background:#F4ECDD;border-radius:10px;padding:9px 14px;margin:2px 0 8px;font-size:12.5px;color:#6B5E4F;line-height:1.45;text-align:center}
+    .moodboard-scroll{overflow-y:auto;max-height:420px;padding:2px 0;-webkit-overflow-scrolling:touch}
+    .moodboard-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    @media (max-width:640px){.moodboard-grid{grid-template-columns:repeat(3,1fr);gap:4px}}
+    .moodboard-cell{position:relative;aspect-ratio:1/1;background:#F4EFE6;border-radius:8px;overflow:hidden}
+    .moodboard-cell img{width:100%;height:100%;object-fit:cover;display:block}
+    .moodboard-cell.uploading{display:flex;align-items:center;justify-content:center;color:#B0A090;font-size:11px;animation:moodPulse 1.4s ease-in-out infinite}
+    @keyframes moodPulse{0%,100%{opacity:0.5}50%{opacity:1}}
+    .moodboard-cell-del{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(30,25,20,0.6);color:#fff;border:none;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;cursor:pointer;font-family:inherit;opacity:0;transition:opacity 0.15s;padding:0}
+    .moodboard-cell:hover .moodboard-cell-del,.moodboard-cell.show-del .moodboard-cell-del{opacity:1}
+    .moodboard-cell-src{position:absolute;bottom:4px;left:4px;font-size:9px;letter-spacing:0.5px;text-transform:uppercase;color:#fff;background:rgba(30,25,20,0.55);padding:2px 5px;border-radius:4px;font-weight:600;pointer-events:none}
+    .moodboard-empty{padding:24px 14px;text-align:center;color:#B0A090;font-size:13px;line-height:1.55}
+    .moodboard-empty strong{color:#6B5E4F;font-weight:600;display:block;margin-bottom:4px;font-size:14px}
+    .moodboard-upload-btn{margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;background:#6B8F71;color:#fff;border:none;padding:12px 18px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s,transform 0.1s;width:100%}
+    .moodboard-upload-btn:hover:not(:disabled){background:#597A5E;transform:translateY(-1px)}
+    .moodboard-upload-btn:disabled{background:#C4D5C4;cursor:not-allowed}
+    .moodboard-upload-btn svg{width:16px;height:16px}
+    .moodboard-error{background:#F4E0DC;color:#B06050;font-size:12px;padding:8px 12px;border-radius:8px;margin-top:8px;text-align:center}
+    .moodboard-error.hidden{display:none}
+    .moodboard-hidden-input{display:none}
+
+    /* Day plan — signature section, always visible */
+    .dayplan-card{background:#fff;border-radius:16px;padding:18px 20px 14px;margin-bottom:14px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .dayplan-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .dayplan-icon{width:36px;height:36px;border-radius:10px;background:#E8F0E6;color:#6B8F71;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .dayplan-header-text{flex:1;min-width:0}
+    .dayplan-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;line-height:1.2;font-weight:600}
+    .dayplan-sub{font-size:11.5px;color:#9B8D7E;margin-top:3px;letter-spacing:0.3px}
+    .dayplan-list{display:flex;flex-direction:column;margin-top:2px}
+    .dayplan-item{display:flex;align-items:stretch;position:relative;min-height:52px}
+    .dayplan-time{flex-shrink:0;width:52px;padding-top:18px;font-family:'SF Mono','Menlo','Courier New',monospace;font-size:13px;font-weight:700;color:#C2847A;letter-spacing:0.3px}
+    .dayplan-rail{flex-shrink:0;width:20px;position:relative}
+    .dayplan-rail::before{content:'';position:absolute;top:22px;left:50%;width:10px;height:10px;margin-left:-5px;border-radius:50%;background:#C2847A;z-index:1}
+    .dayplan-rail::after{content:'';position:absolute;top:34px;bottom:0;left:50%;width:2px;margin-left:-1px;background:rgba(194,132,122,0.40)}
+    .dayplan-item:last-child .dayplan-rail::after{display:none}
+    .dayplan-item:first-child .dayplan-rail::before{width:13px;height:13px;margin-left:-6.5px;top:20px;box-shadow:0 0 0 2px #fff,0 2px 6px rgba(194,132,122,0.45)}
+    .dayplan-item:first-child .dayplan-rail::after{top:35px}
+    .dayplan-body{flex:1;min-width:0;padding:16px 0 22px 14px}
+    .dayplan-event-title{font-size:15px;font-weight:600;color:#3D3229;line-height:1.35}
+    .dayplan-item:first-child .dayplan-event-title{font-size:16px;font-weight:700}
+    .dayplan-event-notes{font-size:13px;color:rgba(194,132,122,0.88);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+
+    /* Deliveries (expandable when photographer has added any) */
+    .tile.expanded + .tile-expand.deliveries-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .deliveries-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .deliveries-scroll{overflow-y:auto;max-height:380px;padding:4px 0;-webkit-overflow-scrolling:touch}
+    .delivery-item{display:flex;align-items:flex-start;gap:10px;padding:10px 2px;border-bottom:1px solid #F4EFE6}
+    .delivery-item:last-child{border-bottom:none}
+    .delivery-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-size:10px;line-height:1;color:#fff}
+    .delivery-dot.delivered{background:#6B8F71}
+    .delivery-dot.inprogress{background:#E4B96F;color:#3D3229}
+    .delivery-dot.notstarted{background:#E8DFD1;color:#8A7D6E}
+    .delivery-body{flex:1;min-width:0}
+    .delivery-title{font-size:14px;font-weight:500;color:#3D3229;line-height:1.3}
+    .delivery-meta{font-size:11.5px;color:#8A7D6E;margin-top:3px}
+    .delivery-meta.delivered{color:#6B8F71;font-weight:500}
+    .delivery-empty{padding:18px;text-align:center;color:#B0A090;font-size:13px}
+    .delivery-progress{display:flex;align-items:center;gap:10px;padding:2px 2px 10px;margin-bottom:4px;border-bottom:1px solid #F0EBE4}
+    .delivery-bar-outer{flex:1;height:6px;background:#F4EFE6;border-radius:3px;overflow:hidden}
+    .delivery-bar-inner{height:100%;background:#6B8F71;border-radius:3px;transition:width 0.4s ease}
+    .delivery-bar-label{font-size:11px;color:#8A7D6E;flex-shrink:0;font-weight:500}
+
+    /* Meetings (expandable when summaries exist) */
+    .tile.expanded + .tile-expand.meetings-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .meetings-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .meetings-scroll{overflow-y:auto;max-height:380px;padding:4px 0;-webkit-overflow-scrolling:touch}
+    .meeting-item{padding:14px 0;border-bottom:1px solid #F4EFE6}
+    .meeting-item:last-child{border-bottom:none}
+    .meeting-kicker{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#9B7E5E;font-weight:600;margin-bottom:4px}
+    .meeting-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;align-items:baseline}
+    .meeting-title{font-size:14px;font-weight:600;color:#3D3229;flex:1}
+    .meeting-date{font-size:11px;color:#9B8D7E;letter-spacing:0.3px;text-transform:uppercase;flex-shrink:0}
+    .meeting-summary{font-size:13.5px;color:#3D3229;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+    .meetings-loading{padding:20px;text-align:center;color:#B0A090;font-size:13px}
+
+    /* Intake summary (expandable when submitted) */
+    .tile.expanded + .tile-expand.intake-expand{max-height:640px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
+    .intake-body{padding:2px 14px 12px;display:flex;flex-direction:column}
+    .intake-scroll{overflow-y:auto;max-height:480px;padding:4px 0 4px;-webkit-overflow-scrolling:touch}
+    .intake-loading{padding:20px;text-align:center;color:#B0A090;font-size:13px}
+    .intake-section{margin-top:14px}
+    .intake-section:first-child{margin-top:4px}
+    .intake-section-title{font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#9B8D7E;font-weight:600;margin-bottom:4px;padding:0 2px}
+    .intake-row{display:flex;justify-content:space-between;gap:12px;padding:8px 2px;border-bottom:1px solid #F4EFE6;font-size:13.5px;align-items:baseline}
+    .intake-row:last-child{border-bottom:none}
+    .intake-row .intake-label{color:#8A7D6E;flex-shrink:0}
+    .intake-row .intake-value{color:#3D3229;text-align:right;word-break:break-word;flex:1;font-weight:500}
+    .intake-row.yn .intake-value.yes{color:#6B8F71}
+    .intake-row.yn .intake-value.no{color:#B07A3E}
+    .intake-note{padding:8px 2px;border-bottom:1px solid #F4EFE6}
+    .intake-note:last-child{border-bottom:none}
+    .intake-note-label{font-size:12px;color:#8A7D6E;margin-bottom:4px}
+    .intake-note-value{font-size:13.5px;color:#3D3229;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+    .intake-actions{margin-top:12px;padding-top:10px;border-top:1px solid #EFE7DA;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#8A7D6E}
+    .intake-edit-btn{background:#FAFAF8;border:1px solid #E8DFD1;color:#6B5E4F;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color 0.15s,color 0.15s}
+    .intake-edit-btn:hover{border-color:#9B7E5E;color:#3D3229}
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <div class="brand-name" id="brand-name">VowFolio</div>
+    <div class="brand-sub" id="brand-sub">Wedding Photography</div>
+    <div class="lang-toggle">
+      <button onclick="setLang('en')" id="lang-en" class="active">EN</button>
+      <button onclick="setLang('no')" id="lang-no" class="inactive">NO</button>
+    </div>
+  </div>
+  <div id="app">
+    <div class="loading"><div class="spinner"></div><p style="margin-top:16px;color:#8A7D6E">Loading your portal...</p></div>
+  </div>
+  <div class="footer">Powered by <a href="https://vowfolio.com" target="_blank">VowFolio</a></div>
+</div>
+
+
+<script>
+const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal';
+const app = document.getElementById('app');
+
+let lang = localStorage.getItem('vf_lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
+
+const t = {
+  en: {
+    loading: 'Loading your portal...',
+    missingLink: 'Missing link',
+    missingLinkDesc: 'Please use the link from your photographer.',
+    invalidLink: 'Invalid link',
+    expired: 'Link expired',
+    expiredDesc: 'This portal link has expired. Please ask your photographer for a new one.',
+    connError: 'Connection error',
+    connErrorDesc: 'Could not reach the server. Please check your connection and try again.',
+
+    countDays: 'days', countHours: 'hours', countMins: 'mins',
+    today: 'Today!',
+    daysAgo: 'days ago',
+
+    yourWedding: 'Your wedding',
+    nextSteps: 'Your to-do',
+
+    quizTitle: 'Wedding questionnaire',
+    quizNotStarted: 'Help your photographer plan your day',
+    quizInProgress: 'In progress — continue where you left off',
+    quizDone: 'Submitted — tap to review or update',
+
+    contractSum: 'Contract total',
+    paidSoFar: 'Paid so far',
+    remaining: 'Remaining',
+    finalDue: 'Final payment due',
+    noContractSum: 'Not set yet',
+
+    contractTitle: 'Contract',
+    contractNone: 'No contract to sign yet',
+    contractPending: 'Awaiting your signature',
+    contractSigned: 'Signed',
+
+    depositTitle: 'Deposit',
+    depositPending: 'Not yet paid',
+    depositPaid: 'Paid',
+    depositAmount: 'Amount',
+
+    yourPhotog: 'Your photographer',
+    photogReplies: 'Usually replies within a day',
+    contactDetails: 'Contact details',
+    emailUs: 'Email',
+    callUs: 'Call',
+
+    nextContract: 'Contract awaiting signature',
+    nextIntake: 'Questionnaire pending',
+    nextDeposit: 'Deposit pending',
+    nextAllSet: 'All set — see you on the day',
+
+    deliveriesTitle: 'Deliveries',
+    deliveriesStatusAll: 'All delivered',
+    deliveriesStatusPartial: 'delivered',
+    deliveriesStatusNone: 'Coming up',
+    deliveriesStatusDelivered: 'Delivered',
+    deliveriesStatusInProgress: 'Underway',
+    deliveriesStatusNotStarted: 'Coming',
+    deliveriesDeliveredOn: 'Delivered',
+    deliveriesExpected: 'Expected',
+    deliveriesEmpty: 'No deliveries shared yet.',
+    deliveriesLoading: 'Loading deliveries…',
+
+    dayPlanTitle: 'Your wedding day',
+    dayPlanEvent: 'event',
+    dayPlanEvents: 'events',
+
+    moodboardTitle: 'Moodboard',
+    moodboardStatusEmpty: 'Share photos that inspire you',
+    moodboardStatusCount1: '1 photo',
+    moodboardStatusCountN: 'photos',
+    moodboardIntro: 'Share photos that inspire you — places, colors, moments you love. Your photographer sees everything you add.',
+    moodboardEmptyTitle: 'Nothing here yet',
+    moodboardEmpty: 'Share photos that inspire you — places, colors, moments you love. Every image helps your photographer understand what matters.',
+    moodboardUpload: 'Add inspiration photos',
+    moodboardUploading: 'Uploading…',
+    moodboardErrorGeneric: 'Something went wrong. Please try again.',
+    moodboardErrorSize: 'That image is too large. Try a smaller one.',
+    moodboardErrorType: 'Only image files are allowed.',
+    moodboardSourceClient: 'You',
+    moodboardSourcePhotographer: 'Photographer',
+    moodboardRemove: 'Remove',
+
+    meetingsTitle: 'Planning Recaps',
+    meetingsItem: 'Meeting summary',
+    meetingsStatus1: '1 summary',
+    meetingsStatusN: 'summaries',
+    meetingsEmpty: 'No summaries yet.',
+    meetingsLoading: 'Loading summaries…',
+
+    intakeSummary: 'Submitted — tap to review your answers',
+    intakeEdit: 'Edit answers',
+    intakeSubmittedOn: 'Submitted',
+    intakeUpdatedOn: 'Updated',
+    intakeLoading: 'Loading your answers…',
+    intakeError: 'Could not load — please try again.',
+    intakeYes: 'Yes',
+    intakeNo: 'No',
+    sContact: 'Contact',
+    sDay: 'The day',
+    sTimeline: 'Timeline',
+    sLocations: 'Locations',
+    sDetails: 'Details',
+    sNotes: 'Notes',
+    lPartner1: 'Partner 1',
+    lPartner2: 'Partner 2',
+    lPartner1Phone: 'Partner 1 phone',
+    lPartner2Phone: 'Partner 2 phone',
+    lEmail: 'Email',
+    lPhone: 'Phone',
+    lAddress: 'Address',
+    lGuests: 'Guests',
+    lCeremonyType: 'Ceremony type',
+    lPackage: 'Package',
+    lPhotoStyle: 'Photo style',
+    lCoordinator: 'Coordinator',
+    lVendors: 'Other vendors',
+    lGettingReady: 'Getting ready',
+    lPhotographerArrives: 'Photographer arrives',
+    lFirstLook: 'First look',
+    lFirstLookTime: 'First look time',
+    lCeremony: 'Ceremony',
+    lGuestArrival: 'Guest arrival',
+    lReception: 'Reception',
+    lSpeechesTime: 'Speeches',
+    lCakeCutting: 'Cake cutting',
+    lFirstDance: 'First dance',
+    lGettingReadyLocation: 'Getting ready',
+    lCeremonyAddress: 'Ceremony',
+    lReceptionAddress: 'Reception',
+    lHasSpeeches: 'Speeches planned',
+    lRingBearer: 'Ring bearer',
+    lDrone: 'Drone',
+    lPets: 'Pets',
+    lFlash: 'Flash allowed',
+    lMustHave: 'Must-have shots',
+    lVip: 'VIPs',
+    lFamily: 'Family notes',
+    lExtra: 'Anything else',
+
+    faqTitle: 'Questions couples often ask',
+    faq1q: 'When will I receive my photos?',
+    faq1a: 'Your photographer will share the final gallery once editing is complete. Typical turnaround is 4–8 weeks after the wedding, but check your contract for the exact timeline.',
+    faq2q: 'How long is this portal link valid?',
+    faq2a: 'This link stays active through your wedding day and for up to two years afterward, so you can always come back to reference your details.',
+    faq3q: 'Can I share this link with family?',
+    faq3a: 'This link is personal to you as the couple — it gives access to your contract and private details. We recommend keeping it between the two of you.',
+    faq4q: 'What if something changes — venue, time, guest count?',
+    faq4a: 'Contact your photographer directly. Updating the questionnaire is the fastest way to communicate changes, and any key updates should be confirmed via message or call.',
+    faq5q: 'Who do I contact with questions?',
+    faq5a: 'Your photographer is your main point of contact — use the email or phone above. For technical issues with this portal itself, email hello@vowfolio.com.',
+
+    openCTA: 'Open',
+    completeCTA: 'Complete',
+    signCTA: 'Sign',
+    viewCTA: 'View',
+
+    chatTitle: 'Chat with your photographer',
+    chatStatus: 'Questions? Send a message',
+    chatStatusUnread: 'new',
+    chatStatusNewMsg: 'new message',
+    chatStatusNewMsgs: 'new messages',
+    chatHeaderSub: 'Usually replies within a day',
+    chatIntro1: 'Send a message here if you have any questions about the day.',
+    chatIntro2: 'This keeps everything in one place.',
+    chatIntroClose: 'Dismiss',
+    chatPlaceholder: 'Type a message…',
+    chatSend: 'Send',
+    chatSendErr: 'Could not send — please try again.',
+    chatEmpty: 'No messages yet.',
+    chatYou: 'You',
+    timeNow: 'now',
+    timeMin: 'm',
+    timeHour: 'h',
+    timeDay: 'd',
+    timeYesterday: 'yesterday',
+  },
+  no: {
+    loading: 'Laster portalen din...',
+    missingLink: 'Manglende lenke',
+    missingLinkDesc: 'Bruk lenken du har fått av fotografen.',
+    invalidLink: 'Ugyldig lenke',
+    expired: 'Lenken er utløpt',
+    expiredDesc: 'Denne portalen er utløpt. Be fotografen om en ny lenke.',
+    connError: 'Tilkoblingsfeil',
+    connErrorDesc: 'Kunne ikke nå serveren. Sjekk nettforbindelsen og prøv igjen.',
+
+    countDays: 'dager', countHours: 'timer', countMins: 'min',
+    today: 'I dag!',
+    daysAgo: 'dager siden',
+
+    yourWedding: 'Bryllupet deres',
+    nextSteps: 'Å gjøre',
+
+    quizTitle: 'Bryllupsspørreskjema',
+    quizNotStarted: 'Hjelp fotografen planlegge dagen',
+    quizInProgress: 'Påbegynt — fortsett der du slapp',
+    quizDone: 'Sendt inn — trykk for å se eller oppdatere',
+
+    contractSum: 'Kontraktsum',
+    paidSoFar: 'Betalt så langt',
+    remaining: 'Gjenstår',
+    finalDue: 'Sluttbetaling forfaller',
+    noContractSum: 'Ikke satt',
+
+    contractTitle: 'Kontrakt',
+    contractNone: 'Ingen kontrakt å signere ennå',
+    contractPending: 'Venter på din signatur',
+    contractSigned: 'Signert',
+
+    depositTitle: 'Depositum',
+    depositPending: 'Ikke betalt ennå',
+    depositPaid: 'Betalt',
+    depositAmount: 'Beløp',
+
+    yourPhotog: 'Fotografen deres',
+    photogReplies: 'Svarer vanligvis innen en dag',
+    contactDetails: 'Kontaktinfo',
+    emailUs: 'E-post',
+    callUs: 'Ring',
+
+    nextContract: 'Kontrakt venter på signatur',
+    nextIntake: 'Spørreskjema gjenstår',
+    nextDeposit: 'Depositum gjenstår',
+    nextAllSet: 'Alt er klart — vi sees på dagen',
+
+    deliveriesTitle: 'Leveranser',
+    deliveriesStatusAll: 'Alt er levert',
+    deliveriesStatusPartial: 'levert',
+    deliveriesStatusNone: 'Kommer',
+    deliveriesStatusDelivered: 'Levert',
+    deliveriesStatusInProgress: 'Underveis',
+    deliveriesStatusNotStarted: 'Kommer',
+    deliveriesDeliveredOn: 'Levert',
+    deliveriesExpected: 'Forventet',
+    deliveriesEmpty: 'Ingen leveranser ennå.',
+    deliveriesLoading: 'Laster leveranser…',
+
+    dayPlanTitle: 'Bryllupsdagen deres',
+    dayPlanEvent: 'punkt',
+    dayPlanEvents: 'punkter',
+
+    moodboardTitle: 'Moodboard',
+    moodboardStatusEmpty: 'Del bilder som inspirerer dere',
+    moodboardStatusCount1: '1 bilde',
+    moodboardStatusCountN: 'bilder',
+    moodboardIntro: 'Del bilder som inspirerer dere — steder, farger, øyeblikk dere elsker. Fotografen ser alt dere legger til.',
+    moodboardEmptyTitle: 'Ingen bilder ennå',
+    moodboardEmpty: 'Del bilder som inspirerer dere — steder, farger, øyeblikk dere elsker. Hvert bilde hjelper fotografen å forstå hva som betyr noe.',
+    moodboardUpload: 'Legg til inspirasjonsbilder',
+    moodboardUploading: 'Laster opp…',
+    moodboardErrorGeneric: 'Noe gikk galt. Prøv igjen.',
+    moodboardErrorSize: 'Bildet er for stort. Prøv et mindre et.',
+    moodboardErrorType: 'Kun bildefiler er tillatt.',
+    moodboardSourceClient: 'Dere',
+    moodboardSourcePhotographer: 'Fotograf',
+    moodboardRemove: 'Fjern',
+
+    meetingsTitle: 'Møteoppsummeringer',
+    meetingsItem: 'Møteoppsummering',
+    meetingsStatus1: '1 oppsummering',
+    meetingsStatusN: 'oppsummeringer',
+    meetingsEmpty: 'Ingen oppsummeringer ennå.',
+    meetingsLoading: 'Laster oppsummeringer…',
+
+    intakeSummary: 'Innsendt — trykk for å se svarene',
+    intakeEdit: 'Rediger svar',
+    intakeSubmittedOn: 'Sendt inn',
+    intakeUpdatedOn: 'Oppdatert',
+    intakeLoading: 'Laster svarene deres…',
+    intakeError: 'Kunne ikke laste — prøv igjen.',
+    intakeYes: 'Ja',
+    intakeNo: 'Nei',
+    sContact: 'Kontakt',
+    sDay: 'Dagen',
+    sTimeline: 'Tidslinje',
+    sLocations: 'Steder',
+    sDetails: 'Detaljer',
+    sNotes: 'Notater',
+    lPartner1: 'Partner 1',
+    lPartner2: 'Partner 2',
+    lPartner1Phone: 'Telefon partner 1',
+    lPartner2Phone: 'Telefon partner 2',
+    lEmail: 'E-post',
+    lPhone: 'Telefon',
+    lAddress: 'Adresse',
+    lGuests: 'Gjester',
+    lCeremonyType: 'Type seremoni',
+    lPackage: 'Pakke',
+    lPhotoStyle: 'Fotostil',
+    lCoordinator: 'Koordinator',
+    lVendors: 'Andre leverandører',
+    lGettingReady: 'Klargjøring',
+    lPhotographerArrives: 'Fotograf ankommer',
+    lFirstLook: 'First look',
+    lFirstLookTime: 'First look-tidspunkt',
+    lCeremony: 'Seremoni',
+    lGuestArrival: 'Gjester ankommer',
+    lReception: 'Middag / fest',
+    lSpeechesTime: 'Taler',
+    lCakeCutting: 'Kakeskjæring',
+    lFirstDance: 'Første dans',
+    lGettingReadyLocation: 'Klargjøring',
+    lCeremonyAddress: 'Seremoni',
+    lReceptionAddress: 'Middag / fest',
+    lHasSpeeches: 'Taler planlagt',
+    lRingBearer: 'Ringbærer',
+    lDrone: 'Drone',
+    lPets: 'Kjæledyr',
+    lFlash: 'Blits tillatt',
+    lMustHave: 'Må-ha-bilder',
+    lVip: 'Viktige personer',
+    lFamily: 'Familienotater',
+    lExtra: 'Noe annet',
+
+    faqTitle: 'Spørsmål par ofte stiller',
+    faq1q: 'Når får vi bildene?',
+    faq1a: 'Fotografen deler det ferdige galleriet når redigeringen er klar. Vanlig leveringstid er 4–8 uker etter bryllupet, men sjekk kontrakten for nøyaktig tidslinje.',
+    faq2q: 'Hvor lenge er denne portal-lenken gyldig?',
+    faq2a: 'Lenken fungerer gjennom bryllupsdagen og i opptil to år etterpå, slik at dere kan slå opp detaljer når som helst.',
+    faq3q: 'Kan vi dele lenken med familien?',
+    faq3a: 'Lenken er personlig for dere som par — den gir tilgang til kontrakt og private detaljer. Vi anbefaler å holde den mellom dere.',
+    faq4q: 'Hva om noe endrer seg — lokale, tidspunkt, antall gjester?',
+    faq4a: 'Ta kontakt med fotografen direkte. Å oppdatere spørreskjemaet er den raskeste måten å kommunisere endringer på, og viktige endringer bør bekreftes på melding eller telefon.',
+    faq5q: 'Hvem kontakter vi ved spørsmål?',
+    faq5a: 'Fotografen er deres primære kontakt — bruk e-post eller telefon over. Ved tekniske problemer med selve portalen, send e-post til hello@vowfolio.com.',
+
+    openCTA: 'Åpne',
+    completeCTA: 'Fullfør',
+    signCTA: 'Signer',
+    viewCTA: 'Se',
+
+    chatTitle: 'Chat med fotografen',
+    chatStatus: 'Spørsmål? Send en melding',
+    chatStatusUnread: 'ny',
+    chatStatusNewMsg: 'ny melding',
+    chatStatusNewMsgs: 'nye meldinger',
+    chatHeaderSub: 'Svarer vanligvis innen en dag',
+    chatIntro1: 'Send en melding her hvis dere har spørsmål om dagen.',
+    chatIntro2: 'Da ligger alt samlet på ett sted.',
+    chatIntroClose: 'Skjul',
+    chatPlaceholder: 'Skriv en melding…',
+    chatSend: 'Send',
+    chatSendErr: 'Kunne ikke sende — prøv igjen.',
+    chatEmpty: 'Ingen meldinger ennå.',
+    chatYou: 'Dere',
+    timeNow: 'nå',
+    timeMin: 'm',
+    timeHour: 't',
+    timeDay: 'd',
+    timeYesterday: 'i går',
+  },
+};
+
+function tr(key) { return t[lang][key] || t.en[key] || key; }
+
+function setLang(newLang) {
+  lang = newLang;
+  localStorage.setItem('vf_lang', newLang);
+  document.getElementById('lang-en').className = newLang === 'en' ? 'active' : 'inactive';
+  document.getElementById('lang-no').className = newLang === 'no' ? 'active' : 'inactive';
+  if (lastData) {
+    render(lastData);
+    if (chatOpen) {
+      const tile = document.getElementById('chat-tile');
+      if (tile) tile.classList.add('expanded');
+      bindChatInput();
+      renderChatMessages();
+    }
+    if (localStorage.getItem(INTAKE_STATE_KEY) === '1') {
+      const itile = document.getElementById('intake-tile');
+      if (itile) {
+        itile.classList.add('expanded');
+        if (intakeData) renderIntake(intakeData);
+      }
+    }
+    if (localStorage.getItem(MEETINGS_STATE_KEY) === '1') {
+      const mtile = document.getElementById('meetings-tile');
+      if (mtile) {
+        mtile.classList.add('expanded');
+        if (meetingsData) renderMeetings();
+      }
+    }
+    if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1') {
+      const dtile = document.getElementById('deliveries-tile');
+      if (dtile) {
+        dtile.classList.add('expanded');
+        if (deliveriesData) renderDeliveries();
+      }
+    }
+    if (localStorage.getItem(MOODBOARD_STATE_KEY) === '1') {
+      const mbtile = document.getElementById('moodboard-tile');
+      if (mbtile) {
+        mbtile.classList.add('expanded');
+        if (moodboardLoaded) renderMoodboard();
+      }
+    }
+  }
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const opts = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+  return d.toLocaleDateString(locale, opts);
+}
+
+function daysUntil(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const today = new Date();
+  d.setHours(0,0,0,0);
+  today.setHours(0,0,0,0);
+  return Math.round((d - today) / (1000 * 60 * 60 * 24));
+}
+
+// Token resolution: /p/{token} or /ps/{token} or ?token= query. URL stays intact so bookmarks work.
+let token = null;
+(function resolveToken() {
+  const path = location.pathname;
+  const m = path.match(/^\/ps?\/([a-f0-9]{8,128})\/?$/);
+  if (m) {
+    token = m[1];
+    return;
+  }
+  const qs = new URLSearchParams(location.search);
+  const qt = qs.get('token');
+  if (qt) token = qt;
+})();
+
+let lastData = null;
+
+function showError(title, desc) {
+  app.innerHTML = `
+    <div class="error-state">
+      <div class="state-title">${title}</div>
+      <div class="state-text">${desc}</div>
+    </div>`;
+}
+
+async function loadOverview() {
+  if (!token) {
+    showError(tr('missingLink'), tr('missingLinkDesc'));
+    return;
+  }
+  try {
+    const res = await fetch(`${API}?action=overview&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (data.error === 'expired') return showError(tr('expired'), tr('expiredDesc'));
+      return showError(tr('invalidLink'), data.message || tr('missingLinkDesc'));
+    }
+    lastData = data;
+    render(data);
+  } catch (e) {
+    showError(tr('connError'), tr('connErrorDesc'));
+  }
+}
+
+function deriveNextStep(s) {
+  const contract = (s && s.contract) || { status: 'none' };
+  const intake = (s && s.intake) || {};
+  const deposit = (s && s.deposit) || {};
+  if (contract.status === 'pending') return { text: tr('nextContract'), ok: false };
+  if (!intake.submitted) return { text: tr('nextIntake'), ok: false };
+  if (!deposit.paid) return { text: tr('nextDeposit'), ok: false };
+  return { text: tr('nextAllSet'), ok: true };
+}
+
+function renderDayPlan(items) {
+  if (!items || !items.length) return '';
+  const rows = items.map(it => `
+    <div class="dayplan-item">
+      <div class="dayplan-time">${escapeHtml(it.time || '')}</div>
+      <div class="dayplan-rail"></div>
+      <div class="dayplan-body">
+        <div class="dayplan-event-title">${escapeHtml(it.title || '')}</div>
+        ${it.notes ? `<div class="dayplan-event-notes">${escapeHtml(it.notes)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+  const unit = items.length === 1 ? tr('dayPlanEvent') : tr('dayPlanEvents');
+  return `
+    <div class="dayplan-card">
+      <div class="dayplan-header">
+        <div class="dayplan-icon">⏱️</div>
+        <div class="dayplan-header-text">
+          <div class="dayplan-title">${escapeHtml(tr('dayPlanTitle'))}</div>
+          <div class="dayplan-sub">${items.length} ${escapeHtml(unit)}</div>
+        </div>
+      </div>
+      <div class="dayplan-list">${rows}</div>
+    </div>
+  `;
+}
+
+function renderCountdown(isoDate, status) {
+  const days = daysUntil(isoDate);
+  const step = deriveNextStep(status);
+  const stepHtml = step ? `<div class="next-step${step.ok ? ' ok' : ''}"><span class="dot-mark"></span>${escapeHtml(step.text)}</div>` : '';
+  if (days === null) return stepHtml ? `<div class="countdown">${stepHtml}</div>` : '';
+  if (days === 0) {
+    return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${tr('today')}</div></div></div>${stepHtml}</div>`;
+  }
+  if (days < 0) {
+    return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${Math.abs(days)}</div><div class="count-label">${tr('daysAgo')}</div></div></div>${stepHtml}</div>`;
+  }
+  return `<div class="countdown"><div class="count-row"><div class="count-box"><div class="count-num">${days}</div><div class="count-label">${tr('countDays')}</div></div></div>${stepHtml}</div>`;
+}
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function formatMoney(amount, symbol) {
+  if (amount === null || amount === undefined) return tr('noContractSum');
+  const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+  const formatted = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(amount);
+  const sym = symbol || '';
+  return lang === 'no' ? `${formatted} ${sym}`.trim() : `${sym}${formatted}`;
+}
+
+function toggleDeposit(btn) {
+  btn.classList.toggle('expanded');
+}
+
+function render(data) {
+  const w = data.wedding || {};
+  const p = data.photographer || {};
+  const s = data.status || {};
+  const coupleName = [w.partner1, w.partner2].filter(Boolean).join(' & ');
+
+  // Update brand
+  if (p.name) document.getElementById('brand-name').textContent = p.name;
+
+  const heroSrc = w.coverImagePath || p.portalHeroUrl;
+  const heroBg = heroSrc ? `<img src="${escapeHtml(heroSrc)}" alt="">` : '';
+
+  const metaParts = [];
+  if (w.venue) metaParts.push(escapeHtml(w.venue));
+  if (w.weddingDate) metaParts.push(formatDate(w.weddingDate));
+
+  const intake = s.intake || {};
+  const intakeStatus = intake.submitted ? 'ok' : (intake.started ? 'warn' : '');
+  const intakeText = intake.submitted ? tr('quizDone') : (intake.started ? tr('quizInProgress') : tr('quizNotStarted'));
+  const intakeCheck = intake.submitted ? '<span class="check">✓</span>' : '';
+
+  const contract = s.contract || { status: 'none' };
+  const contractDisabled = contract.status === 'none' || contract.status === 'signed';
+  const contractClass = contract.status === 'signed' ? 'ok' : (contract.status === 'pending' ? 'warn' : '');
+  const contractText = contract.status === 'signed' ? tr('contractSigned')
+    : contract.status === 'pending' ? tr('contractPending')
+    : tr('contractNone');
+  const contractCheck = contract.status === 'signed' ? '<span class="check">✓</span>' : '';
+
+  const deposit = s.deposit || { paid: false };
+  const depositText = deposit.paid ? tr('depositPaid') : tr('depositPending');
+  const depositCheck = deposit.paid ? '<span class="check">✓</span>' : '';
+  const depositClass = deposit.paid ? 'ok' : 'warn';
+
+  const meetingsStatus = s.meetings || { count: 0 };
+  const meetingsCount = meetingsStatus.count || 0;
+
+  const moodboardStatus = s.moodboard || { count: 0 };
+  const moodboardCount = moodboardStatus.count || 0;
+  let moodboardStatusText;
+  if (moodboardCount === 0) moodboardStatusText = tr('moodboardStatusEmpty');
+  else if (moodboardCount === 1) moodboardStatusText = tr('moodboardStatusCount1');
+  else moodboardStatusText = `${moodboardCount} ${tr('moodboardStatusCountN')}`;
+
+  const delivStatus = s.deliverables || { total: 0, delivered: 0 };
+  const delivTotal = delivStatus.total || 0;
+  const delivDone = delivStatus.delivered || 0;
+  let delivStatusText = '';
+  let delivStatusClass = '';
+  if (delivTotal > 0) {
+    if (delivDone === delivTotal) {
+      delivStatusText = tr('deliveriesStatusAll');
+      delivStatusClass = 'ok';
+    } else if (delivDone > 0) {
+      delivStatusText = `${delivDone}/${delivTotal} ${tr('deliveriesStatusPartial')}`;
+      delivStatusClass = 'preview';
+    } else {
+      delivStatusText = tr('deliveriesStatusNone');
+      delivStatusClass = '';
+    }
+  }
+
+  const msgs = s.messages || { unread: 0 };
+  const chatUnread = msgs.unread || 0;
+  const chatBadge = chatUnread > 0 ? `<span class="tile-badge">${chatUnread}</span>` : '';
+  let chatStatusText, chatStatusClass;
+  if (chatUnread > 0) {
+    chatStatusText = `${chatUnread} ${chatUnread === 1 ? tr('chatStatusNewMsg') : tr('chatStatusNewMsgs')}`;
+    chatStatusClass = 'warn';
+  } else if (msgs.lastAt && msgs.lastPreview) {
+    const who = msgs.lastRole === 'client' ? tr('chatYou') : (p.name || tr('chatTitle'));
+    const preview = msgs.lastPreview.length > 48 ? msgs.lastPreview.slice(0, 48) + '…' : msgs.lastPreview;
+    chatStatusText = `<span class="who">${escapeHtml(who)}:</span> ${escapeHtml(preview)} <span class="dot">·</span> ${relativeTime(msgs.lastAt)}`;
+    chatStatusClass = 'preview';
+  } else {
+    chatStatusText = tr('chatStatus');
+    chatStatusClass = '';
+  }
+  const chatIntroDismissKey = token ? `vf_chat_intro_${token.slice(0, 12)}` : null;
+  const chatIntroDismissed = chatIntroDismissKey && localStorage.getItem(chatIntroDismissKey) === '1';
+
+  const photogInitial = p.name ? p.name.charAt(0).toUpperCase() : 'V';
+  const avatarInner = p.logoUrl ? `<img src="${escapeHtml(p.logoUrl)}" alt="">` : escapeHtml(photogInitial);
+
+  const photogLinks = [];
+  if (p.email) photogLinks.push(`<a class="photog-link" href="mailto:${encodeURIComponent(p.email)}"><span class="icon">✉</span> ${tr('emailUs')}</a>`);
+  if (p.phone) photogLinks.push(`<a class="photog-link" href="tel:${encodeURIComponent(p.phone)}"><span class="icon">📞</span> ${tr('callUs')}</a>`);
+
+  const chevronSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+  const faqs = [1,2,3,4,5].map(n => `
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        <span>${tr('faq'+n+'q')}</span><span class="chev">${chevronSvg}</span>
+      </div>
+      <div class="faq-a"><p>${tr('faq'+n+'a')}</p></div>
+    </div>
+  `).join('');
+
+  app.innerHTML = `
+    <div class="hero">
+      ${heroBg}
+      <div class="hero-content">
+        <div class="hero-couple">${escapeHtml(coupleName)}</div>
+        <div class="hero-meta">${metaParts.join(' · ')}</div>
+      </div>
+    </div>
+
+    ${renderCountdown(w.weddingDate, s)}
+
+    <div class="section-title">${tr('nextSteps')}</div>
+
+    <button class="tile" ${contractDisabled ? 'disabled' : ''} onclick="openContract(${contract.toSign ? `'${contract.toSign.id}'` : 'null'})">
+      <div class="tile-icon gold">📝</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('contractTitle')}</div>
+        <div class="tile-status ${contractClass}">${contractCheck}${contractText}</div>
+      </div>
+      <div class="tile-arrow">›</div>
+    </button>
+
+    <button class="tile" onclick="toggleDeposit(this)">
+      <div class="tile-icon muted">💳</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('depositTitle')}</div>
+        <div class="tile-status ${depositClass}">${depositCheck}${depositText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand">
+      <div class="expand-inner">
+        <div class="expand-row"><span>${tr('contractSum')}</span><strong>${formatMoney(deposit.contractValue, p.currencySymbol)}</strong></div>
+        <div class="expand-row"><span>${tr('paidSoFar')}</span><strong>${formatMoney(deposit.amountPaid, p.currencySymbol)}</strong></div>
+        <div class="expand-row total"><span>${tr('remaining')}</span><strong>${formatMoney(Math.max(0, (deposit.contractValue || 0) - (deposit.amountPaid || 0)), p.currencySymbol)}</strong></div>
+        ${deposit.finalPaymentDueDate ? `<div class="expand-row"><span>${tr('finalDue')}</span><strong>${formatDate(deposit.finalPaymentDueDate)}</strong></div>` : ''}
+      </div>
+    </div>
+
+    ${delivTotal > 0 ? `
+    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
+      <div class="tile-icon sage">📦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('deliveriesTitle')}</div>
+        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand deliveries-expand">
+      <div class="deliveries-body">
+        <div class="delivery-progress">
+          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${Math.round(delivDone/delivTotal*100)}%"></div></div>
+          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
+        </div>
+        <div class="deliveries-scroll" id="deliveries-scroll">
+          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    <button class="tile" id="moodboard-tile" onclick="toggleMoodboard(this)">
+      <div class="tile-icon gold">💐</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('moodboardTitle')}</div>
+        <div class="tile-status">${moodboardStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand moodboard-expand">
+      <div class="moodboard-body">
+        <div class="moodboard-intro">${escapeHtml(tr('moodboardIntro'))}</div>
+        <div class="moodboard-scroll" id="moodboard-scroll">
+          <div class="moodboard-empty">${escapeHtml(tr('moodboardEmpty'))}</div>
+        </div>
+        <div class="moodboard-error hidden" id="moodboard-error"></div>
+        <button class="moodboard-upload-btn" id="moodboard-upload-btn" onclick="document.getElementById('moodboard-file').click()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span id="moodboard-upload-label">${escapeHtml(tr('moodboardUpload'))}</span>
+        </button>
+        <input type="file" id="moodboard-file" class="moodboard-hidden-input" accept="image/*" multiple onchange="handleMoodboardFiles(event)">
+      </div>
+    </div>
+
+    ${meetingsCount > 0 ? `
+    <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
+      <div class="tile-icon gold">🗓️</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('meetingsTitle')}</div>
+        <div class="tile-status">${meetingsCount === 1 ? tr('meetingsStatus1') : `${meetingsCount} ${tr('meetingsStatusN')}`}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand meetings-expand">
+      <div class="meetings-body">
+        <div class="meetings-scroll" id="meetings-scroll">
+          <div class="meetings-loading">${escapeHtml(tr('meetingsLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    ` : ''}
+
+    <button class="tile" id="chat-tile" onclick="toggleChat(this)">
+      <div class="tile-icon sage">💬</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('chatTitle')}${chatBadge}</div>
+        <div class="tile-status ${chatStatusClass}">${chatStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand chat-expand">
+      <div class="chat-body">
+        <div class="chat-intro${chatIntroDismissed ? ' hidden' : ''}" id="chat-intro">
+          <button class="chat-intro-close" onclick="dismissChatIntro(event)" aria-label="${escapeHtml(tr('chatIntroClose'))}">×</button>
+          <p>${escapeHtml(tr('chatIntro1'))}</p>
+          <p>${escapeHtml(tr('chatIntro2'))}</p>
+        </div>
+        <div class="chat-scroll empty" id="chat-scroll"></div>
+        <div class="chat-error hidden" id="chat-error"></div>
+        <div class="chat-input-inline">
+          <textarea id="chat-text" rows="1" placeholder="${escapeHtml(tr('chatPlaceholder'))}"></textarea>
+          <button class="chat-send" id="chat-send" onclick="sendChat()" disabled aria-label="${escapeHtml(tr('chatSend'))}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="photog-card">
+      <div class="section-title" style="margin:0 0 12px">${tr('yourPhotog')}</div>
+      <div class="photog-row">
+        <div class="photog-avatar">${avatarInner}</div>
+        <div>
+          <div class="photog-name">${escapeHtml(p.name || '')}</div>
+          <div class="photog-sub">${tr('photogReplies')}</div>
+        </div>
+      </div>
+      ${photogLinks.length ? `<div class="photog-divider"></div><div class="photog-meta">${tr('contactDetails')}</div><div class="photog-links">${photogLinks.join('')}</div>` : ''}
+    </div>
+
+    <div class="section-title">${tr('faqTitle')}</div>
+    ${faqs}
+  `;
+}
+
+async function openIntake() {
+  if (!token) return;
+  try {
+    const res = await fetch(`${API}?action=open-intake`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    }
+  } catch (e) {
+    alert(tr('connError'));
+  }
+}
+
+async function openContract(documentId) {
+  if (!token || !documentId) return;
+  try {
+    const res = await fetch(`${API}?action=open-contract`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, document_id: documentId }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    }
+  } catch (e) {
+    alert(tr('connError'));
+  }
+}
+
+// ---- Chat (inline expand module) ----
+const CHAT_STATE_KEY = 'vf_chat_expanded';
+let chatOpen = false;
+let chatMessages = [];
+let chatPollTimer = null;
+let overviewPollTimer = null;
+let chatLastFetchedAt = null;
+
+function formatTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+}
+
+function relativeTime(iso) {
+  if (!iso) return '';
+  const now = Date.now();
+  const then = new Date(iso).getTime();
+  const sec = Math.max(0, Math.round((now - then) / 1000));
+  if (sec < 60) return tr('timeNow');
+  const min = Math.round(sec / 60);
+  if (min < 60) return `${min}${tr('timeMin')}`;
+  const hr = Math.round(min / 60);
+  if (hr < 24) return `${hr}${tr('timeHour')}`;
+  const day = Math.round(hr / 24);
+  if (day === 1) return tr('timeYesterday');
+  if (day < 7) return `${day}${tr('timeDay')}`;
+  const d = new Date(iso);
+  const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+}
+
+function dismissChatIntro(e) {
+  if (e) e.stopPropagation();
+  const intro = document.getElementById('chat-intro');
+  if (intro) intro.classList.add('hidden');
+  if (token) localStorage.setItem(`vf_chat_intro_${token.slice(0, 12)}`, '1');
+}
+
+function buildChatGroups() {
+  // Match iOS grouping: same sender + within 5 min of previous in group
+  const groups = [];
+  let current = [];
+  for (const m of chatMessages) {
+    const prev = current[current.length - 1];
+    if (prev) {
+      const sameSender = prev.senderRole === m.senderRole;
+      const diff = (new Date(m.createdAt) - new Date(prev.createdAt)) / 1000;
+      if (sameSender && diff < 300) {
+        current.push(m);
+        continue;
+      }
+      groups.push(current);
+      current = [m];
+    } else {
+      current = [m];
+    }
+  }
+  if (current.length) groups.push(current);
+  return groups;
+}
+
+function renderChatMessages() {
+  const scroll = document.getElementById('chat-scroll');
+  if (!scroll) return;
+  if (chatMessages.length === 0) {
+    scroll.innerHTML = '';
+    scroll.classList.add('empty');
+    return;
+  }
+  scroll.classList.remove('empty');
+  const groups = buildChatGroups();
+  scroll.innerHTML = groups.map(group => {
+    const mine = group[0].senderRole === 'client';
+    const side = mine ? 'me' : 'them';
+    const solo = group.length === 1;
+    const bubbles = group.map((m, idx) => {
+      let pos = '';
+      if (!solo) {
+        if (idx === 0) pos = 'first';
+        else if (idx === group.length - 1) pos = 'last';
+        else pos = 'middle';
+      }
+      return `<div class="msg ${side}${pos ? ' ' + pos : ''}">${escapeHtml(m.body)}</div>`;
+    }).join('');
+    const last = group[group.length - 1];
+    const time = `<div class="msg-time ${side}">${formatTime(last.createdAt)}</div>`;
+    return `<div class="msg-group">${bubbles}${time}</div>`;
+  }).join('');
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+async function fetchMessages(initial) {
+  if (!token) return;
+  try {
+    const params = new URLSearchParams({ action: 'messages', token });
+    if (!initial && chatLastFetchedAt) params.set('since', chatLastFetchedAt);
+    const res = await fetch(`${API}?${params.toString()}`);
+    const data = await res.json();
+    if (!res.ok || data.error) return;
+    const incoming = data.messages || [];
+    if (initial) {
+      chatMessages = incoming;
+    } else if (incoming.length > 0) {
+      const known = new Set(chatMessages.map(m => m.id));
+      for (const m of incoming) if (!known.has(m.id)) chatMessages.push(m);
+    }
+    if (chatMessages.length > 0) {
+      chatLastFetchedAt = chatMessages[chatMessages.length - 1].createdAt;
+    }
+    renderChatMessages();
+  } catch (_) {}
+}
+
+async function markRead() {
+  if (!token) return;
+  try {
+    await fetch(`${API}?action=mark-read`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+  } catch (_) {}
+}
+
+function startChatPolling() {
+  stopChatPolling();
+  chatPollTimer = setInterval(() => fetchMessages(false), 10000);
+}
+function stopChatPolling() {
+  if (chatPollTimer) { clearInterval(chatPollTimer); chatPollTimer = null; }
+}
+function startOverviewPolling() {
+  stopOverviewPolling();
+  overviewPollTimer = setInterval(() => { if (!chatOpen) loadOverview(); }, 30000);
+}
+function stopOverviewPolling() {
+  if (overviewPollTimer) { clearInterval(overviewPollTimer); overviewPollTimer = null; }
+}
+
+function bindChatInput() {
+  const text = document.getElementById('chat-text');
+  const send = document.getElementById('chat-send');
+  if (!text || !send || text.dataset.bound === '1') return;
+  text.dataset.bound = '1';
+  text.addEventListener('input', () => {
+    send.disabled = !text.value.trim();
+    text.style.height = 'auto';
+    text.style.height = Math.min(text.scrollHeight, 100) + 'px';
+  });
+  text.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!send.disabled) sendChat();
+    }
+  });
+}
+
+async function expandChat(tile) {
+  if (!tile) tile = document.getElementById('chat-tile');
+  if (!tile) return;
+  chatOpen = true;
+  tile.classList.add('expanded');
+  localStorage.setItem(CHAT_STATE_KEY, '1');
+  stopOverviewPolling();
+  bindChatInput();
+  await fetchMessages(true);
+  await markRead();
+  if (lastData && lastData.status && lastData.status.messages) {
+    lastData.status.messages.unread = 0;
+    const statusEl = tile.querySelector('.tile-status');
+    if (statusEl) {
+      statusEl.className = 'tile-status';
+      statusEl.textContent = tr('chatStatus');
+    }
+    const titleEl = tile.querySelector('.tile-title');
+    if (titleEl) titleEl.innerHTML = tr('chatTitle');
+  }
+  startChatPolling();
+}
+
+function collapseChat(tile) {
+  if (!tile) tile = document.getElementById('chat-tile');
+  if (!tile) return;
+  chatOpen = false;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(CHAT_STATE_KEY);
+  stopChatPolling();
+  loadOverview();
+  startOverviewPolling();
+}
+
+function toggleChat(tile) {
+  if (tile.classList.contains('expanded')) collapseChat(tile);
+  else expandChat(tile);
+}
+
+async function sendChat() {
+  const text = document.getElementById('chat-text');
+  const send = document.getElementById('chat-send');
+  const errEl = document.getElementById('chat-error');
+  const body = (text.value || '').trim();
+  if (!body || !token) return;
+
+  send.disabled = true;
+  errEl.classList.add('hidden');
+
+  try {
+    const res = await fetch(`${API}?action=send-message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, body }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.message || 'send_failed');
+    text.value = '';
+    text.style.height = 'auto';
+    if (data.message) {
+      chatMessages.push(data.message);
+      chatLastFetchedAt = data.message.createdAt;
+      renderChatMessages();
+    }
+  } catch (_) {
+    errEl.textContent = tr('chatSendErr');
+    errEl.classList.remove('hidden');
+  } finally {
+    const t = document.getElementById('chat-text');
+    send.disabled = !(t && t.value.trim());
+  }
+}
+
+// ---- Moodboard (shared inspiration — client can upload) ----
+const MOODBOARD_STATE_KEY = 'vf_moodboard_expanded';
+let moodboardLoaded = false;
+let moodboardImages = [];
+
+function renderMoodboard() {
+  const scroll = document.getElementById('moodboard-scroll');
+  if (!scroll) return;
+  if (!moodboardImages.length) {
+    scroll.innerHTML = `
+      <div class="moodboard-empty">
+        <strong>${escapeHtml(tr('moodboardEmptyTitle'))}</strong>
+        ${escapeHtml(tr('moodboardEmpty'))}
+      </div>`;
+    return;
+  }
+  const cells = moodboardImages.map(img => {
+    const deletable = img.source === 'client';
+    const url = img.url || '';
+    return `
+      <div class="moodboard-cell" data-id="${escapeHtml(img.id)}">
+        <img src="${escapeHtml(url)}" alt="" loading="lazy">
+        ${deletable ? `<button class="moodboard-cell-del" onclick="deleteMoodboardImage('${escapeHtml(img.id)}')" aria-label="${escapeHtml(tr('moodboardRemove'))}">×</button>` : ''}
+        <span class="moodboard-cell-src">${escapeHtml(img.source === 'client' ? tr('moodboardSourceClient') : tr('moodboardSourcePhotographer'))}</span>
+      </div>
+    `;
+  }).join('');
+  scroll.innerHTML = `<div class="moodboard-grid">${cells}</div>`;
+}
+
+async function fetchMoodboard() {
+  if (!token) return;
+  const scroll = document.getElementById('moodboard-scroll');
+  try {
+    const res = await fetch(`${API}?action=moodboard&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="moodboard-empty">${escapeHtml(tr('moodboardErrorGeneric'))}</div>`;
+      return;
+    }
+    moodboardImages = data.images || [];
+    moodboardLoaded = true;
+    renderMoodboard();
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="moodboard-empty">${escapeHtml(tr('moodboardErrorGeneric'))}</div>`;
+  }
+}
+
+async function compressImage(file, maxDim = 1600, quality = 0.85) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('read_failed'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('decode_failed'));
+      img.onload = () => {
+        const ratio = Math.min(maxDim / img.width, maxDim / img.height, 1);
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          if (!blob) return reject(new Error('blob_failed'));
+          resolve(blob);
+        }, 'image/jpeg', quality);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function showMoodboardError(key) {
+  const el = document.getElementById('moodboard-error');
+  if (!el) return;
+  el.textContent = tr(key);
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 4000);
+}
+
+async function handleMoodboardFiles(event) {
+  const files = Array.from(event.target.files || []);
+  event.target.value = '';
+  if (!files.length || !token) return;
+
+  const btn = document.getElementById('moodboard-upload-btn');
+  const label = document.getElementById('moodboard-upload-label');
+  if (btn) btn.disabled = true;
+  if (label) label.textContent = tr('moodboardUploading');
+
+  for (const file of files) {
+    if (!file.type.startsWith('image/')) { showMoodboardError('moodboardErrorType'); continue; }
+    try {
+      const blob = await compressImage(file);
+      if (blob.size > 2 * 1024 * 1024) { showMoodboardError('moodboardErrorSize'); continue; }
+
+      // Optimistic placeholder
+      const tempId = 'tmp_' + Math.random().toString(36).slice(2);
+      moodboardImages.push({ id: tempId, url: URL.createObjectURL(blob), source: 'client', _uploading: true });
+      renderMoodboard();
+
+      const form = new FormData();
+      form.append('token', token);
+      form.append('file', blob, 'inspiration.jpg');
+      const res = await fetch(`${API}?action=moodboard-upload`, { method: 'POST', body: form });
+      const data = await res.json();
+      // Replace placeholder
+      moodboardImages = moodboardImages.filter(m => m.id !== tempId);
+      if (!res.ok || data.error) {
+        showMoodboardError('moodboardErrorGeneric');
+      } else if (data.image) {
+        moodboardImages.push(data.image);
+      }
+      renderMoodboard();
+    } catch (_) {
+      showMoodboardError('moodboardErrorGeneric');
+    }
+  }
+
+  if (btn) btn.disabled = false;
+  if (label) label.textContent = tr('moodboardUpload');
+}
+
+async function deleteMoodboardImage(id) {
+  if (!token || !id) return;
+  // Optimistic removal
+  const previous = moodboardImages;
+  moodboardImages = moodboardImages.filter(m => m.id !== id);
+  renderMoodboard();
+  try {
+    const res = await fetch(`${API}?action=moodboard-delete`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, image_id: id }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      moodboardImages = previous;
+      renderMoodboard();
+      showMoodboardError('moodboardErrorGeneric');
+    }
+  } catch (_) {
+    moodboardImages = previous;
+    renderMoodboard();
+    showMoodboardError('moodboardErrorGeneric');
+  }
+}
+
+async function expandMoodboard(tile) {
+  if (!tile) tile = document.getElementById('moodboard-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(MOODBOARD_STATE_KEY, '1');
+  if (moodboardLoaded) {
+    renderMoodboard();
+  } else {
+    await fetchMoodboard();
+  }
+}
+
+function collapseMoodboard(tile) {
+  if (!tile) tile = document.getElementById('moodboard-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(MOODBOARD_STATE_KEY);
+}
+
+function toggleMoodboard(tile) {
+  if (tile.classList.contains('expanded')) collapseMoodboard(tile);
+  else expandMoodboard(tile);
+}
+
+// ---- Deliveries (photographer-shared) ----
+const DELIVERIES_STATE_KEY = 'vf_deliveries_expanded';
+let deliveriesLoaded = false;
+let deliveriesData = null;
+
+function renderDeliveries() {
+  const scroll = document.getElementById('deliveries-scroll');
+  if (!scroll) return;
+  const items = (deliveriesData && deliveriesData.items) || [];
+  if (!items.length) {
+    scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('deliveriesEmpty'))}</div>`;
+    return;
+  }
+  scroll.innerHTML = items.map(it => {
+    const status = it.status || 'not_started';
+    let dotCls, dotGlyph, metaCls, metaText;
+    if (status === 'delivered') {
+      dotCls = 'delivered';
+      dotGlyph = '✓';
+      metaCls = 'delivered';
+      metaText = it.deliveredDate
+        ? `${tr('deliveriesDeliveredOn')} ${formatDate(it.deliveredDate)}`
+        : tr('deliveriesStatusDelivered');
+    } else if (status === 'in_progress') {
+      dotCls = 'inprogress';
+      dotGlyph = '•';
+      metaCls = '';
+      metaText = it.dueDate
+        ? `${tr('deliveriesStatusInProgress')} · ${tr('deliveriesExpected')} ${formatDate(it.dueDate)}`
+        : tr('deliveriesStatusInProgress');
+    } else {
+      dotCls = 'notstarted';
+      dotGlyph = '';
+      metaCls = '';
+      metaText = it.dueDate
+        ? `${tr('deliveriesStatusNotStarted')} · ${tr('deliveriesExpected')} ${formatDate(it.dueDate)}`
+        : tr('deliveriesStatusNotStarted');
+    }
+    return `
+      <div class="delivery-item">
+        <div class="delivery-dot ${dotCls}">${escapeHtml(dotGlyph)}</div>
+        <div class="delivery-body">
+          <div class="delivery-title">${escapeHtml(it.title || '')}</div>
+          <div class="delivery-meta ${metaCls}">${escapeHtml(metaText)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function fetchDeliveries() {
+  if (!token) return;
+  const scroll = document.getElementById('deliveries-scroll');
+  try {
+    const res = await fetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    deliveriesData = data;
+    deliveriesLoaded = true;
+    renderDeliveries();
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandDeliveries(tile) {
+  if (!tile) tile = document.getElementById('deliveries-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(DELIVERIES_STATE_KEY, '1');
+  if (deliveriesLoaded && deliveriesData) {
+    renderDeliveries();
+  } else {
+    await fetchDeliveries();
+  }
+}
+
+function collapseDeliveries(tile) {
+  if (!tile) tile = document.getElementById('deliveries-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(DELIVERIES_STATE_KEY);
+}
+
+function toggleDeliveries(tile) {
+  if (tile.classList.contains('expanded')) collapseDeliveries(tile);
+  else expandDeliveries(tile);
+}
+
+// ---- Meetings (shared summaries) ----
+const MEETINGS_STATE_KEY = 'vf_meetings_expanded';
+let meetingsLoaded = false;
+let meetingsData = null;
+
+function renderMeetings() {
+  const scroll = document.getElementById('meetings-scroll');
+  if (!scroll) return;
+  const list = (meetingsData && meetingsData.meetings) || [];
+  if (!list.length) {
+    scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('meetingsEmpty'))}</div>`;
+    return;
+  }
+  scroll.innerHTML = list.map(m => {
+    const date = m.meetingDate ? formatDate(m.meetingDate) : '';
+    return `
+      <div class="meeting-item">
+        <div class="meeting-kicker">${escapeHtml(tr('meetingsItem'))}</div>
+        <div class="meeting-head">
+          <div class="meeting-title">${escapeHtml(m.title || '')}</div>
+          <div class="meeting-date">${escapeHtml(date)}</div>
+        </div>
+        <div class="meeting-summary">${escapeHtml(m.summary || '')}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function fetchMeetings() {
+  if (!token) return;
+  const scroll = document.getElementById('meetings-scroll');
+  try {
+    const res = await fetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    meetingsData = data;
+    meetingsLoaded = true;
+    renderMeetings();
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandMeetings(tile) {
+  if (!tile) tile = document.getElementById('meetings-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(MEETINGS_STATE_KEY, '1');
+  if (meetingsLoaded && meetingsData) {
+    renderMeetings();
+  } else {
+    await fetchMeetings();
+  }
+}
+
+function collapseMeetings(tile) {
+  if (!tile) tile = document.getElementById('meetings-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(MEETINGS_STATE_KEY);
+}
+
+function toggleMeetings(tile) {
+  if (tile.classList.contains('expanded')) collapseMeetings(tile);
+  else expandMeetings(tile);
+}
+
+// ---- Intake (submitted questionnaire summary) ----
+const INTAKE_STATE_KEY = 'vf_intake_expanded';
+let intakeLoaded = false;
+let intakeData = null;
+
+const intakeSections = [
+  { key: 'sContact', rows: [
+    ['lPartner1', 'partner1Name'], ['lPartner2', 'partner2Name'],
+    ['lPartner1Phone', 'partner1Phone'], ['lPartner2Phone', 'partner2Phone'],
+    ['lEmail', 'email'], ['lPhone', 'phone'], ['lAddress', 'address'],
+  ]},
+  { key: 'sDay', rows: [
+    ['lGuests', 'guestCount'], ['lCeremonyType', 'ceremonyType'],
+    ['lPackage', 'bookedPackage'], ['lPhotoStyle', 'photoStyle'],
+    ['lCoordinator', 'coordinator'], ['lVendors', 'vendors'],
+  ]},
+  { key: 'sTimeline', rows: [
+    ['lGettingReady', 'gettingReadyTime'], ['lPhotographerArrives', 'photographerArrivalTime'],
+    ['lFirstLook', 'firstLook', 'yn'], ['lFirstLookTime', 'firstLookTime'],
+    ['lCeremony', 'ceremonyTime'], ['lGuestArrival', 'guestArrivalTime'],
+    ['lReception', 'receptionTime'], ['lSpeechesTime', 'speechesTime'],
+    ['lCakeCutting', 'cakeCuttingTime'], ['lFirstDance', 'firstDanceTime'],
+  ]},
+  { key: 'sLocations', rows: [
+    ['lGettingReadyLocation', 'gettingReadyLocation'],
+    ['lCeremonyAddress', 'ceremonyAddress'],
+    ['lReceptionAddress', 'receptionAddress'],
+  ]},
+  { key: 'sDetails', rows: [
+    ['lHasSpeeches', 'hasSpeeches', 'yn'], ['lRingBearer', 'hasRingBearer', 'yn'],
+    ['lDrone', 'wantsDrone', 'yn'], ['lPets', 'hasPets', 'yn'],
+    ['lFlash', 'flashAllowed', 'yn'],
+  ]},
+];
+const intakeNoteFields = [
+  ['lMustHave', 'mustHaveShots'], ['lVip', 'vipList'],
+  ['lFamily', 'familyNotes'], ['lExtra', 'extraNotes'],
+];
+
+function renderIntake(data) {
+  const scroll = document.getElementById('intake-scroll');
+  const meta = document.getElementById('intake-meta');
+  if (!scroll) return;
+  const form = data.form || {};
+  const parts = [];
+  for (const section of intakeSections) {
+    const rowsHtml = section.rows.map(([labelKey, fieldKey, kind]) => {
+      const v = form[fieldKey];
+      if (v === null || v === undefined || v === '') return '';
+      if (kind === 'yn') {
+        if (v === null) return '';
+        const yes = v === true;
+        const cls = yes ? 'yes' : 'no';
+        const text = yes ? tr('intakeYes') : tr('intakeNo');
+        return `<div class="intake-row yn"><span class="intake-label">${escapeHtml(tr(labelKey))}</span><span class="intake-value ${cls}">${escapeHtml(text)}</span></div>`;
+      }
+      return `<div class="intake-row"><span class="intake-label">${escapeHtml(tr(labelKey))}</span><span class="intake-value">${escapeHtml(String(v))}</span></div>`;
+    }).filter(Boolean).join('');
+    if (rowsHtml) {
+      parts.push(`<div class="intake-section"><div class="intake-section-title">${escapeHtml(tr(section.key))}</div>${rowsHtml}</div>`);
+    }
+  }
+  const notesHtml = intakeNoteFields.map(([labelKey, fieldKey]) => {
+    const v = form[fieldKey];
+    if (!v) return '';
+    return `<div class="intake-note"><div class="intake-note-label">${escapeHtml(tr(labelKey))}</div><div class="intake-note-value">${escapeHtml(String(v))}</div></div>`;
+  }).filter(Boolean).join('');
+  if (notesHtml) {
+    parts.push(`<div class="intake-section"><div class="intake-section-title">${escapeHtml(tr('sNotes'))}</div>${notesHtml}</div>`);
+  }
+  scroll.innerHTML = parts.join('') || `<div class="intake-loading">—</div>`;
+
+  if (meta && data.submittedAt) {
+    const submitted = new Date(data.submittedAt);
+    const updated = data.updatedAt ? new Date(data.updatedAt) : null;
+    const wasUpdated = updated && Math.abs(updated - submitted) > 5000;
+    const label = wasUpdated ? tr('intakeUpdatedOn') : tr('intakeSubmittedOn');
+    const when = wasUpdated ? updated : submitted;
+    meta.textContent = `${label} ${formatDate(when.toISOString())}`;
+  }
+}
+
+async function fetchIntake() {
+  if (!token) return;
+  const scroll = document.getElementById('intake-scroll');
+  try {
+    const res = await fetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
+      return;
+    }
+    intakeData = data;
+    intakeLoaded = true;
+    renderIntake(data);
+  } catch (_) {
+    if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
+  }
+}
+
+async function expandIntake(tile) {
+  if (!tile) tile = document.getElementById('intake-tile');
+  if (!tile) return;
+  tile.classList.add('expanded');
+  localStorage.setItem(INTAKE_STATE_KEY, '1');
+  if (intakeLoaded && intakeData) {
+    renderIntake(intakeData);
+  } else {
+    await fetchIntake();
+  }
+}
+
+function collapseIntake(tile) {
+  if (!tile) tile = document.getElementById('intake-tile');
+  if (!tile) return;
+  tile.classList.remove('expanded');
+  localStorage.removeItem(INTAKE_STATE_KEY);
+}
+
+function toggleIntake(tile) {
+  if (tile.classList.contains('expanded')) collapseIntake(tile);
+  else expandIntake(tile);
+}
+
+async function restoreChatState() {
+  if (localStorage.getItem(INTAKE_STATE_KEY) === '1' && document.getElementById('intake-tile')) {
+    expandIntake();
+  }
+  if (localStorage.getItem(MEETINGS_STATE_KEY) === '1' && document.getElementById('meetings-tile')) {
+    expandMeetings();
+  }
+  if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1' && document.getElementById('deliveries-tile')) {
+    expandDeliveries();
+  }
+  if (localStorage.getItem(MOODBOARD_STATE_KEY) === '1' && document.getElementById('moodboard-tile')) {
+    expandMoodboard();
+  }
+  if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
+    await expandChat();
+  } else {
+    startOverviewPolling();
+  }
+}
+
+setLang(lang);
+loadOverview().then(restoreChatState);
+</script>
+</body>
+</html>

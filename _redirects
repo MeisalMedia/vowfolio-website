@@ -4,6 +4,7 @@
 /f/* /feedback 200
 /i/* /quiz 200
 /p/* /portal 200
+/ps/* /portal-session 200
 /q/* /session-quiz 200
 /editor/* /editor 200
 /editor /editor 200
