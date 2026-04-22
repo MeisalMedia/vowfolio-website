@@ -412,6 +412,254 @@
       <img src="" alt="App screenshot — legg inn bilde her" style="max-width:375px;border-radius:24px;box-shadow:0 8px 32px rgba(61,50,41,0.15);background:#E8E0D6;min-height:200px;display:inline-block">
     </div>
 
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- KLIENTKORT — SAMMENLIGNING                         -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div class="divider"></div>
+    <h2>Klientkort — 3 varianter</h2>
+    <p style="color:#6B5E52;font-size:14px;margin-bottom:32px">
+      Samme data, tre ulike designvalg. Mål: finn riktig nivå av info-tetthet.
+    </p>
+
+    <style>
+      .card-compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 48px; }
+      .card-col { display: flex; flex-direction: column; gap: 12px; }
+      .card-col-label {
+        font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+        color: #9B7E5E; margin-bottom: 4px;
+      }
+
+      /* ── Shared card shell ── */
+      .wc { background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 8px rgba(61,50,41,0.07); }
+
+      /* ── A: Gammel ── */
+      .wc-a-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+      .wc-a-name { font-size: 16px; font-weight: 700; color: #3D3229; }
+      .wc-a-badge { font-size: 11px; font-weight: 600; color: #9B7E5E; background: rgba(155,126,94,0.1); padding: 3px 10px; border-radius: 20px; }
+      .wc-a-badge-green { color: #4CAF50; background: rgba(76,175,80,0.1); }
+      .wc-a-meta { font-size: 12px; color: #A39585; margin-bottom: 12px; }
+      .wc-a-bottom { display: flex; justify-content: space-between; align-items: center; }
+      .wc-a-price { font-size: 15px; font-weight: 700; color: #3D3229; }
+      .wc-a-pills { display: flex; gap: 6px; align-items: center; }
+      .wc-a-pill-red { font-size: 11px; font-weight: 600; color: #C0392B; background: rgba(192,57,43,0.1); padding: 3px 10px; border-radius: 20px; }
+      .wc-a-pill-gray { font-size: 11px; color: #9B7E5E; background: rgba(155,126,94,0.1); padding: 3px 8px; border-radius: 20px; }
+
+      /* ── B: ChatGPT ── */
+      .wc-b { border-left: 4px solid #7C5CBF; padding-left: 14px; }
+      .wc-b-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+      .wc-b-name { font-size: 15px; font-weight: 700; color: #1A1A1A; }
+      .wc-b-status { font-size: 11px; font-weight: 700; color: #fff; background: #7C5CBF; padding: 4px 10px; border-radius: 20px; }
+      .wc-b-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+      .wc-b-chip { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; }
+      .wc-b-chip-type { background: #EDE9FE; color: #5B21B6; }
+      .wc-b-chip-venue { background: #E0F2FE; color: #0369A1; }
+      .wc-b-chip-date { background: #FEF9C3; color: #854D0E; }
+      .wc-b-chip-days { background: #DCFCE7; color: #166534; }
+      .wc-b-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid #F3F4F6; }
+      .wc-b-price { font-size: 14px; font-weight: 700; color: #1A1A1A; }
+      .wc-b-pay { font-size: 11px; font-weight: 600; color: #DC2626; background: #FEE2E2; padding: 3px 8px; border-radius: 6px; }
+      .wc-b-tasks { font-size: 11px; color: #6B7280; background: #F3F4F6; padding: 3px 8px; border-radius: 6px; }
+
+      /* ── C: Mitt forslag ── */
+      .wc-c-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2px; }
+      .wc-c-name { font-size: 16px; font-weight: 700; color: #3D3229; }
+      .wc-c-badge { font-size: 11px; font-weight: 600; color: #9B7E5E; background: rgba(155,126,94,0.1); padding: 3px 10px; border-radius: 20px; }
+      .wc-c-meta { font-size: 12px; color: #7A6A5D; margin-bottom: 12px; line-height: 1.5; }
+      .wc-c-type { color: #6B5E52; font-weight: 600; }
+      .wc-c-sep { color: #C4B5A3; margin: 0 3px; }
+      .wc-c-bottom { display: flex; justify-content: space-between; align-items: center; }
+      .wc-c-price { font-size: 15px; font-weight: 700; color: #3D3229; }
+      .wc-c-pills { display: flex; gap: 6px; align-items: center; }
+      .wc-c-pill-red { font-size: 11px; font-weight: 600; color: #C0392B; background: rgba(192,57,43,0.1); padding: 3px 10px; border-radius: 20px; }
+      .wc-c-pill-gray { font-size: 11px; color: #9B7E5E; background: rgba(155,126,94,0.1); padding: 3px 8px; border-radius: 20px; }
+    </style>
+
+    <div class="card-compare">
+
+      <!-- ── Kolonne A: Gammel ── -->
+      <div class="card-col">
+        <div class="card-col-label">① Gammel (nåværende)</div>
+
+        <div class="wc">
+          <div class="wc-a-top">
+            <span class="wc-a-name">Frankiiiboi & Perla</span>
+            <span class="wc-a-badge">Bestilt</span>
+          </div>
+          <div class="wc-a-meta">29. mai 2026 &middot; Om 36 dager</div>
+          <div class="wc-a-bottom">
+            <span class="wc-a-price">0 kr</span>
+            <span class="wc-a-pills">
+              <span class="wc-a-pill-red">Ubetalt</span>
+              <span class="wc-a-pill-gray">≡ 3</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc">
+          <div class="wc-a-top">
+            <span class="wc-a-name">Ingrid Solberg & Lars Eriksen</span>
+            <span class="wc-a-badge">Bestilt</span>
+          </div>
+          <div class="wc-a-meta">Sola Strand Hotel &middot; 13. juni 2026 &middot; Om 52 dager</div>
+          <div class="wc-a-bottom">
+            <span class="wc-a-price">42 000 kr</span>
+            <span class="wc-a-pills">
+              <span class="wc-a-pill-red">Ubetalt</span>
+              <span class="wc-a-pill-gray">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc">
+          <div class="wc-a-top">
+            <span class="wc-a-name">Kaja Lund & Henrik Dahl</span>
+            <span class="wc-a-badge">Bestilt</span>
+          </div>
+          <div class="wc-a-meta">Solstrand Hotel & Bad &middot; 11. juli 2026 &middot; Om 80 dager</div>
+          <div class="wc-a-bottom">
+            <span class="wc-a-price">45 000 kr</span>
+            <span class="wc-a-pills">
+              <span class="wc-a-badge wc-a-badge-green" style="font-size:11px;padding:3px 10px;border-radius:20px;">Depositum betalt</span>
+              <span class="wc-a-pill-gray">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:#A39585;margin-top:4px;">
+          Problem: type mangler → vet ikke om det er bryllup, parshoot eller familie uten å åpne kortet.
+        </p>
+      </div>
+
+      <!-- ── Kolonne B: ChatGPT ── -->
+      <div class="card-col">
+        <div class="card-col-label">② Ny — ChatGPT-stil</div>
+
+        <div class="wc wc-b">
+          <div class="wc-b-top">
+            <span class="wc-b-name">Frankiiiboi & Perla</span>
+            <span class="wc-b-status">Bestilt</span>
+          </div>
+          <div class="wc-b-chips">
+            <span class="wc-b-chip wc-b-chip-type">💒 Bryllup</span>
+            <span class="wc-b-chip wc-b-chip-date">📅 29. mai 2026</span>
+            <span class="wc-b-chip wc-b-chip-days">⏳ 36 dager</span>
+          </div>
+          <div class="wc-b-bottom">
+            <span class="wc-b-price">0 kr</span>
+            <span class="wc-b-pills" style="display:flex;gap:6px;">
+              <span class="wc-b-pay">Ubetalt</span>
+              <span class="wc-b-tasks">≡ 3</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc wc-b">
+          <div class="wc-b-top">
+            <span class="wc-b-name">Ingrid Solberg & Lars Eriksen</span>
+            <span class="wc-b-status">Bestilt</span>
+          </div>
+          <div class="wc-b-chips">
+            <span class="wc-b-chip wc-b-chip-type">💒 Bryllup</span>
+            <span class="wc-b-chip wc-b-chip-venue">📍 Sola Strand Hotel</span>
+            <span class="wc-b-chip wc-b-chip-date">📅 13. juni 2026</span>
+            <span class="wc-b-chip wc-b-chip-days">⏳ 52 dager</span>
+          </div>
+          <div class="wc-b-bottom">
+            <span class="wc-b-price">42 000 kr</span>
+            <span class="wc-b-pills" style="display:flex;gap:6px;">
+              <span class="wc-b-pay">Ubetalt</span>
+              <span class="wc-b-tasks">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc wc-b">
+          <div class="wc-b-top">
+            <span class="wc-b-name">Kaja Lund & Henrik Dahl</span>
+            <span class="wc-b-status">Bestilt</span>
+          </div>
+          <div class="wc-b-chips">
+            <span class="wc-b-chip wc-b-chip-type">💒 Bryllup</span>
+            <span class="wc-b-chip wc-b-chip-venue">📍 Solstrand Hotel & Bad</span>
+            <span class="wc-b-chip wc-b-chip-date">📅 11. juli 2026</span>
+            <span class="wc-b-chip wc-b-chip-days">⏳ 80 dager</span>
+          </div>
+          <div class="wc-b-bottom">
+            <span class="wc-b-price">45 000 kr</span>
+            <span class="wc-b-pills" style="display:flex;gap:6px;">
+              <span class="wc-b-pay" style="color:#166534;background:#DCFCE7;">Depositum betalt</span>
+              <span class="wc-b-tasks">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:#A39585;margin-top:4px;">
+          Problem: for mange farger, for mange chips → roper om oppmerksomhet. Mister premium-følelsen.
+        </p>
+      </div>
+
+      <!-- ── Kolonne C: Mitt forslag ── -->
+      <div class="card-col">
+        <div class="card-col-label">③ Mitt forslag</div>
+
+        <div class="wc">
+          <div class="wc-c-top">
+            <span class="wc-c-name">Frankiiiboi & Perla</span>
+            <span class="wc-c-badge">Bestilt</span>
+          </div>
+          <div class="wc-c-meta">
+            <span class="wc-c-type">Bryllup</span><span class="wc-c-sep">&middot;</span>29. mai 2026<span class="wc-c-sep">&middot;</span>Om 36 dager
+          </div>
+          <div class="wc-c-bottom">
+            <span class="wc-c-price">0 kr</span>
+            <span class="wc-c-pills">
+              <span class="wc-c-pill-red">Ubetalt</span>
+              <span class="wc-c-pill-gray">≡ 3</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc">
+          <div class="wc-c-top">
+            <span class="wc-c-name">Ingrid Solberg & Lars Eriksen</span>
+            <span class="wc-c-badge">Bestilt</span>
+          </div>
+          <div class="wc-c-meta">
+            <span class="wc-c-type">Bryllup</span><span class="wc-c-sep">&middot;</span>Sola Strand Hotel<span class="wc-c-sep">&middot;</span>13. juni 2026<span class="wc-c-sep">&middot;</span>Om 52 dager
+          </div>
+          <div class="wc-c-bottom">
+            <span class="wc-c-price">42 000 kr</span>
+            <span class="wc-c-pills">
+              <span class="wc-c-pill-red">Ubetalt</span>
+              <span class="wc-c-pill-gray">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="wc">
+          <div class="wc-c-top">
+            <span class="wc-c-name">Kaja Lund & Henrik Dahl</span>
+            <span class="wc-c-badge">Bestilt</span>
+          </div>
+          <div class="wc-c-meta">
+            <span class="wc-c-type">Bryllup</span><span class="wc-c-sep">&middot;</span>Solstrand Hotel & Bad<span class="wc-c-sep">&middot;</span>11. juli 2026<span class="wc-c-sep">&middot;</span>Om 80 dager
+          </div>
+          <div class="wc-c-bottom">
+            <span class="wc-c-price">45 000 kr</span>
+            <span class="wc-c-pills">
+              <span class="wc-c-badge" style="font-size:11px;font-weight:600;color:#4CAF50;background:rgba(76,175,80,0.1);padding:3px 10px;border-radius:20px;">Depositum betalt</span>
+              <span class="wc-c-pill-gray">≡ 4</span>
+            </span>
+          </div>
+        </div>
+
+        <p style="font-size:12px;color:#A39585;margin-top:4px;">
+          Type først = rask scanning. Samme UI-elementer som før, men metadatalinjen gir kontekst uten støy. Én linje mer, null ekstra farger.
+        </p>
+      </div>
+
+    </div>
+
     <div class="divider"></div>
     <p style="font-size:12px;color:#C4B5A3;text-align:center;padding:24px 0">VowFolio Style Guide — vowfolio.com/styleguide</p>
   </div>
