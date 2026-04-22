@@ -41,7 +41,7 @@
     .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #7A6A5A; cursor: pointer; transition: all 0.15s; user-select: none; }
     .nav-item:hover { background: var(--cream); color: var(--espresso); }
     .nav-item.active { background: var(--taupe); color: var(--white); }
-    .nav-item .icon { width: 18px; text-align: center; font-size: 16px; flex-shrink: 0; }
+    .nav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
     .nav-divider { height: 1px; background: var(--sand); margin: 8px 10px; }
     .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--sand); }
     .sidebar-footer .user-email { font-size: 11px; color: #A09080; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -201,20 +201,20 @@
       </div>
       <div class="sidebar-nav">
         <div class="nav-item active" id="navHjem" onclick="navigate('hjem')">
-          <span class="icon">⌂</span> Hjem
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg> Hjem
         </div>
         <div class="nav-item" id="navOppdrag" onclick="navigate('oppdrag')">
-          <span class="icon">◈</span> Oppdrag
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Oppdrag
         </div>
         <div class="nav-item" id="navMeldinger" onclick="navigate('meldinger')">
-          <span class="icon">◻</span> Meldinger
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg> Meldinger
         </div>
         <div class="nav-item" id="navKontakter" onclick="navigate('kontakter')">
-          <span class="icon">◉</span> Kontakter
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg> Kontakter
         </div>
         <div class="nav-divider"></div>
         <div class="nav-item" id="navSettings" onclick="navigate('settings')">
-          <span class="icon">⚙</span> Innstillinger
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Innstillinger
         </div>
       </div>
       <div class="sidebar-footer">
