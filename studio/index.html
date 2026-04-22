@@ -478,6 +478,7 @@
     // ── Kontakter ──
     let kontaktFilter = 'alle';
     let kontaktSearch = '';
+    let kontaktView = 'kort'; // 'kort' | 'liste'
 
     function contactStatusInfo(status) {
       const map = {
@@ -512,23 +513,27 @@
         { key: 'booked', label: 'Booket' },
       ];
 
-      let html = `<div class="main-header"><h2>Kontakter</h2><button class="btn-primary" onclick="showKontaktModal()">+ Legg til</button></div><div class="main-content">`;
+      let html = `<div class="main-header"><h2>Kontakter</h2><div style="display:flex;gap:8px"><button class="btn-primary" onclick="showKontaktModal()">+ Legg til</button></div></div><div class="main-content">`;
 
-      // Search + filter bar
+      // Search + filter + view toggle bar
       html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">`;
       html += `<input type="text" placeholder="Søk navn eller e-post..." value="${esc(kontaktSearch)}" oninput="kontaktSearch=this.value;renderKontakter(document.getElementById('mainContent'))" style="padding:9px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);min-width:220px">`;
       html += `<div style="display:flex;gap:6px">`;
       for (const chip of chips) {
         const active = kontaktFilter === chip.key;
-        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">
-          ${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span>
-        </button>`;
+        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
-      html += `</div></div>`;
+      html += `</div>`;
+      // View toggle
+      html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
+      html += `<button onclick="kontaktView='kort';renderKontakter(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${kontaktView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
+      html += `<button onclick="kontaktView='liste';renderKontakter(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${kontaktView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
+      html += `</div>`;
+      html += `</div>`;
 
       if (filtered.length === 0) {
         html += `<div class="empty-state"><div class="icon">◉</div><h3>${contacts.length === 0 ? 'Ingen kontakter enda' : 'Ingen treff'}</h3><p>${contacts.length === 0 ? 'Kontakter synkroniseres fra appen.' : 'Prøv et annet søk eller filter.'}</p></div>`;
-      } else {
+      } else if (kontaktView === 'kort') {
         html += `<div class="card-grid card-grid-auto">`;
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
@@ -537,7 +542,6 @@
           const wDate = c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'2-digit' }) : null;
           const subtitleParts = [c.venue_name, wDate].filter(Boolean);
           const subtitle = subtitleParts.length ? subtitleParts.join(' · ') : (c.email || '');
-
           html += `<div class="oppdrag-card" onclick="navigate('kontaktDetail','${c.id}')">`;
           html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
           html += `<div style="font-size:15px;font-weight:600;line-height:1.3">${esc(displayName)}</div>`;
@@ -550,6 +554,21 @@
           html += `</div></div>`;
         }
         html += `</div>`;
+      } else {
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Status</th><th>E-post</th><th>Bryllupsdato</th><th>Kilde</th></tr></thead><tbody>`;
+        for (const c of filtered) {
+          const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
+          const st = contactStatusInfo(c.status);
+          const wDate = c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' }) : '—';
+          html += `<tr onclick="navigate('kontaktDetail','${c.id}')">`;
+          html += `<td><div style="display:flex;align-items:center;gap:10px"><div class="contact-avatar" style="width:30px;height:30px;font-size:12px">${(c.primary_name||'?')[0].toUpperCase()}</div><span style="font-weight:500">${esc(displayName)}</span></div></td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
+          html += `<td style="color:#8A7D72">${esc(c.email||'—')}</td>`;
+          html += `<td style="color:#8A7D72">${wDate}</td>`;
+          html += `<td style="color:#8A7D72">${esc(c.source||'—')}</td>`;
+          html += `</tr>`;
+        }
+        html += `</tbody></table></div>`;
       }
       html += `</div>`;
       el.innerHTML = html;
