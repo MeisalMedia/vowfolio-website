@@ -1,4 +1,4 @@
-/contact/*/embed /contact 200
+/contact/*/embed /contact-embed.js 200
 /contact/* /contact 200
 /s/* /signing 200
 /f/* /feedback 200
