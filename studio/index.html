@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VowFolio Editor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Quill rich text editor -->
+  <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FAF7F2; --espresso: #3D3229; --taupe: #9B7E5E; --sage: #6B8F71;
+      --rose: #C2847A; --sand: #E8E0D6; --white: #FFFFFF; --danger: #C0392B;
+      --success: #6B8F71;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--espresso); min-height: 100vh; }
+
+    /* Login */
+    .login-wrap { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .login-card { background: var(--white); border-radius: 16px; padding: 48px 40px; max-width: 400px; width: 100%; box-shadow: 0 4px 24px rgba(61,50,41,0.08); text-align: center; }
+    .login-card h1 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--taupe); letter-spacing: 1px; margin-bottom: 8px; }
+    .login-card .sub { font-size: 14px; color: #8A7D72; margin-bottom: 32px; }
+    .login-card input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 12px; background: var(--cream); color: var(--espresso); }
+    .login-card input:focus { outline: none; border-color: var(--taupe); }
+    .login-card .btn { width: 100%; padding: 14px; background: var(--espresso); color: var(--white); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .login-card .btn:hover { background: #2A2118; }
+    .login-card .error { color: var(--danger); font-size: 13px; margin-top: 8px; }
+
+    /* App shell */
+    .app { display: none; }
+    .app.active { display: flex; height: 100vh; overflow: hidden; }
+
+    /* Sidebar */
+    .sidebar { width: 240px; background: var(--white); border-right: 1px solid var(--sand); padding: 24px 0; flex-shrink: 0; display: flex; flex-direction: column; }
+    .sidebar-logo { font-family: 'Playfair Display', serif; font-size: 20px; color: var(--taupe); padding: 0 24px 24px; letter-spacing: 1px; border-bottom: 1px solid var(--sand); }
+    .sidebar-nav { flex: 1; padding: 16px 12px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #6B5E52; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+    .nav-item:hover { background: var(--cream); }
+    .nav-item.active { background: var(--taupe); color: var(--white); }
+    .sidebar-footer { padding: 16px 24px; border-top: 1px solid var(--sand); }
+    .sidebar-footer .user-email { font-size: 12px; color: #8A7D72; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; }
+    .sidebar-footer .logout-btn { font-size: 13px; color: var(--danger); cursor: pointer; background: none; border: none; font-family: inherit; }
+
+    /* Main */
+    .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; height: 100vh; }
+    .main-header { padding: 20px 32px; border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; background: var(--white); flex-shrink: 0; z-index: 10; }
+    .main-header h2 { font-family: 'Playfair Display', serif; font-size: 22px; }
+    .main-content { padding: 32px; flex: 1; overflow-y: auto; }
+
+    /* Buttons */
+    .btn-primary { background: var(--espresso); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-primary:hover { background: #2A2118; }
+    .btn-secondary { background: var(--taupe); color: var(--white); border: none; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-outline { background: none; border: 1.5px solid var(--sand); color: var(--espresso); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; }
+    .btn-outline:hover { border-color: var(--taupe); }
+    .btn-danger { background: none; border: 1.5px solid var(--danger); color: var(--danger); padding: 8px 16px; border-radius: 8px; font-size: 13px; cursor: pointer; font-family: inherit; }
+
+    /* Template grid */
+    .template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .template-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; border: 1.5px solid transparent; }
+    .template-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(61,50,41,0.1); border-color: var(--sand); }
+    .template-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .template-card .meta { font-size: 12px; color: #8A7D72; }
+    .template-card .type-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px; margin-top: 8px; }
+
+    /* Quill editor */
+    .editor-container { background: var(--white); border-radius: 12px; box-shadow: 0 2px 16px rgba(61,50,41,0.06); overflow: hidden; display: flex; flex-direction: column; height: 100%; }
+    .placeholder-bar { display: flex; gap: 6px; padding: 8px 16px; border-bottom: 1px solid var(--sand); flex-wrap: wrap; align-items: center; background: var(--white); flex-shrink: 0; }
+    .placeholder-chip { font-size: 11px; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--sand); background: var(--cream); color: var(--taupe); cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s; }
+    .placeholder-chip:hover { border-color: var(--taupe); background: var(--taupe); color: var(--white); }
+    .ql-container { font-family: 'Inter', sans-serif; font-size: 15px; border: none !important; flex: 1; overflow-y: auto; }
+    .ql-editor { min-height: 400px; padding: 32px; line-height: 1.8; color: var(--espresso); }
+    .ql-editor h1 { font-family: 'Playfair Display', serif; font-size: 24px; }
+    .ql-editor h2 { font-family: 'Playfair Display', serif; font-size: 18px; }
+    .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid var(--sand) !important; padding: 10px 16px !important; background: var(--white); flex-shrink: 0; }
+    .ql-snow .ql-stroke { stroke: var(--espresso); }
+    .ql-snow .ql-fill { fill: var(--espresso); }
+    .ql-snow .ql-picker { color: var(--espresso); }
+    .ql-editor.ql-blank::before { color: #C4B5A3; font-style: normal; }
+
+    /* Title input */
+    .title-input { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; border: none; background: none; width: 100%; padding: 0; color: var(--espresso); }
+    .title-input:focus { outline: none; }
+    .title-input::placeholder { color: #C4B5A3; }
+
+    /* Save indicator */
+    .save-indicator { font-size: 12px; color: #8A7D72; }
+    .save-indicator.saved { color: var(--success); }
+
+    /* Document table */
+    .doc-table { width: 100%; border-collapse: collapse; }
+    .doc-table th { text-align: left; font-size: 12px; font-weight: 600; color: #8A7D72; text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px; border-bottom: 1px solid var(--sand); }
+    .doc-table td { padding: 14px 16px; border-bottom: 1px solid var(--sand); font-size: 14px; }
+    .doc-table tr:hover { background: var(--cream); cursor: pointer; }
+    .status-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 12px; }
+    .status-draft { background: #F5F0EB; color: var(--taupe); }
+    .status-sent { background: #EBF0F5; color: #4A7FB5; }
+    .status-signed { background: #EBF5EC; color: var(--success); }
+
+    /* Document view */
+    .signers-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); margin-bottom: 24px; }
+    .signer-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+    .signer-status { width: 8px; height: 8px; border-radius: 50%; }
+    .contract-preview { background: var(--white); border-radius: 12px; padding: 32px; box-shadow: 0 2px 12px rgba(61,50,41,0.06); line-height: 1.8; font-size: 15px; }
+    .contract-preview h1 { font-family: 'Playfair Display', serif; font-size: 24px; border-bottom: 2px solid var(--taupe); padding-bottom: 8px; margin-bottom: 16px; }
+    .contract-preview h2 { font-family: 'Playfair Display', serif; font-size: 18px; margin-top: 24px; }
+
+    /* Create form */
+    .create-form { max-width: 600px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--taupe); margin-bottom: 6px; }
+    .form-group select { width: 100%; padding: 12px 14px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: 14px; font-family: inherit; background: var(--white); }
+    .form-group select:focus { outline: none; border-color: var(--taupe); }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 10px 24px; border-radius: 20px; font-size: 14px; font-weight: 600; display: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .toast.show { display: block; animation: fadeUp 0.3s; }
+    @keyframes fadeUp { from { opacity:0; transform: translateX(-50%) translateY(10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; color: #8A7D72; }
+    .empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+    .empty-state h3 { font-size: 18px; color: var(--espresso); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+  <div class="login-wrap" id="loginView">
+    <div class="login-card">
+      <h1>VowFolio</h1>
+      <p class="sub">Logg inn for å administrere kontrakter</p>
+      <input type="email" id="loginEmail" placeholder="E-post" autocomplete="email">
+      <input type="password" id="loginPassword" placeholder="Passord" autocomplete="current-password">
+      <button class="btn" id="loginBtn" onclick="login()">Logg inn</button>
+      <p class="error" id="loginError"></p>
+    </div>
+  </div>
+
+  <div class="app" id="appView">
+    <div class="sidebar">
+      <div class="sidebar-logo">VowFolio</div>
+      <div class="sidebar-nav">
+        <div class="nav-item active" onclick="navigate('templates')" id="navTemplates">📋 Maler</div>
+        <div class="nav-item" onclick="navigate('documents')" id="navDocuments">📄 Dokumenter</div>
+      </div>
+      <div class="sidebar-footer">
+        <div class="user-email" id="userEmail"></div>
+        <button class="logout-btn" onclick="logout()">Logg ut</button>
+      </div>
+    </div>
+    <div class="main" id="mainContent"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://ubdqueuknaqegipnbsxc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZHF1ZXVrbmFxZWdpcG5ic3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjY2MTYsImV4cCI6MjA4OTgwMjYxNn0.UiUReWtlh6lGtoon2AwyQblIVEbzW1LMA3PBH8XclD0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let templates = [], documents = [], weddings = [], contacts = [];
+    let studioName = '';
+    let quillEditor = null;
+
+    // ---- Init ----
+    (async () => {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) { currentUser = session.user; showApp(); }
+    })();
+
+    // ---- Auth ----
+    async function login() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value;
+      const err = document.getElementById('loginError');
+      const btn = document.getElementById('loginBtn');
+      err.textContent = ''; btn.disabled = true; btn.textContent = 'Logger inn...';
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+      if (error) { err.textContent = error.message; btn.disabled = false; btn.textContent = 'Logg inn'; return; }
+      currentUser = data.user; showApp();
+    }
+    async function logout() { await sb.auth.signOut(); location.reload(); }
+    async function showApp() {
+      document.getElementById('loginView').style.display = 'none';
+      document.getElementById('appView').classList.add('active');
+      document.getElementById('userEmail').textContent = currentUser.email;
+      await loadData(); navigate('templates');
+    }
+    async function loadData() {
+      const [t, d, w, c, s] = await Promise.all([
+        sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
+        sb.from('document_instances').select('*').order('created_at', { ascending: false }),
+        sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
+        sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id'),
+        sb.from('studio_settings').select('studio_name').limit(1),
+      ]);
+      templates = t.data || []; documents = d.data || []; weddings = w.data || [];
+      contacts = c.data || []; studioName = s.data?.[0]?.studio_name || '';
+    }
+
+    // ---- Navigation ----
+    function navigate(view, params) {
+      if (quillEditor) { quillEditor = null; }
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      const navId = view.includes('emplate') || view === 'newTemplate' ? 'navTemplates' : 'navDocuments';
+      document.getElementById(navId)?.classList.add('active');
+      const main = document.getElementById('mainContent');
+      switch (view) {
+        case 'templates': renderTemplateList(main); break;
+        case 'newTemplate': renderTemplateEditor(main, null); break;
+        case 'editTemplate': renderTemplateEditor(main, params); break;
+        case 'documents': renderDocumentList(main); break;
+        case 'createDoc': renderCreateDocument(main); break;
+        case 'viewDoc': renderDocumentView(main, params); break;
+      }
+    }
+
+    // ---- Template List ----
+    function renderTemplateList(el) {
+      const typeLabels = { contract:'Kontrakt', quote:'Tilbud', questionnaire:'Spørreskjema', info_document:'Info' };
+      let html = '<div class="main-header"><h2>Kontraktsmaler</h2><button class="btn-primary" onclick="navigate(\'newTemplate\')">+ Ny mal</button></div><div class="main-content">';
+      if (templates.length === 0) {
+        html += '<div class="empty-state"><div class="icon">📋</div><h3>Ingen maler enda</h3><p>Opprett din første kontraktsmal.</p><button class="btn-primary" onclick="navigate(\'newTemplate\')">Opprett mal</button></div>';
+      } else {
+        html += '<div class="template-grid">';
+        for (const t of templates) {
+          const date = new Date(t.updated_at).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' });
+          html += '<div class="template-card" onclick="navigate(\'editTemplate\',\'' + t.id + '\')"><h3>' + esc(t.title) + '</h3><p class="meta">Oppdatert ' + date + '</p><span class="type-badge" style="background:rgba(155,126,94,0.1);color:var(--taupe)">' + (typeLabels[t.type]||t.type) + '</span></div>';
+        }
+        html += '</div>';
+      }
+      html += '</div>'; el.innerHTML = html;
+    }
+
+    // ---- Template Editor (Tiptap) ----
+    function renderTemplateEditor(el, templateId) {
+      const tmpl = templateId ? templates.find(t => t.id === templateId) : null;
+      const title = tmpl ? tmpl.title : '';
+      const content = tmpl ? tmpl.content : '';
+
+      const placeholders = [
+        ['{{primary_name}}','Navn'], ['{{partner_name}}','Partner'], ['{{email}}','E-post'],
+        ['{{phone}}','Telefon'], ['{{wedding_date}}','Dato'], ['{{venue_name}}','Lokale'],
+        ['{{venue_address}}','Adresse'], ['{{studio_name}}','Studio'], ['{{package_price}}','Pris'],
+        ['{{today_date}}','Dagens dato'],
+      ];
+
+      let html = '<div class="main-header"><div style="display:flex;align-items:center;gap:16px;flex:1">';
+      html += '<button class="btn-outline" onclick="navigate(\'templates\')" style="padding:8px 12px">← Tilbake</button>';
+      html += '<input class="title-input" id="tmplTitle" placeholder="Maltittel..." value="' + esc(title) + '">';
+      html += '</div><div style="display:flex;align-items:center;gap:12px">';
+      html += '<span class="save-indicator" id="saveStatus">Klar</span>';
+      if (tmpl) html += '<button class="btn-danger" onclick="deleteTemplate(\'' + tmpl.id + '\')">Slett</button>';
+      html += '<button class="btn-primary" onclick="saveTemplate(\'' + (tmpl?.id||'') + '\')">' + (tmpl?'Lagre':'Opprett') + '</button>';
+      html += '</div></div>';
+
+      html += '<div class="main-content"><div class="editor-container">';
+      // Placeholder bar
+      html += '<div class="placeholder-bar"><span style="font-size:11px;color:#8A7D72;font-weight:600">SETT INN:</span>';
+      for (const [ph, label] of placeholders) {
+        html += '<button class="placeholder-chip" onclick="insertPlaceholder(\'' + ph + '\')">' + label + '</button>';
+      }
+      html += '<span style="width:1px;height:16px;background:var(--sand);margin:0 4px"></span>';
+      html += '<button class="placeholder-chip" onclick="insertHR()" title="Skillelinje">― Linje</button>';
+      html += '</div>';
+      // Quill editor
+      html += '<div id="quillEditor"></div>';
+      html += '</div></div>';
+
+      el.innerHTML = html;
+
+      // Initialize Quill
+      // Register HR blot
+      const BlockEmbed = Quill.import('blots/block/embed');
+      class DividerBlot extends BlockEmbed { static create() { return document.createElement('hr'); } }
+      DividerBlot.blotName = 'divider';
+      DividerBlot.tagName = 'hr';
+      Quill.register(DividerBlot);
+
+      quillEditor = new Quill('#quillEditor', {
+        theme: 'snow',
+        placeholder: 'Skriv kontrakten din her...',
+        modules: {
+          toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            ['clean']
+          ]
+        }
+      });
+
+      // Load content
+      if (content) {
+        const htmlContent = mdToHtml(content);
+        quillEditor.root.innerHTML = htmlContent;
+      }
+    }
+
+    function insertPlaceholder(ph) {
+      if (!quillEditor) return;
+      const range = quillEditor.getSelection(true);
+      quillEditor.insertText(range.index, ph);
+      quillEditor.setSelection(range.index + ph.length);
+    }
+
+    function insertHR() {
+      if (!quillEditor) return;
+      const range = quillEditor.getSelection(true);
+      quillEditor.insertText(range.index, '\n');
+      quillEditor.insertEmbed(range.index + 1, 'divider', true);
+      quillEditor.insertText(range.index + 2, '\n');
+      quillEditor.setSelection(range.index + 3);
+    }
+
+    function getEditorMarkdown() {
+      if (!quillEditor) return '';
+      return htmlToMd(quillEditor.root.innerHTML);
+    }
+
+    async function saveTemplate(id) {
+      const title = document.getElementById('tmplTitle').value.trim();
+      if (!title) { showToast('Tittel mangler'); return; }
+      const content = getEditorMarkdown();
+      const status = document.getElementById('saveStatus');
+      status.textContent = 'Lagrer...'; status.className = 'save-indicator saving';
+
+      if (id) {
+        await sb.from('document_templates').update({ title, content, updated_at: new Date().toISOString() }).eq('id', id);
+      } else {
+        const { data } = await sb.from('document_templates').insert({ title, content, type: 'contract' }).select().single();
+        if (data) id = data.id;
+      }
+      await loadData();
+      status.textContent = '✓ Lagret'; status.className = 'save-indicator saved';
+      setTimeout(() => { status.textContent = 'Klar'; status.className = 'save-indicator'; }, 2000);
+      if (!id) navigate('templates');
+    }
+
+    async function deleteTemplate(id) {
+      if (!confirm('Slett denne malen?')) return;
+      await sb.from('document_templates').delete().eq('id', id);
+      await loadData(); navigate('templates');
+    }
+
+    // ---- Document List ----
+    function renderDocumentList(el) {
+      const statusLabels = { draft:'Utkast', sent:'Sendt', viewed:'Sett', signed_by_client:'Klient signert', signed_by_photographer:'Fotograf signert', fully_signed:'Ferdig signert', archived:'Arkivert' };
+      const statusCls = { draft:'status-draft', sent:'status-sent', viewed:'status-sent', signed_by_client:'status-signed', signed_by_photographer:'status-signed', fully_signed:'status-signed' };
+      let html = '<div class="main-header"><h2>Dokumenter</h2><button class="btn-primary" onclick="navigate(\'createDoc\')">+ Ny kontrakt</button></div><div class="main-content">';
+      if (documents.length === 0) {
+        html += '<div class="empty-state"><div class="icon">📄</div><h3>Ingen dokumenter enda</h3><p>Opprett en kontrakt fra en mal.</p><button class="btn-primary" onclick="navigate(\'createDoc\')">Opprett kontrakt</button></div>';
+      } else {
+        html += '<table class="doc-table"><thead><tr><th>Tittel</th><th>Klient</th><th>Status</th><th>Opprettet</th></tr></thead><tbody>';
+        for (const doc of documents) {
+          const c = contacts.find(x => x.id === doc.contact_id);
+          const date = new Date(doc.created_at).toLocaleDateString('nb-NO', { day:'numeric', month:'short' });
+          html += '<tr onclick="navigate(\'viewDoc\',\'' + doc.id + '\')"><td><strong>' + esc(doc.title) + '</strong></td><td>' + esc(c?.primary_name||'—') + '</td><td><span class="status-badge ' + (statusCls[doc.status]||'') + '">' + (statusLabels[doc.status]||doc.status) + '</span></td><td>' + date + '</td></tr>';
+        }
+        html += '</tbody></table>';
+      }
+      html += '</div>'; el.innerHTML = html;
+    }
+
+    // ---- Create Document ----
+    function renderCreateDocument(el) {
+      let wOpts = '<option value="">Velg bryllup...</option>';
+      for (const w of weddings) { const n = w.partner2 ? w.partner1+' & '+w.partner2 : w.partner1; wOpts += '<option value="'+w.id+'">'+esc(n)+'</option>'; }
+      let tOpts = '<option value="">Velg mal...</option>';
+      for (const t of templates) { tOpts += '<option value="'+t.id+'">'+esc(t.title)+'</option>'; }
+      let html = '<div class="main-header"><h2>Opprett kontrakt</h2></div><div class="main-content"><div class="create-form">';
+      html += '<div class="form-group"><label>Mal</label><select id="createTemplate">'+tOpts+'</select></div>';
+      html += '<div class="form-group"><label>Bryllup / Prosjekt</label><select id="createWedding" onchange="previewCreate()">'+wOpts+'</select></div>';
+      html += '<div id="createPreview" style="margin-top:24px"></div>';
+      html += '<button class="btn-primary" style="margin-top:24px" onclick="createDocument()">Opprett kontrakt</button>';
+      html += '</div></div>'; el.innerHTML = html;
+    }
+    function previewCreate() {
+      const wid = document.getElementById('createWedding').value;
+      const tid = document.getElementById('createTemplate').value;
+      if (!wid || !tid) { document.getElementById('createPreview').innerHTML = ''; return; }
+      const w = weddings.find(x=>x.id===wid), t = templates.find(x=>x.id===tid);
+      const c = contacts.find(x=>x.linked_wedding_id===wid) || {};
+      if (!w||!t) return;
+      document.getElementById('createPreview').innerHTML = '<div class="contract-preview"><h3 style="margin-bottom:16px;color:var(--taupe)">Forhåndsvisning</h3>' + mdToHtml(resolvePlaceholders(t.content,w,c)) + '</div>';
+    }
+    async function createDocument() {
+      const tid = document.getElementById('createTemplate').value;
+      const wid = document.getElementById('createWedding').value;
+      if (!tid) { showToast('Velg en mal'); return; }
+      const t = templates.find(x=>x.id===tid), w = wid?weddings.find(x=>x.id===wid):null;
+      const c = wid?contacts.find(x=>x.linked_wedding_id===wid):null;
+      const resolved = resolvePlaceholders(t.content, w, c||{});
+      const { data: doc, error } = await sb.from('document_instances').insert({ template_id:tid, wedding_id:wid||null, contact_id:c?.id||null, type:t.type||'contract', title:t.title, content:resolved, status:'draft' }).select().single();
+      if (error) { showToast('Feil: '+error.message); return; }
+      const clientName = c?.primary_name||w?.partner1||'';
+      await sb.from('document_signers').insert([
+        { document_id:doc.id, role:'client', name:clientName, email:c?.email||'', status:'pending' },
+        { document_id:doc.id, role:'photographer', name:studioName||'Photographer', email:currentUser.email, status:'pending' },
+      ]);
+      await loadData(); navigate('viewDoc', doc.id); showToast('Kontrakt opprettet');
+    }
+
+    // ---- Document View ----
+    async function renderDocumentView(el, docId) {
+      const doc = documents.find(d=>d.id===docId);
+      if (!doc) { el.innerHTML = '<div class="main-content"><p>Ikke funnet.</p></div>'; return; }
+      const { data: signers } = await sb.from('document_signers').select('*').eq('document_id', docId);
+      const statusLabels = { draft:'Utkast', sent:'Sendt', viewed:'Sett', signed_by_client:'Klient signert', fully_signed:'Ferdig signert' };
+      const statusCls = { draft:'status-draft', sent:'status-sent', viewed:'status-sent', signed_by_client:'status-signed', fully_signed:'status-signed' };
+      let html = '<div class="main-header"><h2>'+esc(doc.title)+'</h2><div style="display:flex;gap:8px">';
+      html += '<button class="btn-outline" onclick="navigate(\'documents\')">← Tilbake</button>';
+      if (doc.status==='draft') html += '<button class="btn-secondary" onclick="sendToSigning(\''+docId+'\')">Send til signering</button>';
+      html += '</div></div><div class="main-content">';
+      html += '<div class="signers-card"><span class="status-badge '+(statusCls[doc.status]||'status-draft')+'">'+(statusLabels[doc.status]||doc.status)+'</span>';
+      if (signers) for (const s of signers) {
+        const signed = s.status==='signed';
+        html += '<div class="signer-row"><div class="signer-status" style="background:'+(signed?'var(--success)':'var(--sand)')+'"></div><strong>'+esc(s.name||s.role)+'</strong> <span style="color:#8A7D72;font-size:12px">('+({client:'Klient',photographer:'Fotograf'}[s.role]||s.role)+')</span><span style="margin-left:auto;font-size:12px;color:#8A7D72">'+(signed?'✓ Signert':'Venter')+'</span></div>';
+      }
+      html += '</div><div class="contract-preview">'+mdToHtml(doc.content)+'</div></div>';
+      el.innerHTML = html;
+    }
+    async function sendToSigning(docId) {
+      const { data: signers } = await sb.from('document_signers').select('*').eq('document_id',docId).eq('role','client');
+      const cs = signers?.[0]; if (!cs) { showToast('Ingen klient-signer'); return; }
+      const rawToken = genToken(); const hash = await hashToken(rawToken);
+      await sb.from('document_share_links').update({ revoked_at: new Date().toISOString() }).eq('document_id',docId).eq('signer_id',cs.id).is('revoked_at',null);
+      const exp = new Date(); exp.setDate(exp.getDate()+30);
+      await sb.from('document_share_links').insert({ document_id:docId, signer_id:cs.id, token_hash:hash, expires_at:exp.toISOString() });
+      await sb.from('document_instances').update({ status:'sent', sent_at:new Date().toISOString(), updated_at:new Date().toISOString() }).eq('id',docId);
+      await navigator.clipboard.writeText('https://vowfolio.com/s/'+rawToken);
+      await loadData(); navigate('viewDoc',docId); showToast('Signeringslenke kopiert!');
+    }
+
+    // ---- Helpers ----
+    function genToken() { const b=new Uint8Array(32); crypto.getRandomValues(b); return Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+    async function hashToken(t) { const d=new TextEncoder().encode(t); const b=await crypto.subtle.digest('SHA-256',d); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+
+    function resolvePlaceholders(content, w, c) {
+      w = w||{}; c = c||{};
+      const df = new Intl.DateTimeFormat('nb-NO', { day:'numeric', month:'long', year:'numeric' });
+      const wd = w.wedding_date ? df.format(new Date(w.wedding_date)) : 'TBD';
+      const price = w.contract_value ? w.contract_value.toLocaleString('nb-NO')+' kr' : 'TBD';
+      return content
+        .replace(/\{\{primary_name\}\}/g, c.primary_name||w.partner1||'')
+        .replace(/\{\{partner_name\}\}/g, c.partner_name||w.partner2||'')
+        .replace(/\{\{email\}\}/g, c.email||'')
+        .replace(/\{\{phone\}\}/g, c.phone||'')
+        .replace(/\{\{wedding_date\}\}/g, wd)
+        .replace(/\{\{venue_name\}\}/g, w.venue||c.venue_name||'')
+        .replace(/\{\{venue_address\}\}/g, w.venue_address||c.venue_address||'')
+        .replace(/\{\{studio_name\}\}/g, studioName)
+        .replace(/\{\{package_price\}\}/g, price)
+        .replace(/\{\{today_date\}\}/g, df.format(new Date()))
+        .replace(/\s*&\s*\n/g, '\n');
+    }
+
+    function mdToHtml(md) {
+      if (!md) return '';
+      // Process line by line for better structure
+      const lines = md.split('\n');
+      let html = '';
+      let inList = false;
+
+      for (let line of lines) {
+        const trimmed = line.trim();
+
+        if (trimmed === '---') {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<hr>';
+          continue;
+        }
+
+        if (trimmed.startsWith('- ')) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += '<li>' + formatInline(trimmed.slice(2)) + '</li>';
+          continue;
+        }
+
+        if (inList) { html += '</ul>'; inList = false; }
+
+        if (trimmed.startsWith('### ')) { html += '<h3>' + formatInline(trimmed.slice(4)) + '</h3>'; }
+        else if (trimmed.startsWith('## ')) { html += '<h2>' + formatInline(trimmed.slice(3)) + '</h2>'; }
+        else if (trimmed.startsWith('# ')) { html += '<h1>' + formatInline(trimmed.slice(2)) + '</h1>'; }
+        else if (trimmed === '') { html += '<p><br></p>'; }
+        else { html += '<p>' + formatInline(trimmed) + '</p>'; }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    function formatInline(text) {
+      let h = esc(text);
+      h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      h = h.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      return h;
+    }
+
+    function htmlToMd(html) {
+      // Convert Tiptap HTML back to markdown for storage
+      let md = html;
+      md = md.replace(/<h1>(.*?)<\/h1>/gi, '# $1\n');
+      md = md.replace(/<h2>(.*?)<\/h2>/gi, '## $1\n');
+      md = md.replace(/<h3>(.*?)<\/h3>/gi, '### $1\n');
+      md = md.replace(/<strong>(.*?)<\/strong>/gi, '**$1**');
+      md = md.replace(/<em>(.*?)<\/em>/gi, '*$1*');
+      md = md.replace(/<hr\s*\/?>/gi, '\n---\n');
+      md = md.replace(/<li>(.*?)<\/li>/gi, '- $1\n');
+      md = md.replace(/<ul>|<\/ul>|<ol>|<\/ol>/gi, '');
+      md = md.replace(/<br\s*\/?>/gi, '\n');
+      md = md.replace(/<p>(.*?)<\/p>/gi, '$1\n\n');
+      md = md.replace(/<[^>]+>/g, ''); // strip remaining tags
+      md = md.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+      md = md.replace(/\n{3,}/g, '\n\n').trim();
+      return md;
+    }
+
+    function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
+    function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+  </script>
+</body>
+</html>
