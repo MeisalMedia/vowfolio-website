@@ -286,8 +286,8 @@
         document.title = studio.studio_name + ' — Kontakt';
       }
 
-      // Hero image
-      if (studio && studio.portal_hero_url) {
+      // Hero image (hidden if show_branding is explicitly false)
+      if (studio && studio.portal_hero_url && config.show_branding !== false) {
         document.getElementById('heroContainer').innerHTML =
           '<div class="hero-img" style="background-image:url(\'' + studio.portal_hero_url + '\')"></div>';
       }
