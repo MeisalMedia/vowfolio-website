@@ -267,7 +267,7 @@
         sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
         sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
-        sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id'),
+        sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id, status, source, notes, wedding_date, updated_at').order('updated_at', { ascending: false }),
         sb.from('studio_settings').select('studio_name').limit(1),
       ]);
       templates = t.data || []; documents = d.data || []; weddings = w.data || [];
@@ -280,7 +280,7 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navMap = {
         hjem: 'navHjem', oppdrag: 'navOppdrag', oppdragDetail: 'navOppdrag',
-        meldinger: 'navMeldinger', kontakter: 'navKontakter',
+        meldinger: 'navMeldinger', kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
         settings: 'navSettings', newTemplate: 'navSettings', editTemplate: 'navSettings',
         createDoc: 'navOppdrag', viewDoc: 'navOppdrag',
       };
@@ -292,6 +292,7 @@
         case 'oppdragDetail': renderOppdragDetail(main, params); break;
         case 'meldinger': renderMeldinger(main); break;
         case 'kontakter': renderKontakter(main); break;
+        case 'kontaktDetail': renderKontaktDetail(main, params); break;
         case 'settings': renderSettings(main); break;
         case 'newTemplate': renderTemplateEditor(main, null); break;
         case 'editTemplate': renderTemplateEditor(main, params); break;
@@ -444,27 +445,143 @@
     }
 
     // ── Kontakter ──
-    function renderKontakter(el) {
+    let kontaktFilter = 'alle';
+    let kontaktSearch = '';
+
+    function contactStatusInfo(status) {
+      const map = {
+        inquiry:   { label: 'Forespørsel', bg: '#E8EFF8', color: '#3A6BA5' },
+        active:    { label: 'Aktiv',       bg: '#EAF0F8', color: '#5577A0' },
+        booked:    { label: 'Booket',      bg: '#E8F4EA', color: '#4A8A55' },
+        completed: { label: 'Fullført',    bg: '#EEF4EE', color: '#5A8060' },
+        archived:  { label: 'Arkivert',    bg: '#F0EBE4', color: '#9B7E5E' },
+      };
+      return map[status] || { label: status || '—', bg: '#F0EBE4', color: '#9B7E5E' };
+    }
+
+    function renderKontakter(el, filterOverride) {
+      if (filterOverride !== undefined) kontaktFilter = filterOverride;
+      const search = kontaktSearch.toLowerCase();
+      const counts = { alle: contacts.length };
+      for (const s of ['inquiry','booked','active','completed','archived']) {
+        counts[s] = contacts.filter(c => c.status === s).length;
+      }
+      let filtered = contacts.filter(c => {
+        const matchFilter = kontaktFilter === 'alle' || c.status === kontaktFilter;
+        const matchSearch = !search ||
+          (c.primary_name||'').toLowerCase().includes(search) ||
+          (c.partner_name||'').toLowerCase().includes(search) ||
+          (c.email||'').toLowerCase().includes(search);
+        return matchFilter && matchSearch;
+      });
+
+      const chips = [
+        { key: 'alle', label: 'Alle' },
+        { key: 'inquiry', label: 'Forespørsel' },
+        { key: 'booked', label: 'Booket' },
+      ];
+
       let html = `<div class="main-header"><h2>Kontakter</h2></div><div class="main-content">`;
-      if (contacts.length === 0) {
-        html += `<div class="empty-state"><div class="icon">◉</div><h3>Ingen kontakter enda</h3><p>Kontakter synkroniseres fra appen.</p></div>`;
+
+      // Search + filter bar
+      html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">`;
+      html += `<input type="text" placeholder="Søk navn eller e-post..." value="${esc(kontaktSearch)}" oninput="kontaktSearch=this.value;renderKontakter(document.getElementById('mainContent'))" style="padding:9px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);min-width:220px">`;
+      html += `<div style="display:flex;gap:6px">`;
+      for (const chip of chips) {
+        const active = kontaktFilter === chip.key;
+        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">
+          ${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span>
+        </button>`;
+      }
+      html += `</div></div>`;
+
+      if (filtered.length === 0) {
+        html += `<div class="empty-state"><div class="icon">◉</div><h3>${contacts.length === 0 ? 'Ingen kontakter enda' : 'Ingen treff'}</h3><p>${contacts.length === 0 ? 'Kontakter synkroniseres fra appen.' : 'Prøv et annet søk eller filter.'}</p></div>`;
       } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>E-post</th><th>Telefon</th><th>Tilknyttet bryllup</th></tr></thead><tbody>`;
-        for (const c of contacts) {
+        html += `<div class="card-grid card-grid-auto">`;
+        for (const c of filtered) {
+          const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
+          const st = contactStatusInfo(c.status);
           const w = weddings.find(x => x.id === c.linked_wedding_id);
-          const couple = w ? (w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1) : '—';
-          html += `<tr style="cursor:default">`;
-          html += `<td><div style="display:flex;align-items:center;gap:10px">`;
-          html += `<div class="contact-avatar" style="width:30px;height:30px;font-size:12px">${(c.primary_name||'?')[0]}</div>`;
-          html += `<div><div style="font-weight:500">${esc(c.primary_name||'')}</div>${c.partner_name ? `<div style="font-size:11px;color:#8A7D72">${esc(c.partner_name)}</div>` : ''}</div></div></td>`;
-          html += `<td style="color:#8A7D72">${esc(c.email||'—')}</td>`;
-          html += `<td style="color:#8A7D72">${esc(c.phone||'—')}</td>`;
-          html += `<td>${w ? `<span style="cursor:pointer;color:var(--taupe);font-weight:500" onclick="navigate('oppdragDetail','${w.id}')">${esc(couple)}</span>` : '—'}</td>`;
-          html += `</tr>`;
+          const wDate = c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'2-digit' }) : null;
+          const subtitleParts = [c.venue_name, wDate].filter(Boolean);
+          const subtitle = subtitleParts.length ? subtitleParts.join(' · ') : (c.email || '');
+
+          html += `<div class="oppdrag-card" onclick="navigate('kontaktDetail','${c.id}')">`;
+          html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
+          html += `<div style="font-size:15px;font-weight:600;line-height:1.3">${esc(displayName)}</div>`;
+          html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap;flex-shrink:0">${st.label}</span>`;
+          html += `</div>`;
+          if (subtitle) html += `<div style="font-size:12px;color:#8A7D72;margin-bottom:10px">${esc(subtitle)}</div>`;
+          html += `<div style="display:flex;gap:6px;flex-wrap:wrap">`;
+          if (c.source) html += `<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500">${esc(c.source)}</span>`;
+          if (w) html += `<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500">Tilknyttet</span>`;
+          html += `</div></div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    // ── Kontakt detail ──
+    function renderKontaktDetail(el, contactId) {
+      const c = contacts.find(x => x.id === contactId);
+      if (!c) { el.innerHTML = '<div class="main-content"><p>Ikke funnet.</p></div>'; return; }
+      const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
+      const st = contactStatusInfo(c.status);
+      const w = weddings.find(x => x.id === c.linked_wedding_id);
+      const couple = w ? (w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1) : null;
+      const df = d => new Date(d).toLocaleDateString('nb-NO', { day:'numeric', month:'long', year:'numeric' });
+
+      let html = `<div class="main-header">
+        <div style="display:flex;align-items:center;gap:14px">
+          <button class="btn-outline btn-sm" onclick="navigate('kontakter')">← Tilbake</button>
+          <h2>${esc(c.primary_name||'')}</h2>
+          <span style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
+        </div>
+      </div><div class="main-content">`;
+
+      html += `<div class="detail-grid">`;
+
+      // Left col
+      html += `<div>`;
+      html += `<div class="detail-info" style="margin-bottom:20px">`;
+      if (c.primary_name) html += `<div class="field"><label>Navn</label><p>${esc(c.primary_name)}${c.partner_name ? ` & ${esc(c.partner_name)}` : ''}</p></div>`;
+      if (c.email) html += `<div class="field"><label>E-post</label><p><a href="mailto:${esc(c.email)}" style="color:var(--taupe)">${esc(c.email)}</a></p></div>`;
+      if (c.phone) html += `<div class="field"><label>Telefon</label><p><a href="tel:${esc(c.phone)}" style="color:var(--taupe)">${esc(c.phone)}</a></p></div>`;
+      if (c.wedding_date) html += `<div class="field"><label>Bryllupsdato</label><p>${df(c.wedding_date)}</p></div>`;
+      if (c.venue_name) html += `<div class="field"><label>Lokale</label><p>${esc(c.venue_name)}${c.venue_address ? `<br><span style="color:#8A7D72;font-size:13px">${esc(c.venue_address)}</span>` : ''}</p></div>`;
+      if (c.source) html += `<div class="field"><label>Kilde</label><p>${esc(c.source)}</p></div>`;
+      if (c.notes) html += `<div class="field"><label>Notater</label><p style="white-space:pre-wrap;font-size:13px;color:#5A4A3A;line-height:1.6">${esc(c.notes)}</p></div>`;
+      html += `</div>`;
+
+      // Documents for this contact
+      const cDocs = documents.filter(d => d.contact_id === c.id);
+      html += `<div class="section-header"><h3>Dokumenter</h3><button class="btn-primary btn-sm" onclick="navigate('createDoc')">+ Ny kontrakt</button></div>`;
+      if (cDocs.length === 0) {
+        html += `<div class="card" style="text-align:center;padding:24px;color:#A09080;font-size:13px">Ingen dokumenter</div>`;
+      } else {
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Tittel</th><th>Status</th><th>Dato</th></tr></thead><tbody>`;
+        for (const doc of cDocs) {
+          html += `<tr onclick="navigate('viewDoc','${doc.id}')"><td><strong>${esc(doc.title)}</strong></td><td>${statusBadge(doc.status)}</td><td style="color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short'})}</td></tr>`;
         }
         html += `</tbody></table></div>`;
       }
       html += `</div>`;
+
+      // Right col: linked wedding
+      html += `<div class="detail-side">`;
+      if (w) {
+        html += `<div class="card" style="cursor:pointer" onclick="navigate('oppdragDetail','${w.id}')">`;
+        html += `<div style="font-size:12px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Tilknyttet oppdrag</div>`;
+        html += `<div style="font-weight:600;font-size:14px;margin-bottom:4px">${esc(couple)}</div>`;
+        if (w.wedding_date) html += `<div style="font-size:12px;color:#8A7D72">📅 ${df(w.wedding_date)}</div>`;
+        if (w.venue) html += `<div style="font-size:12px;color:#8A7D72;margin-top:2px">📍 ${esc(w.venue)}</div>`;
+        html += `<div style="font-size:12px;color:var(--taupe);margin-top:10px;font-weight:500">Se oppdrag →</div>`;
+        html += `</div>`;
+      }
+      html += `</div></div></div>`;
       el.innerHTML = html;
     }
 
