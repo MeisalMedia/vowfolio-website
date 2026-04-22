@@ -12,8 +12,8 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --cream: #FAF7F2; --espresso: #3D3229; --taupe: #9B7E5E; --sage: #6B8F71;
-      --rose: #C2847A; --sand: #E8E0D6; --white: #FFFFFF; --danger: #C0392B;
-      --success: #6B8F71; --sidebar: 220px;
+      --sage-hover: #5E8062; --rose: #C2847A; --sand: #E8E0D6; --white: #FFFFFF;
+      --danger: #C0392B; --success: #6B8F71; --sidebar: 220px;
     }
     body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--espresso); min-height: 100vh; }
 
@@ -24,8 +24,8 @@
     .login-card .sub { font-size: 14px; color: #8A7D72; margin-bottom: 32px; }
     .login-card input { width: 100%; padding: 14px 16px; border: 1.5px solid var(--sand); border-radius: 10px; font-size: 15px; font-family: inherit; margin-bottom: 12px; background: var(--cream); color: var(--espresso); }
     .login-card input:focus { outline: none; border-color: var(--taupe); }
-    .login-card .btn { width: 100%; padding: 14px; background: var(--espresso); color: var(--white); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
-    .login-card .btn:hover { background: #2A2118; }
+    .login-card .btn { width: 100%; padding: 14px; background: var(--sage); color: var(--white); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+    .login-card .btn:hover { background: var(--sage-hover); }
     .login-card .error { color: var(--danger); font-size: 13px; margin-top: 8px; }
 
     /* ── App shell ── */
@@ -40,7 +40,7 @@
     .sidebar-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
     .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: #7A6A5A; cursor: pointer; transition: all 0.15s; user-select: none; }
     .nav-item:hover { background: var(--cream); color: var(--espresso); }
-    .nav-item.active { background: var(--taupe); color: var(--white); }
+    .nav-item.active { background: var(--sage); color: var(--white); }
     .nav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
     .nav-divider { height: 1px; background: var(--sand); margin: 8px 10px; }
     .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--sand); }
@@ -54,8 +54,8 @@
     .main-content { padding: 28px; flex: 1; overflow-y: auto; }
 
     /* ── Buttons ── */
-    .btn-primary { background: var(--espresso); color: var(--white); border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
-    .btn-primary:hover { background: #2A2118; }
+    .btn-primary { background: var(--sage); color: var(--white); border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+    .btn-primary:hover { background: var(--sage-hover); }
     .btn-secondary { background: var(--taupe); color: var(--white); border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
     .btn-outline { background: none; border: 1.5px solid var(--sand); color: var(--espresso); padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; }
     .btn-outline:hover { border-color: var(--taupe); }
@@ -355,7 +355,7 @@
       // Next assignment highlight
       if (nextWedding) {
         const couple = nextWedding.partner2 ? `${nextWedding.partner1} & ${nextWedding.partner2}` : nextWedding.partner1;
-        html += `<div class="card" style="margin-bottom:24px;border-left:3px solid var(--taupe);border-radius:0 12px 12px 0;cursor:pointer" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
+        html += `<div class="card" style="margin-bottom:24px;border-left:3px solid var(--rose);border-radius:0 12px 12px 0;cursor:pointer" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
         html += `<div style="font-size:11px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Neste oppdrag — ${daysUntil === 0 ? 'i dag' : daysUntil + ' dager'}</div>`;
         html += `<div style="font-size:18px;font-weight:600;font-family:'Playfair Display',serif">${esc(couple)}</div>`;
         if (nextWedding.venue) html += `<div style="font-size:13px;color:#8A7D72;margin-top:4px">📍 ${esc(nextWedding.venue)}</div>`;
@@ -425,7 +425,7 @@
       html += `<div style="display:flex;gap:6px">`;
       for (const chip of chips) {
         const active = oppdragFilter === chip.key;
-        html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
+        html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--sage)':'var(--sand)'};background:${active?'var(--sage)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
       html += `</div>`;
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
@@ -589,7 +589,7 @@
       html += `<div style="display:flex;gap:6px">`;
       for (const chip of chips) {
         const active = kontaktFilter === chip.key;
-        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
+        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--sage)':'var(--sand)'};background:${active?'var(--sage)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
       html += `</div>`;
       // View toggle
