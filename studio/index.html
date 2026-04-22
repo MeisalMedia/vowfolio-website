@@ -265,6 +265,7 @@
 
     let currentUser = null;
     let templates = [], documents = [], weddings = [], contacts = [];
+    let messageThreads = [];
     let studioName = '';
     let quillEditor = null;
 
@@ -294,15 +295,17 @@
       navigate('hjem');
     }
     async function loadData() {
-      const [t, d, w, c, s] = await Promise.all([
+      const [t, d, w, c, s, mt] = await Promise.all([
         sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
         sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
         sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id, status, source, notes, wedding_date, updated_at').order('updated_at', { ascending: false }),
         sb.from('studio_settings').select('studio_name').limit(1),
+        sb.from('message_threads').select('*').order('last_message_at', { ascending: false }),
       ]);
       templates = t.data || []; documents = d.data || []; weddings = w.data || [];
       contacts = c.data || []; studioName = s.data?.[0]?.studio_name || '';
+      messageThreads = mt.data || [];
     }
 
     // ── Navigation ──
@@ -311,7 +314,8 @@
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
       const navMap = {
         hjem: 'navHjem', oppdrag: 'navOppdrag', oppdragDetail: 'navOppdrag',
-        meldinger: 'navMeldinger', kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
+        meldinger: 'navMeldinger', conversation: 'navMeldinger',
+        kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
         settings: 'navSettings', newTemplate: 'navSettings', editTemplate: 'navSettings',
         createDoc: 'navOppdrag', viewDoc: 'navOppdrag',
       };
@@ -322,6 +326,7 @@
         case 'oppdrag': renderOppdrag(main); break;
         case 'oppdragDetail': renderOppdragDetail(main, params); break;
         case 'meldinger': renderMeldinger(main); break;
+        case 'conversation': renderConversation(main, params); break;
         case 'kontakter': renderKontakter(main); break;
         case 'kontaktDetail': renderKontaktDetail(main, params); break;
         case 'settings': renderSettings(main); break;
@@ -533,14 +538,159 @@
     }
 
     // ── Meldinger ──
+    function threadDisplayName(t) {
+      if (t.wedding_id) {
+        const w = weddings.find(x => x.id === t.wedding_id);
+        if (w) return w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+        return 'Kunde';
+      }
+      return 'Crew';
+    }
+    function threadSubtitle(t) {
+      if (t.wedding_id) {
+        const w = weddings.find(x => x.id === t.wedding_id);
+        if (w) {
+          const parts = [];
+          if (w.wedding_date) parts.push(new Date(w.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' }));
+          if (w.venue) parts.push(w.venue);
+          return parts.join(' · ');
+        }
+      }
+      return '';
+    }
+    function relativeTime(iso) {
+      if (!iso) return '';
+      const now = new Date(), d = new Date(iso);
+      const mins = Math.floor((now - d) / 60000);
+      if (mins < 1) return 'Nå';
+      if (mins < 60) return mins + 'm';
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return hrs + 't';
+      const days = Math.floor(hrs / 24);
+      if (days === 1) return 'I går';
+      if (days < 7) return days + 'd';
+      return d.toLocaleDateString('nb-NO', { day:'numeric', month:'short' });
+    }
+
     function renderMeldinger(el) {
-      el.innerHTML = `<div class="main-header"><h2>Meldinger</h2></div><div class="main-content">
-        <div class="empty-state">
-          <div class="icon">◻</div>
-          <h3>Meldinger kommer snart</h3>
-          <p>Her vil du kunne kommunisere direkte med kunder. Kobles til appen.</p>
+      let html = `<div class="main-header"><h2>Meldinger</h2></div><div class="main-content" style="padding:0">`;
+      if (messageThreads.length === 0) {
+        html += `<div class="empty-state" style="padding:80px 20px"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><h3>Ingen meldinger enda</h3><p>Meldinger synkroniseres fra appen.</p></div>`;
+      } else {
+        html += `<div style="background:var(--white)">`;
+        for (const t of messageThreads) {
+          const name = threadDisplayName(t);
+          const sub = threadSubtitle(t);
+          const preview = t.last_message_preview || 'Ingen meldinger enda';
+          const time = relativeTime(t.last_message_at);
+          const unread = t.unread_count || 0;
+          const initial = (name[0]||'?').toUpperCase();
+          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='var(--white)'">`;
+          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0">${initial}</div>`;
+          html += `<div style="flex:1;min-width:0">`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${unread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${unread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${unread?600:400}">${time}</div></div>`;
+          if (sub) html += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${unread?'var(--espresso)':'#8A7D72'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
+          if (unread) html += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unread}</div>`;
+          html += `</div></div></div>`;
+        }
+        html += `</div>`;
+      }
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    // ── Conversation view ──
+    let currentThreadId = null;
+    let currentMessages = [];
+
+    async function renderConversation(el, threadId) {
+      currentThreadId = threadId;
+      const thread = messageThreads.find(t => t.id === threadId);
+      if (!thread) { el.innerHTML = '<div class="main-content"><p>Tråd ikke funnet.</p></div>'; return; }
+      const name = threadDisplayName(thread);
+      const sub = threadSubtitle(thread);
+
+      let html = `<div class="main-header">
+        <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
+          <button class="btn-outline btn-sm" onclick="navigate('meldinger')">←</button>
+          <div class="contact-avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0">${(name[0]||'?').toUpperCase()}</div>
+          <div style="min-width:0"><div style="font-family:'Playfair Display',serif;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>${sub ? `<div style="font-size:12px;color:#8A7D72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>` : ''}</div>
         </div>
       </div>`;
+      html += `<div id="msgScroll" style="flex:1;overflow-y:auto;padding:20px 24px;background:var(--cream)"><div id="msgList" style="display:flex;flex-direction:column;gap:4px;max-width:720px;margin:0 auto">Laster...</div></div>`;
+      html += `<div style="padding:12px 24px;background:var(--white);border-top:1px solid var(--sand);display:flex;gap:10px;align-items:flex-end;flex-shrink:0">
+        <textarea id="msgInput" placeholder="Melding..." rows="1" oninput="autoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}" style="flex:1;padding:10px 14px;border:1.5px solid var(--sand);border-radius:20px;font-size:14px;font-family:inherit;resize:none;max-height:120px;background:var(--cream);color:var(--espresso)"></textarea>
+        <button onclick="sendMessage()" id="msgSendBtn" style="width:40px;height:40px;border-radius:50%;background:var(--sage);color:var(--white);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg></button>
+      </div>`;
+      el.innerHTML = html;
+
+      // Load messages
+      const { data } = await sb.from('messages').select('*').eq('thread_id', threadId).order('created_at', { ascending: true });
+      currentMessages = data || [];
+      renderMessageBubbles();
+
+      // Mark read
+      if (currentUser && thread.unread_count > 0) {
+        await sb.from('message_threads').update({ unread_count: 0, updated_at: new Date().toISOString() }).eq('id', threadId);
+        thread.unread_count = 0;
+      }
+    }
+
+    function renderMessageBubbles() {
+      const list = document.getElementById('msgList');
+      if (!list) return;
+      if (currentMessages.length === 0) {
+        list.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#A09080"><div style="font-size:14px;margin-bottom:6px">Start en samtale</div><div style="font-size:12px">Si hei 👋</div></div>`;
+        return;
+      }
+      const myId = currentUser?.id;
+      let html = '';
+      let lastSender = null, lastTime = 0;
+      for (const m of currentMessages) {
+        const mine = m.sender_id === myId || m.sender_role === 'photographer';
+        const t = new Date(m.created_at).getTime();
+        const newGroup = m.sender_id !== lastSender || (t - lastTime) > 5 * 60000;
+        if (newGroup && html) html += `<div style="height:8px"></div>`;
+        html += `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'}">`;
+        html += `<div style="max-width:70%;padding:9px 14px;border-radius:16px;background:${mine?'var(--sage)':'var(--white)'};color:${mine?'var(--white)':'var(--espresso)'};font-size:14px;line-height:1.4;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(61,50,41,0.04)">${esc(m.body)}</div>`;
+        html += `</div>`;
+        lastSender = m.sender_id; lastTime = t;
+      }
+      list.innerHTML = html;
+      const scroll = document.getElementById('msgScroll');
+      if (scroll) scroll.scrollTop = scroll.scrollHeight;
+    }
+
+    function autoGrow(el) {
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('msgInput');
+      const body = input.value.trim();
+      if (!body || !currentThreadId) return;
+      if (!currentUser) { showToast('Du må være logget inn'); return; }
+      const thread = messageThreads.find(t => t.id === currentThreadId);
+      const role = thread?.wedding_id ? 'photographer' : 'crew';
+      input.value = ''; autoGrow(input);
+
+      // Optimistic append
+      const optimistic = { id: 'temp-' + Date.now(), thread_id: currentThreadId, sender_id: currentUser.id, sender_role: role, sender_name: currentUser.email, body, created_at: new Date().toISOString() };
+      currentMessages.push(optimistic);
+      renderMessageBubbles();
+
+      const { error } = await sb.from('messages').insert({
+        thread_id: currentThreadId, wedding_id: thread?.wedding_id || null,
+        sender_id: currentUser.id, sender_role: role, sender_name: currentUser.email, body,
+      });
+      if (error) { showToast('Kunne ikke sende: ' + error.message); return; }
+      const preview = body.length > 80 ? body.slice(0, 79) + '…' : body;
+      await sb.from('message_threads').update({ last_message_preview: preview, last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', currentThreadId);
+      const { data: fresh } = await sb.from('messages').select('*').eq('thread_id', currentThreadId).order('created_at', { ascending: true });
+      currentMessages = fresh || [];
+      renderMessageBubbles();
     }
 
     // ── Kontakter ──
