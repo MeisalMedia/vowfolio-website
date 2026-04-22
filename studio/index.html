@@ -279,9 +279,11 @@
 
     let currentUser = null;
     let templates = [], documents = [], weddings = [], contacts = [];
+    let shotTemplates = [], taskTemplates = [];
     let messageThreads = [];
     let studioName = '';
     let quillEditor = null;
+    let malerTab = 'kontrakt';
 
     // ── Init ──
     (async () => {
@@ -309,17 +311,20 @@
       navigate('hjem');
     }
     async function loadData() {
-      const [t, d, w, c, s, mt] = await Promise.all([
+      const [t, d, w, c, s, mt, st, tt] = await Promise.all([
         sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
         sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
         sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id, status, source, notes, wedding_date, updated_at').order('updated_at', { ascending: false }),
         sb.from('studio_settings').select('studio_name').limit(1),
         sb.from('message_threads').select('*').order('last_message_at', { ascending: false }),
+        sb.from('shot_templates').select('*').order('created_at', { ascending: false }),
+        sb.from('task_templates').select('*').order('updated_at', { ascending: false }),
       ]);
       templates = t.data || []; documents = d.data || []; weddings = w.data || [];
       contacts = c.data || []; studioName = s.data?.[0]?.studio_name || '';
       messageThreads = mt.data || [];
+      shotTemplates = st.data || []; taskTemplates = tt.data || [];
     }
 
     // ── Navigation ──
@@ -909,18 +914,76 @@
     }
 
     // ── Maler ──
-    function renderMaler(el) {
-      let html = `<div class="main-header"><h2>Maler</h2><button class="btn-primary" onclick="navigate('newTemplate')">+ Ny mal</button></div><div class="main-content">`;
-      if (templates.length === 0) {
-        html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg></div><h3>Ingen maler enda</h3><p>Opprett din første kontraktsmal.</p><button class="btn-primary" onclick="navigate('newTemplate')">Opprett mal</button></div>`;
-      } else {
-        html += `<div class="card-grid card-grid-auto">`;
-        for (const t of templates) {
-          const date = new Date(t.updated_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year:'numeric' });
-          html += `<div class="template-card" onclick="navigate('editTemplate','${t.id}')"><h3>${esc(t.title)}</h3><p class="meta">Oppdatert ${date}</p><div style="margin-top:8px"><span class="badge badge-contract">${{contract:'Kontrakt',quote:'Tilbud',questionnaire:'Spørreskjema',info_document:'Info'}[t.type]||t.type}</span></div></div>`;
-        }
-        html += `</div>`;
+    function renderMaler(el, tabOverride) {
+      if (tabOverride) malerTab = tabOverride;
+      const df = d => new Date(d).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' });
+      const tabs = [
+        { key: 'kontrakt', label: 'Kontrakter', count: templates.length },
+        { key: 'shot', label: 'Shotlister', count: shotTemplates.length },
+        { key: 'oppgave', label: 'Oppgaver', count: taskTemplates.length },
+      ];
+
+      const addLabels = { kontrakt: '+ Ny kontraktsmal', shot: '+ Ny shotliste', oppgave: '+ Ny oppgavemal' };
+      const addActions = { kontrakt: "navigate('newTemplate')", shot: "showToast('Shotliste-editor kommer snart')", oppgave: "showToast('Oppgavemal-editor kommer snart')" };
+
+      let html = `<div class="main-header"><h2>Maler</h2><button class="btn-primary" onclick="${addActions[malerTab]}">${addLabels[malerTab]}</button></div><div class="main-content">`;
+
+      // Tabs
+      html += `<div class="tabs">`;
+      for (const t of tabs) {
+        const active = malerTab === t.key;
+        html += `<div class="tab${active?' active':''}" onclick="renderMaler(document.getElementById('mainContent'),'${t.key}')">${t.label} <span style="opacity:0.5;font-weight:400">${t.count}</span></div>`;
       }
+      html += `</div>`;
+
+      if (malerTab === 'kontrakt') {
+        if (templates.length === 0) {
+          html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg></div><h3>Ingen kontraktsmaler enda</h3><p>Opprett din første kontraktsmal.</p><button class="btn-primary" onclick="navigate('newTemplate')">Opprett mal</button></div>`;
+        } else {
+          html += `<div class="card-grid card-grid-auto">`;
+          for (const t of templates) {
+            html += `<div class="template-card" onclick="navigate('editTemplate','${t.id}')"><h3>${esc(t.title)}</h3><p class="meta">Oppdatert ${df(t.updated_at)}</p><div style="margin-top:8px"><span class="badge badge-contract">${{contract:'Kontrakt',quote:'Tilbud',questionnaire:'Spørreskjema',info_document:'Info'}[t.type]||t.type}</span></div></div>`;
+          }
+          html += `</div>`;
+        }
+      } else if (malerTab === 'shot') {
+        if (shotTemplates.length === 0) {
+          html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></div><h3>Ingen shotlistemaler</h3><p>Shotlister administreres i appen for nå.</p></div>`;
+        } else {
+          html += `<div class="card-grid card-grid-auto">`;
+          for (const t of shotTemplates) {
+            const cats = Array.isArray(t.categories) ? t.categories : [];
+            const itemCount = cats.reduce((n, cat) => n + (Array.isArray(cat.items) ? cat.items.length : 0), 0);
+            html += `<div class="template-card"><h3>${esc(t.name)}</h3>`;
+            if (t.description) html += `<p class="meta">${esc(t.description)}</p>`;
+            html += `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-contract">${cats.length} kategori${cats.length!==1?'er':''}</span><span class="badge badge-contract" style="background:rgba(107,143,113,0.12);color:var(--sage)">${itemCount} shots</span></div></div>`;
+          }
+          html += `</div>`;
+        }
+      } else if (malerTab === 'oppgave') {
+        if (taskTemplates.length === 0) {
+          html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><h3>Ingen oppgavemaler</h3><p>Oppgavemaler administreres i appen for nå.</p></div>`;
+        } else {
+          html += `<div class="card-grid card-grid-auto">`;
+          for (const t of taskTemplates) {
+            const tasks = Array.isArray(t.tasks) ? t.tasks : [];
+            html += `<div class="template-card"><h3>${esc(t.name)}</h3>`;
+            const badges = [];
+            if (t.project_type) badges.push(esc(t.project_type));
+            if (t.auto_apply) badges.push('Auto');
+            if (t.is_built_in) badges.push('Innebygd');
+            html += `<p class="meta">${tasks.length} oppgave${tasks.length!==1?'r':''}</p>`;
+            if (badges.length) {
+              html += `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">`;
+              for (const b of badges) html += `<span class="badge badge-contract">${b}</span>`;
+              html += `</div>`;
+            }
+            html += `</div>`;
+          }
+          html += `</div>`;
+        }
+      }
+
       html += `</div>`;
       el.innerHTML = html;
     }
