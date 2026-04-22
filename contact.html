@@ -280,10 +280,15 @@
         document.head.appendChild(style);
       }
 
-      // Studio name
+      // Studio name (hidden if show_studio_name is explicitly false)
       if (studio && studio.studio_name) {
-        document.getElementById('studioName').textContent = studio.studio_name;
-        document.title = studio.studio_name + ' — Kontakt';
+        if (config.show_studio_name === false) {
+          document.getElementById('studioName').style.display = 'none';
+          document.title = 'Ta kontakt';
+        } else {
+          document.getElementById('studioName').textContent = studio.studio_name;
+          document.title = studio.studio_name + ' — Kontakt';
+        }
       }
 
       // Hero image (hidden if show_branding is explicitly false)
