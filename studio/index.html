@@ -42,6 +42,7 @@
     .nav-item:hover { background: var(--cream); color: var(--espresso); }
     .nav-item.active { background: var(--sage); color: var(--white); }
     .nav-item .icon { width: 18px; height: 18px; flex-shrink: 0; }
+    .nav-item.nav-sub .icon { width: 15px; height: 15px; }
     .nav-divider { height: 1px; background: var(--sand); margin: 8px 10px; }
     .sidebar-footer { padding: 14px 20px; border-top: 1px solid var(--sand); }
     .sidebar-footer .user-email { font-size: 11px; color: #A09080; margin-bottom: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -213,6 +214,19 @@
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg> Kontakter
         </div>
         <div class="nav-divider"></div>
+        <div class="nav-item" id="navDokumenter" onclick="toggleDokumenter()">
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/><polyline points="13 3 13 10 20 10"/></svg>
+          <span style="flex:1">Dokumenter</span>
+          <svg id="dokumenterChevron" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform 0.2s"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div id="dokumenterSub" style="display:none;padding-left:18px">
+          <div class="nav-item nav-sub" id="navKontrakter" onclick="navigate('kontrakter')" style="font-size:13px;padding:7px 12px">
+            <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg> Kontrakter
+          </div>
+          <div class="nav-item nav-sub" id="navMaler" onclick="navigate('maler')" style="font-size:13px;padding:7px 12px">
+            <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg> Maler
+          </div>
+        </div>
         <div class="nav-item" id="navSettings" onclick="navigate('settings')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Innstillinger
         </div>
@@ -316,9 +330,11 @@
         hjem: 'navHjem', oppdrag: 'navOppdrag', oppdragDetail: 'navOppdrag',
         meldinger: 'navMeldinger', conversation: 'navMeldinger',
         kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
-        settings: 'navSettings', newTemplate: 'navSettings', editTemplate: 'navSettings',
-        createDoc: 'navOppdrag', viewDoc: 'navOppdrag',
+        kontrakter: 'navKontrakter', createDoc: 'navKontrakter', viewDoc: 'navKontrakter',
+        maler: 'navMaler', newTemplate: 'navMaler', editTemplate: 'navMaler',
+        settings: 'navSettings',
       };
+      if (['kontrakter','maler','createDoc','viewDoc','newTemplate','editTemplate'].includes(view)) expandDokumenter();
       document.getElementById(navMap[view] || 'navHjem')?.classList.add('active');
       const main = document.getElementById('mainContent');
       switch (view) {
@@ -330,6 +346,8 @@
         case 'kontakter': renderKontakter(main); break;
         case 'kontaktDetail': renderKontaktDetail(main, params); break;
         case 'settings': renderSettings(main); break;
+        case 'kontrakter': renderKontrakter(main); break;
+        case 'maler': renderMaler(main); break;
         case 'newTemplate': renderTemplateEditor(main, null); break;
         case 'editTemplate': renderTemplateEditor(main, params); break;
         case 'createDoc': renderCreateDocument(main, params); break;
@@ -854,22 +872,68 @@
     }
 
     // ── Settings ──
-    function renderSettings(el) {
-      let html = `<div class="main-header"><h2>Innstillinger</h2></div><div class="main-content">`;
-      html += `<div class="settings-section">`;
-      html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--sand)">`;
-      html += `<h3 style="border:none;margin:0;padding:0">Kontraktsmaler</h3><button class="btn-primary btn-sm" onclick="navigate('newTemplate')">+ Ny mal</button></div>`;
+    // ── Sidebar collapse ──
+    function toggleDokumenter() {
+      const sub = document.getElementById('dokumenterSub');
+      const chev = document.getElementById('dokumenterChevron');
+      const open = sub.style.display !== 'none';
+      sub.style.display = open ? 'none' : 'block';
+      chev.style.transform = open ? 'rotate(-90deg)' : 'rotate(0)';
+    }
+    function expandDokumenter() {
+      const sub = document.getElementById('dokumenterSub');
+      const chev = document.getElementById('dokumenterChevron');
+      sub.style.display = 'block';
+      chev.style.transform = 'rotate(0)';
+    }
+
+    // ── Kontrakter (documents) ──
+    function renderKontrakter(el) {
+      const statusLabels = { draft:'Utkast', sent:'Sendt', viewed:'Sett', signed_by_client:'Klient signert', signed_by_photographer:'Fotograf signert', fully_signed:'Ferdig signert', archived:'Arkivert' };
+      let html = `<div class="main-header"><h2>Kontrakter</h2><button class="btn-primary" onclick="navigate('createDoc')">+ Ny kontrakt</button></div><div class="main-content">`;
+      if (documents.length === 0) {
+        html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>Ingen kontrakter enda</h3><p>Opprett en kontrakt fra en mal.</p><button class="btn-primary" onclick="navigate('createDoc')">Opprett kontrakt</button></div>`;
+      } else {
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Tittel</th><th>Klient</th><th>Bryllup</th><th>Status</th><th>Opprettet</th></tr></thead><tbody>`;
+        for (const doc of documents) {
+          const c = contacts.find(x => x.id === doc.contact_id);
+          const w = doc.wedding_id ? weddings.find(x => x.id === doc.wedding_id) : null;
+          const couple = w ? (w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1) : '—';
+          const date = new Date(doc.created_at).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' });
+          html += `<tr onclick="navigate('viewDoc','${doc.id}')"><td><strong>${esc(doc.title)}</strong></td><td style="color:#8A7D72">${esc(c?.primary_name||'—')}</td><td style="color:#8A7D72">${esc(couple)}</td><td>${statusBadge(doc.status)}</td><td style="color:#8A7D72">${date}</td></tr>`;
+        }
+        html += `</tbody></table></div>`;
+      }
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    // ── Maler ──
+    function renderMaler(el) {
+      let html = `<div class="main-header"><h2>Maler</h2><button class="btn-primary" onclick="navigate('newTemplate')">+ Ny mal</button></div><div class="main-content">`;
       if (templates.length === 0) {
-        html += `<div class="empty-state" style="padding:40px 20px"><div class="icon">📋</div><h3>Ingen maler</h3><p>Opprett din første kontraktsmal.</p></div>`;
+        html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg></div><h3>Ingen maler enda</h3><p>Opprett din første kontraktsmal.</p><button class="btn-primary" onclick="navigate('newTemplate')">Opprett mal</button></div>`;
       } else {
         html += `<div class="card-grid card-grid-auto">`;
         for (const t of templates) {
-          const date = new Date(t.updated_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' });
+          const date = new Date(t.updated_at).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year:'numeric' });
           html += `<div class="template-card" onclick="navigate('editTemplate','${t.id}')"><h3>${esc(t.title)}</h3><p class="meta">Oppdatert ${date}</p><div style="margin-top:8px"><span class="badge badge-contract">${{contract:'Kontrakt',quote:'Tilbud',questionnaire:'Spørreskjema',info_document:'Info'}[t.type]||t.type}</span></div></div>`;
         }
         html += `</div>`;
       }
-      html += `</div></div>`;
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    function renderSettings(el) {
+      let html = `<div class="main-header"><h2>Innstillinger</h2></div><div class="main-content">`;
+      html += `<div class="settings-section"><h3>Studio</h3>`;
+      html += `<div class="card"><div class="field" style="margin:0"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Studio-navn</label><p>${esc(studioName || '—')}</p></div></div>`;
+      html += `</div>`;
+      html += `<div class="settings-section"><h3>Konto</h3>`;
+      html += `<div class="card"><div class="field" style="margin:0"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">E-post</label><p>${esc(currentUser?.email || '—')}</p></div></div>`;
+      html += `</div>`;
+      html += `</div>`;
       el.innerHTML = html;
     }
 
@@ -883,7 +947,7 @@
         ['{{today_date}}','Dagens dato'],
       ];
       let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1">`;
-      html += `<button class="btn-outline btn-sm" onclick="navigate('settings')">← Tilbake</button>`;
+      html += `<button class="btn-outline btn-sm" onclick="navigate('maler')">← Tilbake</button>`;
       html += `<input class="title-input" id="tmplTitle" placeholder="Maltittel..." value="${esc(tmpl?.title||'')}">`;
       html += `</div><div style="display:flex;align-items:center;gap:10px">`;
       html += `<span class="save-indicator" id="saveStatus">Klar</span>`;
@@ -948,7 +1012,7 @@
     async function deleteTemplate(id) {
       if (!confirm('Slett denne malen?')) return;
       await sb.from('document_templates').delete().eq('id', id);
-      await loadData(); navigate('settings');
+      await loadData(); navigate('maler');
     }
 
     // ── Create document ──
