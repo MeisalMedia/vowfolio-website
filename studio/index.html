@@ -329,6 +329,7 @@
     let shotTemplates = [], taskTemplates = [];
     let messageThreads = [];
     let studioName = '';
+    let studioSettings = null;
     let quillEditor = null;
     let malerTab = 'kontrakt';
 
@@ -363,13 +364,13 @@
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
         sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
         sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id, status, source, notes, wedding_date, updated_at').order('updated_at', { ascending: false }),
-        sb.from('studio_settings').select('studio_name').limit(1),
+        sb.from('studio_settings').select('*').limit(1),
         sb.from('message_threads').select('*').order('last_message_at', { ascending: false }),
         sb.from('shot_templates').select('*').order('created_at', { ascending: false }),
         sb.from('task_templates').select('*').order('updated_at', { ascending: false }),
       ]);
       templates = t.data || []; documents = d.data || []; weddings = w.data || [];
-      contacts = c.data || []; studioName = s.data?.[0]?.studio_name || '';
+      contacts = c.data || []; studioSettings = s.data?.[0] || null; studioName = studioSettings?.studio_name || '';
       messageThreads = mt.data || [];
       shotTemplates = st.data || []; taskTemplates = tt.data || [];
     }
@@ -1051,16 +1052,71 @@
       el.innerHTML = html;
     }
 
+    let settingsDraft = null;
+
     function renderSettings(el) {
-      let html = `<div class="main-header"><h2>Innstillinger</h2></div><div class="main-content">`;
-      html += `<div class="settings-section"><h3>Studio</h3>`;
-      html += `<div class="card"><div class="field" style="margin:0"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Studio-navn</label><p>${esc(studioName || '—')}</p></div></div>`;
-      html += `</div>`;
-      html += `<div class="settings-section"><h3>Konto</h3>`;
-      html += `<div class="card"><div class="field" style="margin:0"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">E-post</label><p>${esc(currentUser?.email || '—')}</p></div></div>`;
-      html += `</div>`;
+      const s = studioSettings || {};
+      settingsDraft = {
+        studio_name: s.studio_name || '',
+        country: s.country || '',
+        currency_code: s.currency_code || '',
+        currency_symbol: s.currency_symbol || '',
+        timezone: s.timezone || '',
+        portal_hero_url: s.portal_hero_url || '',
+        logo_url: s.logo_url || '',
+      };
+
+      const fieldLabel = 'font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px';
+      const fieldInput = 'width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso)';
+
+      let html = `<div class="main-header"><h2>Innstillinger</h2><button class="btn-primary" onclick="saveStudioSettings()">Lagre</button></div><div class="main-content">`;
+
+      html += `<div class="settings-section"><h3>Studio-profil</h3><div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">`;
+      html += `<div><label style="${fieldLabel}">Studio-navn</label><input type="text" value="${esc(settingsDraft.studio_name)}" oninput="settingsDraft.studio_name=this.value" placeholder="f.eks. Ole Foto" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Land</label><input type="text" value="${esc(settingsDraft.country)}" oninput="settingsDraft.country=this.value" placeholder="Norge" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Valuta</label><input type="text" value="${esc(settingsDraft.currency_code)}" oninput="settingsDraft.currency_code=this.value.toUpperCase()" placeholder="NOK" maxlength="3" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Valutasymbol</label><input type="text" value="${esc(settingsDraft.currency_symbol)}" oninput="settingsDraft.currency_symbol=this.value" placeholder="kr" maxlength="3" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Tidssone</label><input type="text" value="${esc(settingsDraft.timezone)}" oninput="settingsDraft.timezone=this.value" placeholder="Europe/Oslo" style="${fieldInput}"></div>`;
+      html += `</div></div>`;
+
+      html += `<div class="settings-section"><h3>Merkevare</h3><div class="card" style="display:flex;flex-direction:column;gap:16px">`;
+      html += `<div><label style="${fieldLabel}">Logo URL</label><input type="url" value="${esc(settingsDraft.logo_url)}" oninput="settingsDraft.logo_url=this.value;document.getElementById('logoPreview').src=this.value||''" placeholder="https://..." style="${fieldInput}">`;
+      html += `<div style="margin-top:8px">${settingsDraft.logo_url ? `<img id="logoPreview" src="${esc(settingsDraft.logo_url)}" style="max-height:60px;max-width:200px;border-radius:6px;border:1px solid var(--sand);padding:4px;background:var(--white)" onerror="this.style.display='none'">` : `<img id="logoPreview" style="display:none">`}</div></div>`;
+      html += `<div><label style="${fieldLabel}">Portal hero-bilde URL</label><input type="url" value="${esc(settingsDraft.portal_hero_url)}" oninput="settingsDraft.portal_hero_url=this.value;document.getElementById('heroPreview').src=this.value||''" placeholder="https://..." style="${fieldInput}">`;
+      html += `<div style="margin-top:8px">${settingsDraft.portal_hero_url ? `<img id="heroPreview" src="${esc(settingsDraft.portal_hero_url)}" style="max-height:120px;max-width:100%;border-radius:6px;border:1px solid var(--sand);object-fit:cover" onerror="this.style.display='none'">` : `<img id="heroPreview" style="display:none">`}</div></div>`;
+      html += `</div></div>`;
+
+      html += `<div class="settings-section"><h3>Konto</h3><div class="card" style="display:flex;flex-direction:column;gap:12px">`;
+      html += `<div class="field" style="margin:0"><label style="${fieldLabel}">E-post</label><p style="font-size:14px">${esc(currentUser?.email || '—')}</p></div>`;
+      const proBadge = (s.is_pro ? '<span class="badge" style="background:rgba(107,143,113,0.15);color:var(--sage);font-weight:600">Pro</span>' : '<span class="badge badge-draft">Gratis</span>');
+      html += `<div class="field" style="margin:0"><label style="${fieldLabel}">Plan</label><div>${proBadge}</div></div>`;
+      html += `<div><button class="btn-outline btn-sm" onclick="logout()" style="color:var(--danger);border-color:var(--danger)">Logg ut</button></div>`;
+      html += `</div></div>`;
+
       html += `</div>`;
       el.innerHTML = html;
+    }
+
+    async function saveStudioSettings() {
+      if (!currentUser) return;
+      const payload = {
+        id: studioSettings?.id || crypto.randomUUID(),
+        user_id: currentUser.id,
+        studio_name: settingsDraft.studio_name.trim() || null,
+        country: settingsDraft.country.trim() || null,
+        currency_code: settingsDraft.currency_code.trim() || null,
+        currency_symbol: settingsDraft.currency_symbol.trim() || null,
+        timezone: settingsDraft.timezone.trim() || null,
+        portal_hero_url: settingsDraft.portal_hero_url.trim() || null,
+        logo_url: settingsDraft.logo_url.trim() || null,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await sb.from('studio_settings').upsert(payload, { onConflict: 'id' });
+      if (error) { showToast('Feil ved lagring'); console.error(error); return; }
+      const { data } = await sb.from('studio_settings').select('*').limit(1);
+      studioSettings = data?.[0] || studioSettings;
+      studioName = studioSettings?.studio_name || '';
+      showToast('Lagret');
     }
 
     // ── Task Template editor ──
