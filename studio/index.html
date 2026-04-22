@@ -425,7 +425,7 @@
       html += `<div style="display:flex;gap:6px">`;
       for (const chip of chips) {
         const active = oppdragFilter === chip.key;
-        html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--sage)':'var(--sand)'};background:${active?'var(--sage)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
+        html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--sand)'};background:${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
       html += `</div>`;
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
@@ -589,7 +589,7 @@
       html += `<div style="display:flex;gap:6px">`;
       for (const chip of chips) {
         const active = kontaktFilter === chip.key;
-        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--sage)':'var(--sand)'};background:${active?'var(--sage)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
+        html += `<button onclick="renderKontakter(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--sand)'};background:${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
       html += `</div>`;
       // View toggle
