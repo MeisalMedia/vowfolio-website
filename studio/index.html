@@ -380,26 +380,94 @@
     }
 
     // ── Oppdrag (wedding list) ──
-    function renderOppdrag(el) {
+    let oppdragView = 'kort'; // 'kort' | 'liste'
+    let oppdragFilter = 'alle';
+
+    function weddingStatusInfo(w) {
+      const c = contacts.find(x => x.linked_wedding_id === w.id);
+      const status = c?.status || 'inquiry';
+      const map = {
+        inquiry:   { label: 'Lead',      bg: '#E8EFF8', color: '#3A6BA5' },
+        active:    { label: 'Aktiv',     bg: '#EAF0F8', color: '#5577A0' },
+        booked:    { label: 'Booket',    bg: '#E8F4EA', color: '#4A8A55' },
+        completed: { label: 'Fullført',  bg: '#EEF4EE', color: '#5A8060' },
+        archived:  { label: 'Arkivert', bg: '#F0EBE4', color: '#9B7E5E' },
+      };
+      return map[status] || map.inquiry;
+    }
+
+    function renderOppdrag(el, filterOverride) {
+      if (filterOverride !== undefined) oppdragFilter = filterOverride;
       const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const counts = { alle: weddings.length };
+      for (const s of ['inquiry','booked','completed','archived']) {
+        counts[s] = weddings.filter(w => {
+          const c = contacts.find(x => x.linked_wedding_id === w.id);
+          return (c?.status || 'inquiry') === s;
+        }).length;
+      }
+      const filtered = oppdragFilter === 'alle' ? weddings : weddings.filter(w => {
+        const c = contacts.find(x => x.linked_wedding_id === w.id);
+        return (c?.status || 'inquiry') === oppdragFilter;
+      });
+
+      const chips = [
+        { key: 'alle', label: 'Alle' },
+        { key: 'inquiry', label: 'Lead' },
+        { key: 'booked', label: 'Booket' },
+      ];
+
       let html = `<div class="main-header"><h2>Oppdrag</h2><button class="btn-primary" onclick="navigate('createDoc')">+ Ny kontrakt</button></div><div class="main-content">`;
 
-      if (weddings.length === 0) {
-        html += `<div class="empty-state"><div class="icon">◈</div><h3>Ingen oppdrag enda</h3><p>Oppdrag hentes fra bryllupsregisteret i appen.</p></div>`;
-      } else {
+      // Filter + view toggle bar
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap">`;
+      html += `<div style="display:flex;gap:6px">`;
+      for (const chip of chips) {
+        const active = oppdragFilter === chip.key;
+        html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?'var(--taupe)':'var(--sand)'};background:${active?'var(--taupe)':'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
+      }
+      html += `</div>`;
+      html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
+      html += `<button onclick="oppdragView='kort';renderOppdrag(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${oppdragView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
+      html += `<button onclick="oppdragView='liste';renderOppdrag(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
+      html += `</div></div>`;
+
+      if (filtered.length === 0) {
+        html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px">◈</div><h3>Ingen oppdrag</h3><p>Oppdrag hentes fra bryllupsregisteret i appen.</p></div>`;
+      } else if (oppdragView === 'kort') {
         html += `<div class="card-grid card-grid-auto">`;
-        for (const w of weddings) {
+        for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
           const wDocs = documents.filter(d => d.wedding_id === w.id);
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
+          const st = weddingStatusInfo(w);
           html += `<div class="oppdrag-card" onclick="navigate('oppdragDetail','${w.id}')">`;
+          html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
           html += `<div class="couple">${esc(couple)}</div>`;
+          html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap;flex-shrink:0">${st.label}</span>`;
+          html += `</div>`;
           html += `<div class="meta"><span>📅 ${wDate}</span>${w.venue ? `<span>📍 ${esc(w.venue)}</span>` : ''}</div>`;
-          html += `<div class="footer"><span style="font-size:12px;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</span>`;
-          if (wDocs.length > 0) html += statusBadge(wDocs[0].status);
-          html += `</div></div>`;
+          html += `<div class="footer"><span style="font-size:12px;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</span></div>`;
+          html += `</div>`;
         }
         html += `</div>`;
+      } else {
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Par</th><th>Status</th><th>Dato</th><th>Lokale</th><th>Dokumenter</th></tr></thead><tbody>`;
+        for (const w of filtered) {
+          const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+          const wDocs = documents.filter(d => d.wedding_id === w.id);
+          const wDate = w.wedding_date ? df(w.wedding_date) : '—';
+          const st = weddingStatusInfo(w);
+          html += `<tr onclick="navigate('oppdragDetail','${w.id}')">`;
+          html += `<td><strong>${esc(couple)}</strong></td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
+          html += `<td style="color:#8A7D72">${wDate}</td>`;
+          html += `<td style="color:#8A7D72">${esc(w.venue||'—')}</td>`;
+          html += `<td style="color:#8A7D72">${wDocs.length}</td>`;
+          html += `</tr>`;
+        }
+        html += `</tbody></table></div>`;
       }
       html += `</div>`;
       el.innerHTML = html;
