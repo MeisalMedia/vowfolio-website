@@ -394,9 +394,11 @@
         kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
         kontrakter: 'navKontrakter', createDoc: 'navKontrakter', viewDoc: 'navKontrakter',
         maler: 'navMaler', newTemplate: 'navMaler', editTemplate: 'navMaler',
+        editShotTemplate: 'navMaler', newShotTemplate: 'navMaler',
+        editTaskTemplate: 'navMaler', newTaskTemplate: 'navMaler',
         settings: 'navSettings',
       };
-      if (['kontrakter','maler','createDoc','viewDoc','newTemplate','editTemplate'].includes(view)) expandDokumenter();
+      if (['kontrakter','maler','createDoc','viewDoc','newTemplate','editTemplate','editShotTemplate','newShotTemplate','editTaskTemplate','newTaskTemplate'].includes(view)) expandDokumenter();
       document.getElementById(navMap[view] || 'navHjem')?.classList.add('active');
       const main = document.getElementById('mainContent');
       switch (view) {
@@ -409,11 +411,15 @@
         case 'kontaktDetail': renderKontaktDetail(main, params); break;
         case 'settings': renderSettings(main); break;
         case 'kontrakter': renderKontrakter(main); break;
-        case 'maler': renderMaler(main); break;
+        case 'maler': renderMaler(main, params?.tab); break;
         case 'newTemplate': renderTemplateEditor(main, null); break;
         case 'editTemplate': renderTemplateEditor(main, params); break;
         case 'createDoc': renderCreateDocument(main, params); break;
         case 'viewDoc': renderDocumentView(main, params); break;
+        case 'editShotTemplate': renderShotTemplateEditor(main, params); break;
+        case 'newShotTemplate': renderShotTemplateEditor(main, null); break;
+        case 'editTaskTemplate': renderTaskTemplateEditor(main, params); break;
+        case 'newTaskTemplate': renderTaskTemplateEditor(main, null); break;
       }
     }
 
@@ -981,7 +987,7 @@
       ];
 
       const addLabels = { kontrakt: '+ Ny kontraktsmal', shot: '+ Ny shotliste', oppgave: '+ Ny oppgavemal' };
-      const addActions = { kontrakt: "navigate('newTemplate')", shot: "showToast('Shotliste-editor kommer snart')", oppgave: "showToast('Oppgavemal-editor kommer snart')" };
+      const addActions = { kontrakt: "navigate('newTemplate')", shot: "navigate('newShotTemplate')", oppgave: "navigate('newTaskTemplate')" };
 
       let html = `<div class="main-header"><h2>Maler</h2><button class="btn-primary" onclick="${addActions[malerTab]}">${addLabels[malerTab]}</button></div><div class="main-content">`;
 
@@ -1011,7 +1017,7 @@
           for (const t of shotTemplates) {
             const cats = Array.isArray(t.categories) ? t.categories : [];
             const itemCount = cats.reduce((n, cat) => n + (Array.isArray(cat.items) ? cat.items.length : 0), 0);
-            html += `<div class="template-card"><h3>${esc(t.name)}</h3>`;
+            html += `<div class="template-card" onclick="navigate('editShotTemplate','${t.id}')"><h3>${esc(t.name)}</h3>`;
             if (t.description) html += `<p class="meta">${esc(t.description)}</p>`;
             html += `<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><span class="badge badge-contract">${cats.length} kategori${cats.length!==1?'er':''}</span><span class="badge badge-contract" style="background:rgba(107,143,113,0.12);color:var(--sage)">${itemCount} shots</span></div></div>`;
           }
@@ -1024,7 +1030,7 @@
           html += `<div class="card-grid card-grid-auto">`;
           for (const t of taskTemplates) {
             const tasks = Array.isArray(t.tasks) ? t.tasks : [];
-            html += `<div class="template-card"><h3>${esc(t.name)}</h3>`;
+            html += `<div class="template-card" onclick="navigate('editTaskTemplate','${t.id}')"><h3>${esc(t.name)}</h3>`;
             const badges = [];
             if (t.project_type) badges.push(esc(t.project_type));
             if (t.auto_apply) badges.push('Auto');
@@ -1055,6 +1061,219 @@
       html += `</div>`;
       html += `</div>`;
       el.innerHTML = html;
+    }
+
+    // ── Task Template editor ──
+    let taskEditorState = null;
+
+    function renderTaskTemplateEditor(el, templateId) {
+      const existing = templateId ? taskTemplates.find(t => t.id === templateId) : null;
+      taskEditorState = {
+        id: existing?.id || crypto.randomUUID(),
+        isNew: !existing,
+        name: existing?.name || '',
+        project_type: existing?.project_type || 'wedding',
+        auto_apply: !!existing?.auto_apply,
+        tasks: Array.isArray(existing?.tasks) ? JSON.parse(JSON.stringify(existing.tasks)) : [],
+      };
+      renderTaskEditorBody(el);
+    }
+
+    function taskEffectiveTrigger(t) {
+      if (t.trigger) return t.trigger;
+      if ((t.relative_days ?? 0) < 0) return 'event';
+      if (t.after_event === true) return 'event';
+      return 'inquiry';
+    }
+
+    function renderTaskEditorBody(el) {
+      const s = taskEditorState;
+      const stages = [
+        { key: 'inquiry',  label: 'Henvendelse',      footer: 'Dager etter henvendelsen kom inn',  before: false },
+        { key: 'booked',   label: 'Booking',          footer: 'Dager etter booking ble bekreftet', before: false },
+        { key: 'eventBefore', label: 'Før bryllupet', footer: 'Dager før bryllupsdagen',           before: true,  trig: 'event' },
+        { key: 'eventAfter',  label: 'Etter bryllupet', footer: 'Dager etter bryllupsdagen',       before: false, trig: 'event' },
+      ];
+
+      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'oppgave'})">← Tilbake</button><input class="title-input" id="taskTmplName" placeholder="Navn på mal..." value="${esc(s.name)}" oninput="taskEditorState.name=this.value"></div><div style="display:flex;gap:8px"><button class="btn-primary" onclick="saveTaskTemplate()">Lagre</button></div></div>`;
+      html += `<div class="main-content">`;
+      html += `<div class="card" style="margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center"><div><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Prosjekttype</label><select onchange="taskEditorState.project_type=this.value" style="padding:8px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;background:var(--white)">${['wedding','couple','family','other'].map(v=>`<option value="${v}"${s.project_type===v?' selected':''}>${{wedding:'Bryllup',couple:'Par',family:'Familie',other:'Annet'}[v]}</option>`).join('')}</select></div><label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" ${s.auto_apply?'checked':''} onchange="taskEditorState.auto_apply=this.checked"> Brukes automatisk på nye oppdrag</label></div>`;
+
+      for (const stage of stages) {
+        const tasks = s.tasks
+          .map((t, i) => ({ t, i }))
+          .filter(({ t }) => {
+            if (stage.key === 'inquiry') return taskEffectiveTrigger(t) === 'inquiry';
+            if (stage.key === 'booked')  return taskEffectiveTrigger(t) === 'booked';
+            if (stage.key === 'eventBefore') return taskEffectiveTrigger(t) === 'event' && (t.relative_days ?? 0) < 0;
+            if (stage.key === 'eventAfter')  return taskEffectiveTrigger(t) === 'event' && (t.relative_days ?? 0) >= 0;
+          });
+
+        html += `<div class="card" style="margin-bottom:16px"><div style="font-size:12px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">${stage.label}</div>`;
+        if (tasks.length === 0) {
+          html += `<p style="font-size:13px;color:#A09080;margin-bottom:10px">Ingen oppgaver her.</p>`;
+        } else {
+          for (const { t, i } of tasks) {
+            html += `<div style="border-bottom:1px solid var(--sand);padding:10px 0;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">`;
+            html += `<div style="display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px">`;
+            html += `<input type="text" placeholder="Tittel (EN)" value="${esc(t.title||'')}" oninput="updateTask(${i},'title',this.value)" style="padding:7px 10px;border:1.5px solid var(--sand);border-radius:6px;font-size:13px;font-family:inherit">`;
+            html += `<input type="text" placeholder="Tittel (NO)" value="${esc(t.title_no||'')}" oninput="updateTask(${i},'title_no',this.value)" style="padding:7px 10px;border:1.5px solid var(--sand);border-radius:6px;font-size:13px;font-family:inherit;color:var(--taupe)">`;
+            html += `</div>`;
+            html += `<div style="display:flex;gap:6px;align-items:center"><input type="number" min="0" value="${Math.abs(t.relative_days ?? 0)}" onchange="updateTaskDays(${i},this.value,'${stage.key}')" style="width:60px;padding:7px 8px;border:1.5px solid var(--sand);border-radius:6px;font-size:13px;text-align:center;font-family:inherit"><span style="font-size:11px;color:var(--taupe)">${stage.before?'dager før':'dager etter'}</span></div>`;
+            html += `<select onchange="updateTask(${i},'priority',this.value)" style="padding:7px 10px;border:1.5px solid var(--sand);border-radius:6px;font-size:12px;font-family:inherit;background:var(--white)">${['high','medium','low'].map(p=>`<option value="${p}"${t.priority===p?' selected':''}>${{high:'Høy',medium:'Medium',low:'Lav'}[p]}</option>`).join('')}</select>`;
+            html += `<button class="btn-danger" style="padding:6px 10px;font-size:11px" onclick="removeTask(${i})">Slett</button>`;
+            html += `</div>`;
+          }
+        }
+        html += `<button class="btn-outline btn-sm" style="margin-top:10px" onclick="addTaskInStage('${stage.key}')">+ Legg til oppgave</button>`;
+        html += `<div style="font-size:11px;color:#A09080;margin-top:8px">${stage.footer}</div>`;
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    function addTaskInStage(key) {
+      const map = { inquiry: { trigger: 'inquiry', days: 1 }, booked: { trigger: 'booked', days: 1 }, eventBefore: { trigger: 'event', days: -7 }, eventAfter: { trigger: 'event', days: 1 } };
+      const cfg = map[key];
+      taskEditorState.tasks.push({ title: '', title_no: '', relative_days: cfg.days, priority: 'medium', trigger: cfg.trigger });
+      renderTaskEditorBody(document.getElementById('mainContent'));
+    }
+
+    function updateTask(i, key, val) {
+      taskEditorState.tasks[i][key] = val;
+    }
+
+    function updateTaskDays(i, val, stageKey) {
+      const n = Math.max(0, parseInt(val) || 0);
+      const signed = stageKey === 'eventBefore' ? -n : n;
+      taskEditorState.tasks[i].relative_days = signed;
+    }
+
+    function removeTask(i) {
+      taskEditorState.tasks.splice(i, 1);
+      renderTaskEditorBody(document.getElementById('mainContent'));
+    }
+
+    async function saveTaskTemplate() {
+      const s = taskEditorState;
+      if (!s.name.trim()) { showToast('Gi malen et navn'); return; }
+      const cleaned = s.tasks.filter(t => (t.title||'').trim() || (t.title_no||'').trim()).map(t => {
+        const copy = { ...t };
+        if (!copy.trigger) copy.trigger = taskEffectiveTrigger(copy);
+        return copy;
+      });
+      const payload = {
+        id: s.id,
+        user_id: currentUser.id,
+        name: s.name.trim(),
+        project_type: s.project_type,
+        auto_apply: s.auto_apply,
+        is_built_in: false,
+        tasks: cleaned,
+        updated_at: new Date().toISOString(),
+      };
+      const { error } = await sb.from('task_templates').upsert(payload, { onConflict: 'id' });
+      if (error) { showToast('Feil ved lagring'); console.error(error); return; }
+      showToast('Lagret');
+      const { data } = await sb.from('task_templates').select('*').order('updated_at', { ascending: false });
+      if (data) taskTemplates = data;
+      navigate('maler', { tab: 'oppgave' });
+    }
+
+    // ── Shot Template editor ──
+    let shotEditorState = null;
+
+    function renderShotTemplateEditor(el, templateId) {
+      const existing = templateId ? shotTemplates.find(t => t.id === templateId) : null;
+      shotEditorState = {
+        id: existing?.id || crypto.randomUUID(),
+        isNew: !existing,
+        name: existing?.name || '',
+        description: existing?.description || '',
+        categories: Array.isArray(existing?.categories) ? JSON.parse(JSON.stringify(existing.categories)) : [],
+      };
+      renderShotEditorBody(el);
+    }
+
+    function renderShotEditorBody(el) {
+      const s = shotEditorState;
+      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'shot'})">← Tilbake</button><input class="title-input" id="shotTmplName" placeholder="Navn på shotliste..." value="${esc(s.name)}" oninput="shotEditorState.name=this.value"></div><div><button class="btn-primary" onclick="saveShotTemplate()">Lagre</button></div></div>`;
+      html += `<div class="main-content">`;
+      html += `<div class="card" style="margin-bottom:16px"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Beskrivelse</label><input type="text" placeholder="Kort beskrivelse (valgfritt)" value="${esc(s.description)}" oninput="shotEditorState.description=this.value" style="width:100%;padding:9px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit"></div>`;
+
+      if (s.categories.length === 0) {
+        html += `<p style="font-size:13px;color:#A09080;text-align:center;padding:20px">Ingen kategorier. Legg til en under.</p>`;
+      }
+      s.categories.forEach((cat, ci) => {
+        html += `<div class="card" style="margin-bottom:16px">`;
+        html += `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">`;
+        html += `<input type="text" placeholder="Kategorinavn" value="${esc(cat.name||'')}" oninput="updateCategory(${ci},'name',this.value)" style="flex:1;min-width:180px;padding:9px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit">`;
+        html += `<input type="time" value="${esc(cat.timeStart||'')}" onchange="updateCategory(${ci},'timeStart',this.value)" style="padding:8px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:12px;font-family:inherit">`;
+        html += `<span style="color:var(--taupe)">–</span>`;
+        html += `<input type="time" value="${esc(cat.timeEnd||'')}" onchange="updateCategory(${ci},'timeEnd',this.value)" style="padding:8px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:12px;font-family:inherit">`;
+        html += `<button class="btn-danger" style="padding:7px 10px;font-size:11px" onclick="removeCategory(${ci})">Slett</button>`;
+        html += `</div>`;
+
+        const items = Array.isArray(cat.items) ? cat.items : [];
+        items.forEach((item, ii) => {
+          html += `<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--sand)">`;
+          html += `<input type="text" placeholder="Shot-tittel" value="${esc(item.title||'')}" oninput="updateShot(${ci},${ii},'title',this.value)" style="flex:1;padding:6px 10px;border:1.5px solid var(--sand);border-radius:6px;font-size:13px;font-family:inherit">`;
+          html += `<input type="text" placeholder="Notat" value="${esc(item.notes||'')}" oninput="updateShot(${ci},${ii},'notes',this.value)" style="flex:1;padding:6px 10px;border:1.5px solid var(--sand);border-radius:6px;font-size:13px;font-family:inherit;color:var(--taupe)">`;
+          html += `<button class="btn-danger" style="padding:4px 8px;font-size:10px" onclick="removeShot(${ci},${ii})">×</button>`;
+          html += `</div>`;
+        });
+        html += `<button class="btn-outline btn-sm" style="margin-top:10px" onclick="addShot(${ci})">+ Legg til shot</button>`;
+        html += `</div>`;
+      });
+
+      html += `<button class="btn-outline" onclick="addCategory()" style="margin-top:8px">+ Legg til kategori</button>`;
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    function addCategory() {
+      shotEditorState.categories.push({ id: crypto.randomUUID(), name: '', icon: 'camera.fill', timeStart: '', timeEnd: '', items: [] });
+      renderShotEditorBody(document.getElementById('mainContent'));
+    }
+    function removeCategory(ci) {
+      shotEditorState.categories.splice(ci, 1);
+      renderShotEditorBody(document.getElementById('mainContent'));
+    }
+    function updateCategory(ci, key, val) {
+      shotEditorState.categories[ci][key] = val;
+    }
+    function addShot(ci) {
+      if (!Array.isArray(shotEditorState.categories[ci].items)) shotEditorState.categories[ci].items = [];
+      shotEditorState.categories[ci].items.push({ id: crypto.randomUUID(), title: '', notes: '' });
+      renderShotEditorBody(document.getElementById('mainContent'));
+    }
+    function removeShot(ci, ii) {
+      shotEditorState.categories[ci].items.splice(ii, 1);
+      renderShotEditorBody(document.getElementById('mainContent'));
+    }
+    function updateShot(ci, ii, key, val) {
+      shotEditorState.categories[ci].items[ii][key] = val;
+    }
+
+    async function saveShotTemplate() {
+      const s = shotEditorState;
+      if (!s.name.trim()) { showToast('Gi shotlisten et navn'); return; }
+      const payload = {
+        id: s.id,
+        user_id: currentUser.id,
+        name: s.name.trim(),
+        description: s.description || '',
+        categories: s.categories,
+        created_at: new Date().toISOString(),
+      };
+      const { error } = await sb.from('shot_templates').upsert(payload, { onConflict: 'id' });
+      if (error) { showToast('Feil ved lagring'); console.error(error); return; }
+      showToast('Lagret');
+      const { data } = await sb.from('shot_templates').select('*').order('created_at', { ascending: false });
+      if (data) shotTemplates = data;
+      navigate('maler', { tab: 'shot' });
     }
 
     // ── Template editor ──
