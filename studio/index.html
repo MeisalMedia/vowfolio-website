@@ -287,7 +287,9 @@
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Oppdrag
         </div>
         <div class="nav-item" id="navMeldinger" onclick="navigate('meldinger')">
-          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg> Meldinger
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>
+          <span style="flex:1">Meldinger</span>
+          <span id="navMeldingerBadge" style="display:none;background:var(--rose);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:18px;border-radius:9px;padding:0 6px;align-items:center;justify-content:center"></span>
         </div>
         <div class="nav-item" id="navKontakter" onclick="navigate('kontakter')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg> Kontakter
@@ -390,6 +392,7 @@
       document.getElementById('appView').classList.add('active');
       document.getElementById('userEmail').textContent = currentUser.email;
       await loadData();
+      updateMeldingerBadge();
       navigate('hjem');
     }
     async function loadData() {
@@ -420,6 +423,18 @@
         for (const m of (msgs || [])) {
           if (!lastMessageByThread[m.thread_id]) lastMessageByThread[m.thread_id] = m;
         }
+      }
+    }
+
+    function updateMeldingerBadge() {
+      const badge = document.getElementById('navMeldingerBadge');
+      if (!badge) return;
+      const count = messageThreads.filter(threadWaitingForYou).length;
+      if (count > 0) {
+        badge.textContent = count;
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
       }
     }
 
@@ -491,14 +506,8 @@
       const coupleName = w => w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
       const weddingCoupleById = id => { const w = weddings.find(x => x.id === id); return w ? coupleName(w) : ''; };
 
-      // Trenger deg nå — handlinger
+      // Trenger deg nå — handlinger (meldinger vises i Meldinger-menyen i stedet)
       const todos = [];
-      for (const t of messageThreads.filter(threadWaitingForYou)) {
-        const name = threadDisplayName(t);
-        const m = lastMessageByThread[t.id];
-        const preview = m?.body ? '"' + m.body.slice(0, 56) + (m.body.length > 56 ? '…' : '') + '"' : 'venter på svar';
-        todos.push({ dot: '#3A6BA5', name, ctx: preview, label: 'Svar', onclick: `navigate('conversation','${t.id}')`, priority: 1 });
-      }
       for (const p of payments.filter(p => p.status !== 'paid' && p.due_date && new Date(p.due_date) < today)) {
         const days = Math.floor((today - new Date(p.due_date)) / 86400000);
         const name = weddingCoupleById(p.wedding_id) || p.title || 'Betaling';
@@ -1068,6 +1077,7 @@
       if (currentUser && thread.unread_count > 0) {
         await sb.from('message_threads').update({ unread_count: 0, updated_at: new Date().toISOString() }).eq('id', threadId);
         thread.unread_count = 0;
+        updateMeldingerBadge();
       }
     }
 
