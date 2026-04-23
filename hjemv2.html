@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
   <title>VowFolio — The studio app for wedding photographers</title>
   <meta name="description" content="Built for wedding days, not generic workflows. The studio app for the day itself — day plan, shotlist, crew, and a premium client portal.">
+  <link rel="canonical" href="https://vowfolio.com/">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -281,6 +283,100 @@
       font-size: 14px;
       color: var(--muted);
       line-height: 1.6;
+    }
+
+    /* Emotional outcomes section */
+    .outcomes {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 24px 56px;
+    }
+    .outcomes-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .outcomes-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 5vw, 42px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .outcomes-header h2 em {
+      font-style: italic;
+      color: var(--taupe);
+      font-weight: 700;
+    }
+    .outcomes-header p {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .outcomes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .outcome-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 28px 26px;
+      border: 1px solid var(--sand);
+    }
+    .outcome-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      color: var(--espresso);
+    }
+    .outcome-card p {
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Objection / comparison section */
+    .objection {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 24px 56px;
+    }
+    .objection-inner {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 44px 40px;
+      border: 1px solid var(--sand);
+    }
+    .objection h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 4vw, 34px);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      color: var(--espresso);
+    }
+    .objection h2 em {
+      font-style: italic;
+      color: var(--taupe);
+      font-weight: 700;
+    }
+    .objection p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .objection p:last-child { margin-bottom: 0; }
+    .objection p strong {
+      color: var(--espresso);
+      font-weight: 600;
     }
 
     /* Screenshots */
@@ -644,6 +740,10 @@
       .howto-grid { grid-template-columns: 1fr; }
       .features { padding: 60px 20px; }
       .features-grid { grid-template-columns: 1fr; }
+      .outcomes { padding: 40px 20px; }
+      .outcomes-grid { grid-template-columns: 1fr; gap: 14px; }
+      .objection { padding: 20px 20px 40px; }
+      .objection-inner { padding: 32px 24px; }
       .shots { padding: 20px 20px 40px; }
       .shots-grid { gap: 28px 16px; }
       .mid-cta { padding: 10px 20px 40px; }
@@ -710,8 +810,8 @@
     <div class="hero-badge" data-lang="no">Bygget av en bryllupsfotograf</div>
     <h1 data-lang="en">Built for <span>visual storytellers</span></h1>
     <h1 data-lang="no">Bygget for <span>visuelle historiefortellere</span></h1>
-    <p class="hero-subtitle" data-lang="en">Plan shoots, manage clients, collaborate, and deliver exceptional client experiences.</p>
-    <p class="hero-subtitle" data-lang="no">Planlegg shoots, håndter klienter, samarbeid, og leverer eksepsjonelle klientopplevelser.</p>
+    <p class="hero-subtitle" data-lang="en">The day feels calm. You feel present. The photos feel like you again.</p>
+    <p class="hero-subtitle" data-lang="no">Dagen føles rolig. Du er til stede. Bildene føles som deg igjen.</p>
     <p class="hero-support" data-lang="en">The studio app for the day itself — day plans, shotlists, crew, and a premium portal your couples actually love.</p>
     <p class="hero-support" data-lang="no">Studioappen for selve dagen — dagplaner, shotlister, crew og en premium portal paret faktisk elsker.</p>
     <a href="#" class="hero-cta" data-lang="en" data-open-access>
@@ -805,6 +905,47 @@
     </div>
   </section>
 
+  <!-- Emotional outcomes: What happens when the day just flows -->
+  <section class="outcomes">
+    <div class="outcomes-header">
+      <h2 data-lang="en">What happens when the day <em>just flows</em>?</h2>
+      <h2 data-lang="no">Hva skjer når dagen <em>bare flyter</em>?</h2>
+      <p data-lang="en">You stop managing the day. You start photographing it again.</p>
+      <p data-lang="no">Du slutter å styre dagen. Du begynner å fotografere den igjen.</p>
+    </div>
+    <div class="outcomes-grid">
+
+      <div class="outcome-card">
+        <h3 data-lang="en">You stop waking up at 3am</h3>
+        <h3 data-lang="no">Du slutter å våkne klokka tre</h3>
+        <p data-lang="en">No more lying awake wondering if the timeline reached the couple, or if your second shooter knows where first look is.</p>
+        <p data-lang="no">Slutt å ligge våken og lure på om tidsplanen kom frem til paret, eller om andrefotografen vet hvor first look skal være.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">Phone in pocket. Eyes on the couple.</h3>
+        <h3 data-lang="no">Telefonen i lomma. Blikket på paret.</h3>
+        <p data-lang="en">You stop flipping between Notes, WhatsApp, a Google Doc and email to find the next thing. One place. One glance. Back to the moment.</p>
+        <p data-lang="no">Du slutter å bla mellom Notater, WhatsApp, et Google-dokument og e-post for å finne det neste. Ett sted. Ett blikk. Tilbake til øyeblikket.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">The crew moves as one</h3>
+        <h3 data-lang="no">Crewet beveger seg som ett</h3>
+        <p data-lang="en">Your second shooter, planner and MUA know what's next without being told. You show up already aligned — not briefing people between shots.</p>
+        <p data-lang="no">Andrefotografen, planleggeren og MUA vet hva som kommer uten å bli fortalt. Dere møter opp samkjørt — ikke briefer mellom bildene.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">The edit feels lighter too</h3>
+        <h3 data-lang="no">Redigeringen føles lettere også</h3>
+        <p data-lang="en">When the day was calm, the gallery is too. You shot with intention, not firefighting — and you can feel it on the edit bay.</p>
+        <p data-lang="no">Når dagen var rolig, er galleriet det også. Du fotograferte med intensjon, ikke brannslukking — og du kjenner det når du redigerer.</p>
+      </div>
+
+    </div>
+  </section>
+
   <!-- Screenshots -->
   <section class="shots">
     <div class="shots-header">
@@ -859,6 +1000,18 @@
         <div class="why-point-body" data-lang="no">Hver funksjon er testet på ekte shoots — ikke bare tegnet opp i et møterom.</div>
       </div>
 
+    </div>
+  </section>
+
+  <!-- Objection: Why not just use HoneyBook / Studio Ninja -->
+  <section class="objection">
+    <div class="objection-inner">
+      <h2 data-lang="en">Why not just use <em>HoneyBook</em> or <em>Studio Ninja</em>?</h2>
+      <h2 data-lang="no">Hvorfor ikke bare bruke <em>HoneyBook</em> eller <em>Studio Ninja</em>?</h2>
+      <p data-lang="en"><strong>Because they weren't built for the day itself.</strong> They handle contracts and invoicing beautifully — but not a shotlist at 14:42, not the first-look light, not the father-of-the-bride toast at 19:15.</p>
+      <p data-lang="no"><strong>Fordi de ikke er laget for selve dagen.</strong> De håndterer kontrakter og fakturering flott — men ikke en shotliste kl. 14:42, ikke lyset ved first look, ikke brudens fars tale kl. 19:15.</p>
+      <p data-lang="en">You've tried them. You've glued them to Notes, a Google Doc and WhatsApp to make the day work. That's fine — it's why we're building VowFolio.</p>
+      <p data-lang="no">Du har prøvd dem. Du har limt dem sammen med Notater, et Google-dokument og WhatsApp for å få dagen til å fungere. Det er greit — det er derfor vi bygger VowFolio.</p>
     </div>
   </section>
 
