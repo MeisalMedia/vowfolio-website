@@ -1298,10 +1298,10 @@
       if (c.source) html += `<div class="field"><label>Kilde</label><p>${esc(c.source)}</p></div>`;
       html += `</div>`;
 
-      // Split documents: contracts vs attachments
+      // Split documents: contracts vs opplastede vedlegg
       const cDocs = documents.filter(d => d.contact_id === c.id);
-      const contracts = cDocs.filter(d => d.type !== 'contact_attachment');
-      const attachments = cDocs.filter(d => d.type === 'contact_attachment');
+      const attachments = cDocs.filter(d => d.status === 'uploaded');
+      const contracts = cDocs.filter(d => d.status !== 'uploaded');
 
       // Kontrakter
       html += `<div class="section-header" style="margin-top:24px"><h3>Kontrakter</h3><button class="btn-primary btn-sm" onclick="navigate('createDoc')">+ Ny kontrakt</button></div>`;
@@ -1374,7 +1374,7 @@
         if (upErr) { showToast('Opplasting feilet: ' + upErr.message); return; }
         const { error: insErr } = await sb.from('document_instances').insert({
           contact_id: contactId,
-          type: 'contact_attachment',
+          type: 'info_document',
           status: 'uploaded',
           title: file.name,
           content: '',
