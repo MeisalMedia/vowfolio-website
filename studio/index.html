@@ -110,6 +110,7 @@
 
     /* ── Oppdrag detail ── */
     .detail-grid { display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start; }
+    .detail-info-grid { display: grid; grid-template-columns: 1fr 280px; gap: 20px; align-items: start; }
     .detail-info { background: var(--white); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(61,50,41,0.05); }
     .detail-info .field { margin-bottom: 16px; }
     .detail-info .field label { font-size: 11px; font-weight: 600; color: #A09080; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
@@ -210,6 +211,9 @@
       .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
       .card-grid-auto { grid-template-columns: 1fr; }
       .detail-grid { grid-template-columns: 1fr; }
+      .detail-info-grid { grid-template-columns: 1fr; }
+      #oppdragTabContent { padding: 16px !important; }
+      .tabs { padding: 0 16px !important; }
       .create-form { max-width: 100%; }
       .card { padding: 16px; }
       .stat-grid { gap: 8px; }
@@ -487,6 +491,10 @@
     let oppdragView = 'kort'; // 'kort' | 'liste'
     let oppdragFilter = 'alle';
 
+    // ── Oppdrag detail state ──
+    let activeOppdragTab = 'info';
+    let detailWeddingId = null;
+
     function weddingStatusInfo(w) {
       const c = contacts.find(x => x.linked_wedding_id === w.id);
       const status = c?.status || 'inquiry';
@@ -579,61 +587,251 @@
 
     // ── Oppdrag detail ──
     function renderOppdragDetail(el, weddingId) {
+      detailWeddingId = weddingId;
+      activeOppdragTab = 'info';
       const w = weddings.find(x => x.id === weddingId);
       if (!w) { el.innerHTML = '<div class="main-content"><p>Ikke funnet.</p></div>'; return; }
       const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
-      const c = contacts.find(x => x.linked_wedding_id === weddingId) || {};
-      const wDocs = documents.filter(d => d.wedding_id === weddingId);
-      const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+      const st = weddingStatusInfo(w);
 
       let html = `<div class="main-header">
-        <div style="display:flex;align-items:center;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button>
-          <h2>${esc(couple)}</h2>
+          <div>
+            <h2 style="margin-bottom:2px">${esc(couple)}</h2>
+            <span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
+          </div>
         </div>
         <button class="btn-primary" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
-      </div><div class="main-content">`;
+      </div>`;
 
-      html += `<div class="detail-grid">`;
+      html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
+        <div class="tab active" id="dtab-info" onclick="switchOppdragTab('info')">Info</div>
+        <div class="tab" id="dtab-dokumenter" onclick="switchOppdragTab('dokumenter')">Dokumenter</div>
+        <div class="tab" id="dtab-betalinger" onclick="switchOppdragTab('betalinger')">Betalinger</div>
+        <div class="tab" id="dtab-meldinger" onclick="switchOppdragTab('meldinger')">Meldinger</div>
+      </div>`;
 
-      // Left: info + documents
-      html += `<div>`;
-      html += `<div class="detail-info" style="margin-bottom:20px">`;
-      if (w.wedding_date) html += `<div class="field"><label>Dato</label><p>${df(w.wedding_date)}</p></div>`;
-      if (w.venue) html += `<div class="field"><label>Lokale</label><p>${esc(w.venue)}${w.venue_address ? ', ' + esc(w.venue_address) : ''}</p></div>`;
-      if (w.contract_value) html += `<div class="field"><label>Kontraktsverdi</label><p>${w.contract_value.toLocaleString('nb-NO')} kr</p></div>`;
-      if (c.email) html += `<div class="field"><label>E-post</label><p>${esc(c.email)}</p></div>`;
-      if (c.phone) html += `<div class="field"><label>Telefon</label><p>${esc(c.phone)}</p></div>`;
-      html += `</div>`;
+      html += `<div id="oppdragTabContent" style="flex:1;overflow-y:auto;padding:24px 28px"></div>`;
 
-      // Documents for this wedding
-      html += `<div class="section-header"><h3>Dokumenter</h3></div>`;
-      if (wDocs.length === 0) {
-        html += `<div class="card" style="text-align:center;padding:28px;color:#A09080;font-size:14px">Ingen dokumenter for dette oppdraget</div>`;
-      } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Tittel</th><th>Status</th><th>Dato</th></tr></thead><tbody>`;
-        for (const doc of wDocs) {
-          html += `<tr onclick="navigate('viewDoc','${doc.id}')"><td><strong>${esc(doc.title)}</strong></td><td>${statusBadge(doc.status)}</td><td style="color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short'})}</td></tr>`;
-        }
-        html += `</tbody></table></div>`;
-      }
-      html += `</div>`;
-
-      // Right sidebar: contact card
-      html += `<div class="detail-side">`;
-      if (c.primary_name) {
-        html += `<div class="card">`;
-        html += `<div style="font-size:12px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">Kontakt</div>`;
-        html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">`;
-        html += `<div class="contact-avatar">${c.primary_name[0]}</div>`;
-        html += `<div><div style="font-weight:600;font-size:14px">${esc(c.primary_name)}</div>${c.partner_name ? `<div style="font-size:12px;color:#8A7D72">& ${esc(c.partner_name)}</div>` : ''}</div>`;
-        html += `</div>`;
-        if (c.email) html += `<div style="font-size:13px;margin-bottom:4px">✉ ${esc(c.email)}</div>`;
-        if (c.phone) html += `<div style="font-size:13px">📞 ${esc(c.phone)}</div>`;
-        html += `</div>`;
-      }
-      html += `</div></div></div>`;
       el.innerHTML = html;
+      renderOppdragInfoTab();
+    }
+
+    function switchOppdragTab(tab) {
+      activeOppdragTab = tab;
+      document.querySelectorAll('[id^="dtab-"]').forEach(el => el.classList.remove('active'));
+      const tabEl = document.getElementById('dtab-' + tab);
+      if (tabEl) tabEl.classList.add('active');
+      const content = document.getElementById('oppdragTabContent');
+      if (content) { content.style.cssText = 'flex:1;overflow-y:auto;padding:24px 28px'; }
+      if (tab === 'info') renderOppdragInfoTab();
+      else if (tab === 'dokumenter') renderOppdragDokumenterTab();
+      else if (tab === 'betalinger') renderOppdragBetalingerTab();
+      else if (tab === 'meldinger') renderOppdragMeldingerTab();
+    }
+
+    function renderOppdragInfoTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el) return;
+      const w = weddings.find(x => x.id === detailWeddingId);
+      if (!w) return;
+      const c = contacts.find(x => x.linked_wedding_id === detailWeddingId) || {};
+      const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+      const curr = studioSettings?.currency_symbol || 'kr';
+
+      let daysInfo = '';
+      if (w.wedding_date) {
+        const days = Math.ceil((new Date(w.wedding_date) - new Date()) / 86400000);
+        daysInfo = days > 0 ? `${days} dager til bryllupet` : days === 0 ? 'I dag!' : `${Math.abs(days)} dager siden`;
+      }
+
+      const fieldRow = (label, content) => `<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--sand)">
+        <div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
+        ${content}</div>`;
+
+      let html = `<div class="detail-info-grid">`;
+
+      // Left column
+      html += `<div>`;
+      html += `<div class="card" style="margin-bottom:16px">`;
+      if (w.wedding_date) html += fieldRow('Dato', `<div style="font-size:16px;font-weight:600">${df(w.wedding_date)}</div>${daysInfo ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${daysInfo}</div>` : ''}`);
+      if (w.venue) html += fieldRow('Lokale', `<div style="font-size:15px">${esc(w.venue)}</div>${w.venue_address ? `<div style="font-size:13px;color:#8A7D72;margin-top:2px">${esc(w.venue_address)}</div>` : ''}`);
+      if (w.contract_value) html += fieldRow('Kontraktsverdi', `<div style="font-size:15px;font-weight:600">${w.contract_value.toLocaleString('nb-NO')} ${curr}</div>`);
+      if (c.notes) html += `<div><div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Notater</div><div style="font-size:14px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</div></div>`;
+      html += `</div>`;
+      html += `</div>`;
+
+      // Right column: contact card
+      html += `<div>`;
+      if (c.primary_name || c.email || c.phone) {
+        html += `<div class="card">`;
+        html += `<div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">Kontakt</div>`;
+        if (c.primary_name) {
+          html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">`;
+          html += `<div class="contact-avatar">${c.primary_name[0]}</div>`;
+          html += `<div><div style="font-weight:600;font-size:15px">${esc(c.primary_name)}</div>${c.partner_name ? `<div style="font-size:13px;color:#8A7D72">& ${esc(c.partner_name)}</div>` : ''}</div>`;
+          html += `</div>`;
+        }
+        html += `<div style="display:flex;flex-direction:column;gap:10px">`;
+        if (c.email) html += `<a href="mailto:${esc(c.email)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${esc(c.email)}</a>`;
+        if (c.phone) html += `<a href="tel:${esc(c.phone)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${esc(c.phone)}</a>`;
+        html += `</div></div>`;
+      }
+      html += `</div>`;
+
+      html += `</div>`; // grid
+      el.innerHTML = html;
+    }
+
+    function renderOppdragDokumenterTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el) return;
+      const wDocs = documents.filter(d => d.wedding_id === detailWeddingId);
+
+      let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">`;
+      html += `<div style="font-size:14px;font-weight:600;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</div>`;
+      html += `<button class="btn-primary" onclick="navigate('createDoc','${detailWeddingId}')">+ Ny kontrakt</button>`;
+      html += `</div>`;
+
+      if (wDocs.length === 0) {
+        html += `<div class="card" style="text-align:center;padding:56px 20px;color:#A09080">`;
+        html += `<svg width="40" height="40" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;opacity:0.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+        html += `<div style="font-size:15px;font-weight:600;color:var(--espresso);margin-bottom:6px">Ingen dokumenter enda</div>`;
+        html += `<div style="font-size:13px">Opprett en kontrakt for dette oppdraget</div>`;
+        html += `</div>`;
+      } else {
+        html += `<div class="card" style="padding:0;overflow:hidden">`;
+        for (let i = 0; i < wDocs.length; i++) {
+          const doc = wDocs[i];
+          const border = i < wDocs.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+          html += `<div onclick="navigate('viewDoc','${doc.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;${border}cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">`;
+          html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${esc(doc.title)}</div>`;
+          html += `<div style="font-size:12px;color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'})}</div></div>`;
+          html += statusBadge(doc.status);
+          html += `</div>`;
+        }
+        html += `</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function renderOppdragBetalingerTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el) return;
+      el.innerHTML = `<div style="color:#A09080;font-size:14px;text-align:center;padding:60px">Laster betalinger…</div>`;
+
+      const [paymentsRes, expensesRes] = await Promise.all([
+        sb.from('payments').select('*').eq('wedding_id', detailWeddingId).order('due_date', { ascending: true }),
+        sb.from('expenses').select('*').eq('wedding_id', detailWeddingId).order('expense_date', { ascending: true }),
+      ]);
+      const payments = paymentsRes.data || [];
+      const expenses = expensesRes.data || [];
+      const w = weddings.find(x => x.id === detailWeddingId);
+      const curr = studioSettings?.currency_symbol || 'kr';
+      const contractValue = parseFloat(w?.contract_value || 0);
+      const totalPaid = payments.filter(p => p.status === 'paid').reduce((s, p) => s + parseFloat(p.amount || 0), 0);
+      const remaining = contractValue - totalPaid;
+      const totalExpenses = expenses.reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+      const pct = contractValue > 0 ? Math.min(100, Math.round(totalPaid / contractValue * 100)) : 0;
+      const fmt = n => n.toLocaleString('nb-NO');
+
+      let html = '';
+
+      // Summary card
+      html += `<div class="card" style="margin-bottom:20px">`;
+      html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;text-align:center">`;
+      html += `<div><div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Kontraktsverdi</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:700">${fmt(contractValue)} ${curr}</div></div>`;
+      html += `<div><div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Innbetalt</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:700;color:var(--sage)">${fmt(totalPaid)} ${curr}</div></div>`;
+      html += `<div><div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Gjenstående</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:700;color:${remaining > 0 ? 'var(--taupe)' : 'var(--sage)'}">${fmt(Math.abs(remaining))} ${curr}</div></div>`;
+      html += `</div>`;
+      html += `<div style="background:var(--sand);border-radius:99px;height:8px;overflow:hidden"><div style="background:var(--sage);width:${pct}%;height:100%;border-radius:99px;transition:width 0.6s"></div></div>`;
+      html += `<div style="font-size:12px;color:#8A7D72;margin-top:6px;text-align:center">${pct}% betalt</div>`;
+      html += `</div>`;
+
+      // Payment entries
+      html += `<div style="font-size:12px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Betalinger</div>`;
+      if (payments.length === 0) {
+        html += `<div class="card" style="text-align:center;padding:28px;color:#A09080;font-size:14px;margin-bottom:20px">Ingen betalinger registrert</div>`;
+      } else {
+        html += `<div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">`;
+        const statusMap = { paid: { label:'Betalt', color:'#4A8A55', bg:'#E8F4EA' }, unpaid: { label:'Ikke betalt', color:'#9B7E5E', bg:'#F0EBE4' }, overdue: { label:'Forfalt', color:'#C0392B', bg:'#FDECEA' } };
+        for (let i = 0; i < payments.length; i++) {
+          const p = payments[i]; const s = statusMap[p.status] || statusMap.unpaid;
+          const border = i < payments.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+          const dateStr = (p.paid_date || p.due_date) ? new Date(p.paid_date || p.due_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : '';
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;${border}gap:12px">`;
+          html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(p.title)}</div><div style="font-size:12px;color:#8A7D72">${dateStr}</div></div>`;
+          html += `<div style="display:flex;align-items:center;gap:12px;flex-shrink:0"><div style="font-size:15px;font-weight:600">${fmt(parseFloat(p.amount||0))} ${curr}</div><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${s.bg};color:${s.color};white-space:nowrap">${s.label}</span></div>`;
+          html += `</div>`;
+        }
+        html += `</div>`;
+      }
+
+      // Expenses
+      if (expenses.length > 0) {
+        html += `<div style="font-size:12px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">Utgifter <span style="font-weight:400;text-transform:none">${fmt(totalExpenses)} ${curr}</span></div>`;
+        html += `<div class="card" style="padding:0;overflow:hidden">`;
+        for (let i = 0; i < expenses.length; i++) {
+          const e = expenses[i];
+          const border = i < expenses.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+          const dateStr = e.expense_date ? new Date(e.expense_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : '';
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;${border}gap:12px">`;
+          html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(e.title)}</div><div style="font-size:12px;color:#8A7D72">${[e.category, dateStr].filter(Boolean).join(' · ')}</div></div>`;
+          html += `<div style="font-size:15px;font-weight:600;flex-shrink:0">${fmt(parseFloat(e.amount||0))} ${curr}</div>`;
+          html += `</div>`;
+        }
+        html += `</div>`;
+      }
+
+      el.innerHTML = html;
+    }
+
+    async function renderOppdragMeldingerTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el) return;
+      const thread = messageThreads.find(t => t.wedding_id === detailWeddingId);
+
+      if (!thread) {
+        el.innerHTML = `<div class="card" style="text-align:center;padding:56px 20px">
+          <svg width="40" height="40" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;opacity:0.25"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>
+          <div style="font-size:15px;font-weight:600;color:var(--espresso);margin-bottom:6px">Ingen meldinger enda</div>
+          <div style="font-size:13px;color:#8A7D72;margin-bottom:20px">Start en samtale med kunden</div>
+          <button class="btn-primary" onclick="startOppdragThread()">Start samtale</button>
+        </div>`;
+        return;
+      }
+
+      currentThreadId = thread.id;
+      el.style.cssText = 'flex:1;overflow:hidden;display:flex;flex-direction:column;padding:0;margin:-24px -28px;';
+      el.innerHTML = `
+        <div id="msgScroll" style="flex:1;overflow-y:auto;padding:20px 24px;background:var(--cream)">
+          <div id="msgList" style="display:flex;flex-direction:column;gap:4px;max-width:720px;margin:0 auto">Laster…</div>
+        </div>
+        <div style="padding:12px 24px;background:var(--white);border-top:1px solid var(--sand);display:flex;gap:10px;align-items:flex-end;flex-shrink:0">
+          <textarea id="msgInput" placeholder="Melding…" rows="1" oninput="autoGrow(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}" style="flex:1;padding:10px 14px;border:1.5px solid var(--sand);border-radius:20px;font-size:14px;font-family:inherit;resize:none;max-height:120px;background:var(--cream);color:var(--espresso)"></textarea>
+          <button onclick="sendMessage()" style="width:40px;height:40px;border-radius:50%;background:var(--sage);color:var(--white);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>`;
+
+      const { data } = await sb.from('messages').select('*').eq('thread_id', thread.id).order('created_at', { ascending: true });
+      currentMessages = data || [];
+      renderMessageBubbles();
+    }
+
+    async function startOppdragThread() {
+      const c = contacts.find(x => x.linked_wedding_id === detailWeddingId) || {};
+      const { data, error } = await sb.from('message_threads').insert({
+        wedding_id: detailWeddingId,
+        photographer_id: currentUser.id,
+        client_email: c.email || null,
+        last_message_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }).select().single();
+      if (error) { showToast('Kunne ikke opprette tråd'); return; }
+      messageThreads.push(data);
+      renderOppdragMeldingerTab();
     }
 
     // ── Meldinger ──
