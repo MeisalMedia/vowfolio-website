@@ -396,7 +396,8 @@
       document.getElementById('userEmail').textContent = currentUser.email;
       await loadData();
       updateMeldingerBadge();
-      navigate('hjem');
+      const { view, params } = parseHash();
+      navigate(view || 'hjem', params);
     }
     async function loadData() {
       const [t, d, w, c, s, mt, st, tt, pay] = await Promise.all([
@@ -459,7 +460,19 @@
       document.getElementById('sidebarOverlay')?.classList.remove('open');
     }
 
+    function parseHash() {
+      const raw = (window.location.hash || '').replace(/^#/, '');
+      if (!raw) return { view: null, params: null };
+      const [view, ...rest] = raw.split('/');
+      return { view, params: rest.length ? decodeURIComponent(rest.join('/')) : null };
+    }
+
     function navigate(view, params) {
+      // Sync URL hash så reload / deling husker hvor brukeren var
+      let hash = '#' + view;
+      if (typeof params === 'string') hash += '/' + encodeURIComponent(params);
+      if (window.location.hash !== hash) history.replaceState(null, '', hash);
+
       closeSidebar();
       if (quillEditor) { quillEditor = null; }
       document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
