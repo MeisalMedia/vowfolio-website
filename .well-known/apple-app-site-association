@@ -1,0 +1,21 @@
+{
+  "webcredentials": {
+    "apps": ["6U2H6MDZUT.com.helgemeisal.vowfolio"]
+  },
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["6U2H6MDZUT.com.helgemeisal.vowfolio"],
+        "components": [
+          { "/": "/p/*", "comment": "client portal" },
+          { "/": "/ps/*", "comment": "session portal" },
+          { "/": "/s/*", "comment": "signing" },
+          { "/": "/f/*", "comment": "feedback form" },
+          { "/": "/i/*", "comment": "intake form" },
+          { "/": "/q/*", "comment": "session quiz" }
+        ]
+      }
+    ]
+  }
+}
