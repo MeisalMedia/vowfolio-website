@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>VowFolio — The studio app for wedding photographers</title>
+  <meta name="description" content="Built for wedding days, not generic workflows. The studio app for the day itself — day plan, shotlist, crew, and a premium client portal.">
+  <link rel="canonical" href="https://vowfolio.com/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Language bootstrap — runs before render to prevent FOUC -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('vowfolio_lang');
+        var browser = (navigator.language || 'en').toLowerCase();
+        var isNorwegian = /^(nb|nn|no)/.test(browser);
+        var lang = (saved === 'no' || saved === 'en') ? saved : (isNorwegian ? 'no' : 'en');
+        document.documentElement.setAttribute('data-lang', lang);
+        document.documentElement.setAttribute('lang', lang === 'no' ? 'nb' : 'en');
+      } catch (e) {}
+    })();
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF7F2;
+      --espresso: #3D3229;
+      --taupe: #9B7E5E;
+      --sage: #6B8F71;
+      --rose: #C2847A;
+      --sand: #E8E0D6;
+      --white: #FFFFFF;
+      --muted: #6B5E52;
+      --faint: #A39585;
+    }
+
+    /* Language visibility — pure CSS, no JS flicker */
+    html[data-lang="en"] [data-lang="no"] { display: none !important; }
+    html[data-lang="no"] [data-lang="en"] { display: none !important; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--espresso);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(250,247,242,0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      z-index: 100;
+      border-bottom: 1px solid var(--sand);
+    }
+    .nav-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--taupe);
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-left: auto;
+    }
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--espresso);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-link:hover { color: var(--taupe); }
+
+    /* Language toggle */
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: var(--sand);
+      border-radius: 20px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .lang-btn {
+      border: 0;
+      background: transparent;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      padding: 5px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      letter-spacing: 0.6px;
+      transition: background 0.2s, color 0.2s;
+    }
+    html[data-lang="en"] .lang-btn[data-lang-btn="en"],
+    html[data-lang="no"] .lang-btn[data-lang-btn="no"] {
+      background: var(--white);
+      color: var(--espresso);
+      box-shadow: 0 1px 3px rgba(61,50,41,0.08);
+    }
+    .lang-btn:hover { color: var(--espresso); }
+
+    .nav-cta {
+      background: var(--espresso);
+      color: var(--white);
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: #2A2118; }
+
+    /* Hero */
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 140px 24px 80px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--sage);
+      background: rgba(107,143,113,0.1);
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--espresso);
+      margin-bottom: 20px;
+    }
+    .hero h1 span { color: var(--taupe); }
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .hero .hero-subtitle {
+      font-size: 20px;
+      color: var(--espresso);
+      max-width: 620px;
+      margin: 0 auto 14px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .hero .hero-support {
+      font-size: 15px;
+      color: var(--faint);
+      max-width: 540px;
+      margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--espresso);
+      color: var(--white);
+      padding: 16px 36px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .hero-cta:hover { background: #2A2118; transform: translateY(-1px); }
+    .hero-cta svg { width: 20px; height: 20px; }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--faint);
+    }
+
+    /* Hero microcopy — vertical stack, editorial, no icons */
+    .hero-micro {
+      margin-top: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--faint);
+      letter-spacing: 0.2px;
+    }
+    .hero-micro span { white-space: nowrap; }
+
+    /* Features */
+    .features {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 56px 24px;
+    }
+    .features-header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .features-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .features-header p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 28px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.06);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(61,50,41,0.1);
+    }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .feature-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .feature-card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .feature-card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Emotional outcomes section */
+    .outcomes {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 24px 24px 56px;
+    }
+    .outcomes-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .outcomes-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 5vw, 42px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      max-width: 720px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .outcomes-header h2 em {
+      font-style: italic;
+      color: var(--taupe);
+      font-weight: 700;
+    }
+    .outcomes-header p {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .outcomes-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .outcome-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 28px 28px 26px;
+      border: 1px solid var(--sand);
+    }
+    .outcome-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      color: var(--espresso);
+    }
+    .outcome-card p {
+      font-size: 14.5px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Objection / comparison section */
+    .objection {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 24px 24px 56px;
+    }
+    .objection-inner {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 44px 40px;
+      border: 1px solid var(--sand);
+    }
+    .objection h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 4vw, 34px);
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      color: var(--espresso);
+    }
+    .objection h2 em {
+      font-style: italic;
+      color: var(--taupe);
+      font-weight: 700;
+    }
+    .objection p {
+      font-size: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .objection p:last-child { margin-bottom: 0; }
+    .objection p strong {
+      color: var(--espresso);
+      font-weight: 600;
+    }
+
+    /* Screenshots */
+    .shots {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px 56px;
+    }
+    .shots-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .shots-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .shots-header p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+    /* Hero devices — single composed mockup replacing the 3-phone layout */
+    .hero-devices {
+      display: block;
+      max-width: 900px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .hero-devices img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* Why VowFolio */
+    .why {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 40px 24px 56px;
+      text-align: center;
+    }
+    .why-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: var(--taupe);
+      margin-bottom: 6px;
+    }
+    .why h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+    .why-lede {
+      font-size: 17px;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .why-points {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      text-align: left;
+    }
+    .why-point {
+      padding: 20px 20px;
+      background: var(--white);
+      border-radius: 14px;
+      border: 1px solid var(--sand);
+    }
+    .why-point-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--espresso);
+      margin-bottom: 5px;
+    }
+    .why-point-body {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Trust stats */
+    .trust-stats {
+      max-width: 900px;
+      margin: 40px auto 0;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      text-align: center;
+    }
+    .trust-stats.trust-stats-two {
+      max-width: 600px;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .trust-stat {
+      padding: 8px;
+    }
+    .trust-stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--taupe);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .trust-stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* Testimonials */
+    .testimonials {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 56px 24px 44px;
+    }
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .testimonials-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .testimonials-header p {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+    .testimonial-card {
+      background: var(--white);
+      border-radius: 16px;
+      padding: 32px 30px 26px;
+      box-shadow: 0 2px 16px rgba(61,50,41,0.05);
+      position: relative;
+    }
+    .testimonial-card::before {
+      content: "\201C";
+      position: absolute;
+      top: 6px;
+      left: 18px;
+      font-family: 'Playfair Display', serif;
+      font-size: 72px;
+      color: var(--taupe);
+      opacity: 0.18;
+      line-height: 1;
+    }
+    .testimonial-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 19px;
+      font-style: italic;
+      line-height: 1.5;
+      color: var(--espresso);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .testimonial-attr {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--taupe);
+    }
+
+    /* CTA section */
+    .cta-section {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .cta-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .cta-section p {
+      font-size: 16px;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    /* Mid-page CTA */
+    .mid-cta {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px 24px 40px;
+      text-align: center;
+    }
+    .mid-cta h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--espresso);
+    }
+    .mid-cta p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+    .mid-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--espresso);
+      color: var(--white);
+      padding: 14px 30px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .mid-cta-btn:hover { background: #2A2118; transform: translateY(-1px); }
+
+    /* Shot subtitles */
+    .shot-sub {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+      margin-top: 4px;
+      max-width: 240px;
+    }
+
+    /* FAQ */
+    .faq {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 44px 24px 56px;
+    }
+    .faq-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .faq-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .faq-header p {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .faq-item {
+      background: var(--white);
+      border-radius: 12px;
+      border: 1px solid var(--sand);
+      overflow: hidden;
+    }
+    .faq-item summary {
+      padding: 18px 22px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--espresso);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      list-style: none;
+      user-select: none;
+    }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid var(--taupe);
+      border-bottom: 2px solid var(--taupe);
+      transform: rotate(45deg);
+      transition: transform 0.25s ease;
+      flex-shrink: 0;
+    }
+    .faq-item[open] summary::after { transform: rotate(-135deg); }
+    .faq-item .faq-answer {
+      padding: 0 22px 20px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* Sticky mobile CTA */
+    .mobile-sticky-cta {
+      display: none;
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      right: 16px;
+      background: var(--espresso);
+      color: var(--white);
+      padding: 15px 20px;
+      padding-bottom: calc(15px + env(safe-area-inset-bottom, 0px));
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 15px;
+      text-decoration: none;
+      z-index: 90;
+      box-shadow: 0 6px 24px rgba(61,50,41,0.22);
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+    .mobile-sticky-cta.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--sand);
+      padding: 32px 24px;
+      text-align: center;
+    }
+    footer p {
+      font-size: 13px;
+      color: var(--faint);
+    }
+    footer a { color: var(--taupe); text-decoration: none; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .howto-grid { grid-template-columns: repeat(2, 1fr); }
+      .why-points { grid-template-columns: 1fr; }
+      .trust-stats { grid-template-columns: 1fr; gap: 20px; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { gap: 12px; }
+      .nav-link { display: none; }
+      .hero { padding: 120px 20px 60px; }
+      .hero-micro { gap: 14px; font-size: 12px; }
+      .howto { padding: 60px 20px; }
+      .howto-grid { grid-template-columns: 1fr; }
+      .features { padding: 60px 20px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .outcomes { padding: 40px 20px; }
+      .outcomes-grid { grid-template-columns: 1fr; gap: 14px; }
+      .objection { padding: 20px 20px 40px; }
+      .objection-inner { padding: 32px 24px; }
+      .shots { padding: 20px 20px 40px; }
+      .shots-grid { gap: 28px 16px; }
+      .mid-cta { padding: 10px 20px 40px; }
+      .why { padding: 60px 20px; }
+      .testimonials { padding: 60px 20px; }
+      .testimonials-grid { grid-template-columns: 1fr; gap: 16px; }
+      .faq { padding: 60px 20px; }
+      .cta-section { padding: 60px 20px 120px; }
+      .mobile-sticky-cta { display: block; }
+    }
+
+    /* Access request modal */
+    .access-backdrop{position:fixed;inset:0;background:rgba(30,25,20,0.6);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;opacity:0;transition:opacity 0.2s ease;overflow-y:auto}
+    .access-backdrop.show{display:flex;opacity:1}
+    .access-modal{background:var(--cream);border-radius:20px;max-width:460px;width:100%;padding:32px 28px;box-shadow:0 20px 60px rgba(30,25,20,0.4);position:relative;transform:translateY(12px);transition:transform 0.25s ease;margin:auto}
+    .access-backdrop.show .access-modal{transform:translateY(0)}
+    .access-close{position:absolute;top:12px;right:12px;background:none;border:none;font-size:22px;color:#B0A090;cursor:pointer;padding:8px 10px;line-height:1;border-radius:8px;font-family:inherit}
+    .access-close:hover{color:var(--espresso);background:rgba(0,0,0,0.04)}
+    .access-eyebrow{display:inline-block;font-size:10.5px;font-weight:700;color:var(--sage);background:rgba(107,143,113,0.12);padding:5px 12px;border-radius:16px;letter-spacing:1px;margin-bottom:14px;text-transform:uppercase}
+    .access-title{font-family:'Playfair Display',serif;font-size:26px;line-height:1.2;color:var(--espresso);margin-bottom:10px;font-weight:700}
+    .access-body{font-size:14.5px;color:#6B5E4F;line-height:1.55;margin-bottom:20px}
+    .access-field{margin-bottom:14px}
+    .access-label{display:block;font-size:12px;font-weight:600;color:#8A7D6E;margin-bottom:5px;letter-spacing:0.3px}
+    .access-optional{font-size:11px;color:#B0A090;font-weight:400;margin-left:6px;text-transform:none;letter-spacing:0}
+    .access-input{width:100%;padding:12px 14px;font-size:16px;border:1px solid #E8DFD1;border-radius:10px;font-family:inherit;color:var(--espresso);background:#fff;outline:none;transition:border-color 0.15s;box-sizing:border-box}
+    .access-input:focus{border-color:var(--taupe)}
+    .access-submit{width:100%;background:var(--espresso);color:#fff;border:none;padding:14px 24px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s,transform 0.1s;margin-top:6px}
+    .access-submit:hover:not(:disabled){background:#2A2118;transform:translateY(-1px)}
+    .access-submit:disabled{background:#C4B8A8;cursor:not-allowed}
+    .access-error{background:#F4E0DC;color:#B06050;font-size:13px;padding:10px 14px;border-radius:8px;margin-top:12px;text-align:center}
+    .access-error.hidden,.access-success.hidden,#access-form-view.hidden{display:none}
+    .access-success{text-align:center;padding:8px 0 4px}
+    .access-success-icon{width:60px;height:60px;border-radius:50%;background:rgba(107,143,113,0.18);color:var(--sage);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px;font-weight:600}
+    .access-success-title{font-family:'Playfair Display',serif;font-size:24px;color:var(--espresso);margin-bottom:8px;font-weight:700}
+    .access-success-body{font-size:14.5px;color:#6B5E4F;line-height:1.55}
+    .access-small{font-size:11.5px;color:#B0A090;margin-top:14px;text-align:center;line-height:1.5}
+    @media (max-width:640px){
+      .access-modal{padding:28px 22px}
+      .access-title{font-size:22px}
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="/" class="logo">VowFolio</a>
+      <div class="nav-links">
+        <a href="/pricing" class="nav-link" data-lang="en">Pricing</a>
+        <a href="/pricing" class="nav-link" data-lang="no">Priser</a>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="lang-btn" data-lang-btn="no" type="button">NO</button>
+          <button class="lang-btn" data-lang-btn="en" type="button">EN</button>
+        </div>
+        <a href="#" class="nav-cta" data-lang="en" data-open-access>Get early access</a>
+        <a href="#" class="nav-cta" data-lang="no" data-open-access>Få tidlig tilgang</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge" data-lang="en">Built by a wedding photographer</div>
+    <div class="hero-badge" data-lang="no">Bygget av en bryllupsfotograf</div>
+    <h1 data-lang="en">Built for <span>visual storytellers</span></h1>
+    <h1 data-lang="no">Bygget for <span>visuelle historiefortellere</span></h1>
+    <p class="hero-subtitle" data-lang="en">The day feels calm. You feel present. The photos feel like you again.</p>
+    <p class="hero-subtitle" data-lang="no">Dagen føles rolig. Du er til stede. Bildene føles som deg igjen.</p>
+    <p class="hero-support" data-lang="en">The studio app for the day itself — day plans, shotlists, crew, and a premium portal your couples actually love.</p>
+    <p class="hero-support" data-lang="no">Studioappen for selve dagen — dagplaner, shotlister, crew og en premium portal paret faktisk elsker.</p>
+    <a href="#" class="hero-cta" data-lang="en" data-open-access>
+      Get early access
+    </a>
+    <a href="#" class="hero-cta" data-lang="no" data-open-access>
+      Få tidlig tilgang
+    </a>
+    <div class="hero-micro" data-lang="en">
+      <span>iOS · private preview</span>
+      <span>Invitation only</span>
+      <span>Nordic photographers first</span>
+    </div>
+    <div class="hero-micro" data-lang="no">
+      <span>iOS · private preview</span>
+      <span>Invitasjonsbasert tilgang</span>
+      <span>Norske fotografer først</span>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <div class="features-header">
+      <h2 data-lang="en">Everything for shoot day</h2>
+      <h2 data-lang="no">Alt for shoot-dagen</h2>
+      <p data-lang="en">Built for the hours that matter — and the weeks around them.</p>
+      <p data-lang="no">Bygget for timene som betyr noe — og ukene rundt dem.</p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.12);color:#6B8F71;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+        </div>
+        <h3 data-lang="en">Never lose the flow of the day</h3>
+        <h3 data-lang="no">Mist aldri flyten i dagen</h3>
+        <p data-lang="en">Stay ahead of what happens next, from prep to final dance.</p>
+        <p data-lang="no">Ligg foran det som skjer — fra klargjøring til siste dans.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.12);color:#6B8F71;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+        </div>
+        <h3 data-lang="en">Never miss the moments that matter</h3>
+        <h3 data-lang="no">Aldri glem øyeblikkene som teller</h3>
+        <p data-lang="en">Must-have moments, reference images and groupings — one place, ready when you need them.</p>
+        <p data-lang="no">Må-ha-øyeblikk, referanser og gruppebilder — ett sted, klart når du trenger det.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(155,126,94,0.12);color:#9B7E5E;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path d="M12 20.5s-7.5-4.7-7.5-10.2a4.3 4.3 0 0 1 7.5-2.9 4.3 4.3 0 0 1 7.5 2.9c0 5.5-7.5 10.2-7.5 10.2z"/></svg>
+        </div>
+        <h3 data-lang="en">Give couples one place for everything</h3>
+        <h3 data-lang="no">Gi paret ett sted for alt</h3>
+        <p data-lang="en">Timelines, inspiration, contracts and progress — one warm portal your couples will actually use.</p>
+        <p data-lang="no">Tidslinjer, inspirasjon, kontrakter og fremdrift — én varm portal paret faktisk bruker.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(194,132,122,0.12);color:#C2847A;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg>
+        </div>
+        <h3 data-lang="en">Collaborate without the chaos</h3>
+        <h3 data-lang="no">Samarbeid uten kaoset</h3>
+        <p data-lang="en">Share plans, shotlists and details so everyone's on the same page.</p>
+        <p data-lang="no">Del planer, shotlister og detaljer — alle på samme side.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(107,143,113,0.12);color:#6B8F71;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="6.5" y1="14.5" x2="10" y2="14.5"/></svg>
+        </div>
+        <h3 data-lang="en">Track payments without the spreadsheets</h3>
+        <h3 data-lang="no">Følg opp betalinger uten regneark</h3>
+        <p data-lang="en">Deposits and payments — organized, visible and tied to each project.</p>
+        <p data-lang="no">Depositum og betalinger — organisert, synlig, knyttet til hvert prosjekt.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon" style="background:rgba(61,50,41,0.08);color:#3D3229;">
+          <svg viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg>
+        </div>
+        <h3 data-lang="en">Keep everyone in sync</h3>
+        <h3 data-lang="no">Hold alle på samme side</h3>
+        <p data-lang="en">Client and crew in one thread — no scatter across channels.</p>
+        <p data-lang="no">Klient og crew i én tråd — ingen spredning på tvers av kanaler.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Emotional outcomes: What happens when the day just flows -->
+  <section class="outcomes">
+    <div class="outcomes-header">
+      <h2 data-lang="en">What happens when the day <em>just flows</em>?</h2>
+      <h2 data-lang="no">Hva skjer når dagen <em>bare flyter</em>?</h2>
+      <p data-lang="en">You stop managing the day. You start photographing it again.</p>
+      <p data-lang="no">Du slutter å styre dagen. Du begynner å fotografere den igjen.</p>
+    </div>
+    <div class="outcomes-grid">
+
+      <div class="outcome-card">
+        <h3 data-lang="en">You stop waking up at 3am</h3>
+        <h3 data-lang="no">Du slutter å våkne klokka tre</h3>
+        <p data-lang="en">No more lying awake wondering if the timeline reached the couple, or if your second shooter knows where first look is.</p>
+        <p data-lang="no">Slutt å ligge våken og lure på om tidsplanen kom frem til paret, eller om andrefotografen vet hvor first look skal være.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">Phone in pocket. Eyes on the couple.</h3>
+        <h3 data-lang="no">Telefonen i lomma. Blikket på paret.</h3>
+        <p data-lang="en">You stop flipping between Notes, WhatsApp, a Google Doc and email to find the next thing. One place. One glance. Back to the moment.</p>
+        <p data-lang="no">Du slutter å bla mellom Notater, WhatsApp, et Google-dokument og e-post for å finne det neste. Ett sted. Ett blikk. Tilbake til øyeblikket.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">The crew moves as one</h3>
+        <h3 data-lang="no">Crewet beveger seg som ett</h3>
+        <p data-lang="en">Your second shooter, planner and MUA know what's next without being told. You show up already aligned — not briefing people between shots.</p>
+        <p data-lang="no">Andrefotografen, planleggeren og MUA vet hva som kommer uten å bli fortalt. Dere møter opp samkjørt — ikke briefer mellom bildene.</p>
+      </div>
+
+      <div class="outcome-card">
+        <h3 data-lang="en">The edit feels lighter too</h3>
+        <h3 data-lang="no">Redigeringen føles lettere også</h3>
+        <p data-lang="en">When the day was calm, the gallery is too. You shot with intention, not firefighting — and you can feel it on the edit bay.</p>
+        <p data-lang="no">Når dagen var rolig, er galleriet det også. Du fotograferte med intensjon, ikke brannslukking — og du kjenner det når du redigerer.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Screenshots -->
+  <section class="shots">
+    <div class="shots-header">
+      <h2 data-lang="en">What it looks like in the field</h2>
+      <h2 data-lang="no">Slik ser det ut i felt</h2>
+      <p data-lang="en">The tools you'll use before, during, and after every shoot.</p>
+      <p data-lang="no">Verktøyene du bruker før, under og etter hver shoot.</p>
+    </div>
+    <div class="hero-devices">
+      <img src="/app-screens/hero-devices.png" alt="VowFolio day plan, client portal and shotlist on iPhone" loading="lazy">
+    </div>
+  </section>
+
+  <!-- Mid-page CTA (right after screenshots = peak interest) -->
+  <section class="mid-cta">
+    <h3 data-lang="en">Try it on your next shoot</h3>
+    <h3 data-lang="no">Prøv det på neste shoot</h3>
+    <p data-lang="en">Invitation only</p>
+    <p data-lang="no">Kun via invitasjon</p>
+    <a href="#" class="mid-cta-btn" data-lang="en" data-open-access>Get early access</a>
+    <a href="#" class="mid-cta-btn" data-lang="no" data-open-access>Få tidlig tilgang</a>
+  </section>
+
+  <!-- Why VowFolio -->
+  <section class="why">
+    <div class="why-eyebrow" data-lang="en">Why VowFolio</div>
+    <div class="why-eyebrow" data-lang="no">Hvorfor VowFolio</div>
+    <h2 data-lang="en">Because no two shoots<br>work the same</h2>
+    <h2 data-lang="no">Fordi ingen shoots<br>er like</h2>
+    <p class="why-lede" data-lang="en">Most tools are built for everyone. VowFolio is built for how visual storytellers actually work.</p>
+    <p class="why-lede" data-lang="no">De fleste verktøy er laget for alle. VowFolio er laget for måten visuelle historiefortellere faktisk jobber på.</p>
+    <div class="why-points">
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">Built for real shoots</div>
+        <div class="why-point-title" data-lang="no">Laget for ekte shoots</div>
+        <div class="why-point-body" data-lang="en">Shotlists, day plans, getting-ready and first look — built in. Not bolted on.</div>
+        <div class="why-point-body" data-lang="no">Shotlister, dagplan, getting-ready og first look — bygget inn. Ikke skrudd på etterpå.</div>
+      </div>
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">No bloated software</div>
+        <div class="why-point-title" data-lang="no">Ingen overfylt software</div>
+        <div class="why-point-body" data-lang="en">No pipelines you'll never use, no settings you'll never touch. Just the parts that actually matter.</div>
+        <div class="why-point-body" data-lang="no">Ingen pipelines du aldri bruker, ingen innstillinger du aldri rører. Bare delene som faktisk teller.</div>
+      </div>
+
+      <div class="why-point">
+        <div class="why-point-title" data-lang="en">Built in the field</div>
+        <div class="why-point-title" data-lang="no">Laget i felt</div>
+        <div class="why-point-body" data-lang="en">Every feature has been tested on real shoots — not just designed in a boardroom.</div>
+        <div class="why-point-body" data-lang="no">Hver funksjon er testet på ekte shoots — ikke bare tegnet opp i et møterom.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Objection: Why not just use HoneyBook / Studio Ninja -->
+  <section class="objection">
+    <div class="objection-inner">
+      <h2 data-lang="en">Why not just use <em>HoneyBook</em> or <em>Studio Ninja</em>?</h2>
+      <h2 data-lang="no">Hvorfor ikke bare bruke <em>HoneyBook</em> eller <em>Studio Ninja</em>?</h2>
+      <p data-lang="en"><strong>Because they weren't built for the day itself.</strong> They handle contracts and invoicing beautifully — but not a shotlist at 14:42, not the first-look light, not the father-of-the-bride toast at 19:15.</p>
+      <p data-lang="no"><strong>Fordi de ikke er laget for selve dagen.</strong> De håndterer kontrakter og fakturering flott — men ikke en shotliste kl. 14:42, ikke lyset ved first look, ikke brudens fars tale kl. 19:15.</p>
+      <p data-lang="en">You've tried them. You've glued them to Notes, a Google Doc and WhatsApp to make the day work. That's fine — it's why we're building VowFolio.</p>
+      <p data-lang="no">Du har prøvd dem. Du har limt dem sammen med Notater, et Google-dokument og WhatsApp for å få dagen til å fungere. Det er greit — det er derfor vi bygger VowFolio.</p>
+    </div>
+  </section>
+
+  <!-- Testimonials + Trust stats -->
+  <section class="testimonials">
+    <div class="testimonials-header">
+      <h2 data-lang="en">What visual storytellers say</h2>
+      <h2 data-lang="no">Fra tidlige testere</h2>
+      <p data-lang="en">From early testers.</p>
+      <p data-lang="no">Ekte ord fra dem som bruker den.</p>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card">
+        <p class="testimonial-quote" data-lang="en">"The day plan alone changed how I shoot weddings. I always know what's next."</p>
+        <p class="testimonial-quote" data-lang="no">"Dagplanen alene endret måten jeg fotograferer bryllup på. Jeg vet alltid hva som kommer neste."</p>
+        <p class="testimonial-attr" data-lang="en">— Second shooter</p>
+        <p class="testimonial-attr" data-lang="no">— Medfotograf</p>
+      </div>
+
+      <!-- TODO: Replace with real tester quote once collected -->
+      <div class="testimonial-card">
+        <p class="testimonial-quote" data-lang="en">"The shotlist made our first wedding together feel like we'd worked as a crew for years."</p>
+        <p class="testimonial-quote" data-lang="no">"Shotlisten gjorde at vårt første bryllup sammen føltes som vi hadde jobbet som crew i flere år."</p>
+        <p class="testimonial-attr" data-lang="en">— Private preview tester</p>
+        <p class="testimonial-attr" data-lang="no">— Tester i private preview</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq">
+    <div class="faq-header">
+      <h2 data-lang="en">Before you try it</h2>
+      <h2 data-lang="no">Før du prøver det</h2>
+      <p data-lang="en">A few things people usually ask.</p>
+      <p data-lang="no">Noen spørsmål folk pleier å stille.</p>
+    </div>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Do I need to switch from my current system?</span>
+          <span data-lang="no">Må jeg bytte fra systemet jeg bruker nå?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">No. Most people start by using VowFolio alongside what they already have, then move more of their workflow over time.</span>
+          <span data-lang="no">Nei. De fleste starter med å bruke VowFolio sammen med det de har, og flytter gradvis mer av arbeidsflyten over tid.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Can I use this on a shoot day?</span>
+          <span data-lang="no">Kan jeg bruke den under et oppdrag?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">Yes. That is the point. Day plans, shotlists and timing are built for quick use while you're shooting, not for sitting at a desk.</span>
+          <span data-lang="no">Ja. Det er hele poenget. Dagplaner, shotlister og timing er laget for rask bruk mens du fotograferer — ikke for å sitte ved et skrivebord.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Do my clients need an app?</span>
+          <span data-lang="no">Må klientene mine laste ned en app?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">No. Clients use a simple link in their browser to fill out forms, review details and stay in sync with you. No app, no login friction.</span>
+          <span data-lang="no">Nei. Klientene bruker en enkel lenke i nettleseren for å fylle ut skjemaer, se detaljer og holde seg synkronisert med deg. Ingen app, ingen påloggingsfriksjon.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">What do clients actually see?</span>
+          <span data-lang="no">Hva ser klientene faktisk?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">One warm, shared space for the project. They can fill out forms, review details, sign contracts, follow progress and stay in touch with you in one place.</span>
+          <span data-lang="no">Ett varmt, delt rom for prosjektet. De kan fylle ut skjemaer, se detaljer, signere kontrakter, følge fremdriften og holde kontakt med deg — alt på ett sted.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Can clients see the shoot day timeline?</span>
+          <span data-lang="no">Kan klientene se dagsplanen?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">Yes. Once you've added the timeline in the app, clients can view the schedule, timing and notes you choose to share.</span>
+          <span data-lang="no">Ja. Når du har lagt inn tidslinjen i appen, kan klientene se planen, timingen og notatene du velger å dele.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Can clients share inspiration with me?</span>
+          <span data-lang="no">Kan klientene dele inspirasjon med meg?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">Yes. Clients can add inspiration, references and moodboard images in the portal, so everything stays in one place.</span>
+          <span data-lang="no">Ja. Klientene kan legge til inspirasjon, referanser og moodboard-bilder i portalen, så alt ligger på ett sted.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Can I use it with my second shooter or team?</span>
+          <span data-lang="no">Kan jeg bruke den med andrefotografen eller teamet mitt?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">Yes. You can share plans, shotlists and key details with the people working the shoot with you, so everyone stays aligned.</span>
+          <span data-lang="no">Ja. Du kan dele planer, shotlister og viktige detaljer med de som jobber shooten med deg, så alle er på samme side.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Is this only for weddings?</span>
+          <span data-lang="no">Er VowFolio kun for bryllup?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">It started with weddings, but the workflow also fits other shoot-based work where planning, client communication and timing matter.</span>
+          <span data-lang="no">Den startet med bryllup, men arbeidsflyten passer også annet shoot-basert arbeid hvor planlegging, klientkommunikasjon og timing betyr noe.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Is it mobile first?</span>
+          <span data-lang="no">Er den mobil-først?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">Yes. VowFolio is built for the phone first, because that is where the real work happens before, during and after a shoot.</span>
+          <span data-lang="no">Ja. VowFolio er bygget for mobilen først — fordi det er der det faktiske arbeidet skjer før, under og etter en shoot.</span>
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>
+          <span data-lang="en">Will my clients actually use the portal?</span>
+          <span data-lang="no">Vil klientene mine faktisk bruke portalen?</span>
+        </summary>
+        <div class="faq-answer">
+          <span data-lang="en">That is the goal. The portal is designed to feel simple, warm and easy to use, so clients can actually keep up without needing another app.</span>
+          <span data-lang="no">Det er målet. Portalen er laget for å føles enkel, varm og lett å bruke — så klientene faktisk kan følge med uten å måtte ha enda en app.</span>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2 data-lang="en">Get early access</h2>
+    <h2 data-lang="no">Få tidlig tilgang</h2>
+    <p data-lang="en">Private preview. Invitation only.</p>
+    <p data-lang="no">Private preview. Kun via invitasjon.</p>
+    <a href="#" class="hero-cta" data-lang="en" data-open-access>
+      Request access
+    </a>
+    <a href="#" class="hero-cta" data-lang="no" data-open-access>
+      Be om early access
+    </a>
+  </section>
+
+  <!-- Sticky mobile CTA -->
+  <a href="#" class="mobile-sticky-cta" id="mobileStickyCta" data-open-access>
+    <span data-lang="en">Get early access</span>
+    <span data-lang="no">Få tidlig tilgang</span>
+  </a>
+
+  <!-- Access Request Modal -->
+  <div class="access-backdrop" id="access-backdrop" role="dialog" aria-modal="true" aria-labelledby="access-title" onclick="if(event.target.id==='access-backdrop')closeAccessModal()">
+    <div class="access-modal">
+      <button class="access-close" onclick="closeAccessModal()" aria-label="Close" type="button">×</button>
+      <div id="access-form-view">
+        <div class="access-eyebrow" data-lang="en">Private preview</div>
+        <div class="access-eyebrow" data-lang="no">Private preview</div>
+        <h3 class="access-title" id="access-title" data-lang="en">Get early access to VowFolio</h3>
+        <h3 class="access-title" data-lang="no">Få tidlig tilgang til VowFolio</h3>
+        <p class="access-body" data-lang="en">We're inviting a small number of wedding photographers before launch. Enter the email connected to your Apple ID and I'll send you an invitation.</p>
+        <p class="access-body" data-lang="no">Vi inviterer et lite antall bryllupsfotografer før lansering. Legg inn e-posten knyttet til Apple ID-en din, så sender jeg deg en invitasjon.</p>
+        <form onsubmit="submitAccessRequest(event)">
+          <div class="access-field">
+            <label class="access-label" for="access-email">
+              <span data-lang="en">Apple ID email</span>
+              <span data-lang="no">Apple ID-epost</span>
+            </label>
+            <input class="access-input" type="email" id="access-email" required autocomplete="email" placeholder="you@example.com">
+          </div>
+          <div class="access-field">
+            <label class="access-label" for="access-instagram">
+              <span data-lang="en">Instagram handle <span class="access-optional">optional</span></span>
+              <span data-lang="no">Instagram-handle <span class="access-optional">valgfritt</span></span>
+            </label>
+            <input class="access-input" type="text" id="access-instagram" autocomplete="off" placeholder="@yourstudio" maxlength="40">
+          </div>
+          <button class="access-submit" type="submit" id="access-submit">
+            <span data-lang="en">Request access</span>
+            <span data-lang="no">Be om early access</span>
+          </button>
+          <div class="access-error hidden" id="access-error"></div>
+        </form>
+        <div class="access-small" data-lang="en">Only Helge sees this. Not shared, not added to any list.</div>
+        <div class="access-small" data-lang="no">Kun Helge ser dette. Deles ikke, legges ikke til på noen liste.</div>
+      </div>
+      <div id="access-success-view" class="access-success hidden">
+        <div class="access-success-icon">✓</div>
+        <div class="access-success-title" data-lang="en">On the list</div>
+        <div class="access-success-title" data-lang="no">Du er på listen</div>
+        <div class="access-success-body" data-lang="en">Thanks — I'll send your TestFlight invite soon.</div>
+        <div class="access-success-body" data-lang="no">Takk — jeg sender TestFlight-invitasjon snart.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p data-lang="en">&copy; 2026 VowFolio · <a href="mailto:hello@vowfolio.com">hello@vowfolio.com</a> · <a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
+    <p data-lang="no">&copy; 2026 VowFolio · <a href="mailto:hello@vowfolio.com">hello@vowfolio.com</a> · <a href="/privacy">Personvern</a> · <a href="/terms">Vilkår</a></p>
+  </footer>
+
+  <script>
+    (function() {
+      var titles = {
+        en: 'VowFolio — The studio app for wedding photographers',
+        no: 'VowFolio — Studioappen for bryllupsfotografer'
+      };
+      var descriptions = {
+        en: 'Built for wedding days, not generic workflows. The studio app for the day itself — day plan, shotlist, crew, and a premium client portal.',
+        no: 'Bygget for bryllupsdagen, ikke generiske arbeidsflyter. Studioappen for selve dagen — dagplan, shotliste, crew og en premium klientportal.'
+      };
+
+      function setLang(lang) {
+        if (lang !== 'no' && lang !== 'en') return;
+        document.documentElement.setAttribute('data-lang', lang);
+        document.documentElement.setAttribute('lang', lang === 'no' ? 'nb' : 'en');
+        document.title = titles[lang];
+        var metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', descriptions[lang]);
+        try { localStorage.setItem('vowfolio_lang', lang); } catch (e) {}
+      }
+
+      // Sync title/meta on initial load (head script set the attribute already)
+      var current = document.documentElement.getAttribute('data-lang') || 'en';
+      setLang(current);
+
+      // Wire up toggle buttons
+      document.querySelectorAll('.lang-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          setLang(btn.getAttribute('data-lang-btn'));
+        });
+      });
+    })();
+  </script>
+
+  <!-- Access request modal -->
+  <script>
+    const ACCESS_API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/request-access';
+
+    function openAccessModal() {
+      const backdrop = document.getElementById('access-backdrop');
+      document.getElementById('access-form-view').classList.remove('hidden');
+      document.getElementById('access-success-view').classList.add('hidden');
+      document.getElementById('access-error').classList.add('hidden');
+      backdrop.classList.add('show');
+      document.body.style.overflow = 'hidden';
+      setTimeout(() => {
+        const emailInput = document.getElementById('access-email');
+        if (emailInput) emailInput.focus();
+      }, 200);
+    }
+
+    function closeAccessModal() {
+      document.getElementById('access-backdrop').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    async function submitAccessRequest(e) {
+      e.preventDefault();
+      const email = document.getElementById('access-email').value.trim();
+      const instagram = document.getElementById('access-instagram').value.trim();
+      const submitBtn = document.getElementById('access-submit');
+      const errEl = document.getElementById('access-error');
+      errEl.classList.add('hidden');
+      submitBtn.disabled = true;
+      try {
+        const res = await fetch(ACCESS_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, instagram }),
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.message || 'Something went wrong. Please try again.');
+        }
+        document.getElementById('access-form-view').classList.add('hidden');
+        document.getElementById('access-success-view').classList.remove('hidden');
+        document.getElementById('access-email').value = '';
+        document.getElementById('access-instagram').value = '';
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+      }
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const backdrop = document.getElementById('access-backdrop');
+        if (backdrop && backdrop.classList.contains('show')) closeAccessModal();
+      }
+    });
+
+    // Intercept all [data-open-access] elements so CTAs trigger the modal
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('[data-open-access]');
+      if (trigger) {
+        e.preventDefault();
+        openAccessModal();
+      }
+    });
+  </script>
+
+  <!-- Sticky mobile CTA show/hide -->
+  <script>
+    (function() {
+      var sticky = document.getElementById('mobileStickyCta');
+      if (!sticky) return;
+      var heroCta = document.querySelector('.hero .hero-cta');
+      var finalCta = document.querySelector('.cta-section');
+      var ticking = false;
+
+      function update() {
+        var scrolled = window.scrollY;
+        var heroBottom = heroCta ? heroCta.getBoundingClientRect().bottom : 0;
+        var heroVisible = heroBottom > 0;
+        var finalVisible = false;
+        if (finalCta) {
+          var r = finalCta.getBoundingClientRect();
+          finalVisible = r.top < window.innerHeight - 80 && r.bottom > 0;
+        }
+        var show = scrolled > 320 && !heroVisible && !finalVisible;
+        sticky.classList.toggle('visible', show);
+        ticking = false;
+      }
+
+      function onScroll() {
+        if (!ticking) {
+          window.requestAnimationFrame(update);
+          ticking = true;
+        }
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+      update();
+    })();
+  </script>
+
+</body>
+</html>
