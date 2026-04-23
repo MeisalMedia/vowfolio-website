@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registrer deg – VowFolio Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --cream: #FAF7F2; --espresso: #3D3229; --taupe: #9B7E5E; --sage: #6B8F71;
+      --sage-hover: #5E8062; --sand: #E8E0D6; --white: #FFFFFF; --danger: #C0392B;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--cream); color: var(--espresso); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: var(--white); border-radius: 16px; padding: 48px 40px; max-width: 400px; width: 100%; box-shadow: 0 4px 24px rgba(61,50,41,0.08); text-align: center; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--taupe); letter-spacing: 1px; margin-bottom: 8px; }
+    .sub { font-size: 14px; color: #8A7D72; margin-bottom: 28px; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .step-indicator { display: flex; justify-content: center; gap: 8px; margin-bottom: 28px; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--sand); transition: background 0.2s; }
+    .step-dot.active { background: var(--taupe); }
+    input, select {
+      width: 100%; padding: 14px 16px; border: 1.5px solid var(--sand); border-radius: 10px;
+      font-size: 15px; font-family: inherit; margin-bottom: 12px; background: var(--cream);
+      color: var(--espresso); display: block; appearance: none;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--taupe); }
+    .btn {
+      width: 100%; padding: 14px; background: var(--sage); color: var(--white); border: none;
+      border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--sage-hover); }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .error { color: var(--danger); font-size: 13px; margin-top: 8px; min-height: 20px; }
+    .link-row { font-size: 13px; color: #8A7D72; margin-top: 20px; }
+    .link-row a { color: var(--taupe); text-decoration: none; font-weight: 500; }
+    .link-row a:hover { text-decoration: underline; }
+    .confirm-icon { font-size: 44px; margin-bottom: 16px; }
+    @media (max-width: 480px) { .card { padding: 32px 24px; } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>VowFolio</h1>
+
+    <div class="step-indicator">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+    </div>
+
+    <!-- Steg 1: Konto -->
+    <div class="step active" id="step1">
+      <p class="sub">Opprett konto</p>
+      <input type="email" id="email" placeholder="E-post" autocomplete="email">
+      <input type="password" id="password" placeholder="Passord" autocomplete="new-password">
+      <input type="password" id="passwordConfirm" placeholder="Bekreft passord" autocomplete="new-password">
+      <button class="btn" id="step1Btn" onclick="submitStep1()">Neste</button>
+      <p class="error" id="step1Error"></p>
+      <p class="link-row">Har du allerede konto? <a href="/studio/">Logg inn</a></p>
+    </div>
+
+    <!-- Steg 2: Profil -->
+    <div class="step" id="step2">
+      <p class="sub">Fortell oss om studioet ditt</p>
+      <input type="text" id="fullName" placeholder="Ditt fulle navn" autocomplete="name">
+      <input type="text" id="studioName" placeholder="Studionavn" autocomplete="organization">
+      <select id="country" onchange="onCountryChange()">
+        <option value="">Velg land</option>
+        <option value="Norge">Norge</option>
+        <option value="Sverige">Sverige</option>
+        <option value="Danmark">Danmark</option>
+        <option value="Finland">Finland</option>
+        <option value="Island">Island</option>
+        <option value="Storbritannia">Storbritannia</option>
+        <option value="USA">USA</option>
+        <option value="Annet">Annet</option>
+      </select>
+      <button class="btn" id="step2Btn" onclick="submitStep2()">Kom i gang</button>
+      <p class="error" id="step2Error"></p>
+    </div>
+
+    <!-- E-postbekreftelse nødvendig -->
+    <div class="step" id="stepConfirm">
+      <div class="confirm-icon">✉️</div>
+      <p class="sub" style="margin-bottom:0">Sjekk e-posten din! Vi har sendt deg en bekreftelseslenke. Klikk på lenken for å aktivere kontoen din, så kan du logge inn.</p>
+      <p class="link-row" style="margin-top:24px"><a href="/studio/">Tilbake til innlogging</a></p>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://ubdqueuknaqegipnbsxc.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZHF1ZXVrbmFxZWdpcG5ic3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjY2MTYsImV4cCI6MjA4OTgwMjYxNn0.UiUReWtlh6lGtoon2AwyQblIVEbzW1LMA3PBH8XclD0';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const currencyMap = {
+      'Norge':        { code: 'NOK', symbol: 'kr',  tz: 'Europe/Oslo' },
+      'Sverige':      { code: 'SEK', symbol: 'kr',  tz: 'Europe/Stockholm' },
+      'Danmark':      { code: 'DKK', symbol: 'kr',  tz: 'Europe/Copenhagen' },
+      'Finland':      { code: 'EUR', symbol: '€',   tz: 'Europe/Helsinki' },
+      'Island':       { code: 'ISK', symbol: 'kr',  tz: 'Atlantic/Reykjavik' },
+      'Storbritannia':{ code: 'GBP', symbol: '£',   tz: 'Europe/London' },
+      'USA':          { code: 'USD', symbol: '$',   tz: 'America/New_York' },
+    };
+
+    let newUser = null;
+
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + id).classList.add('active');
+      if (id === 1) { document.getElementById('dot1').classList.add('active'); document.getElementById('dot2').classList.remove('active'); }
+      if (id === 2) { document.getElementById('dot1').classList.add('active'); document.getElementById('dot2').classList.add('active'); }
+    }
+
+    function onCountryChange() {}
+
+    async function submitStep1() {
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value;
+      const confirm = document.getElementById('passwordConfirm').value;
+      const err = document.getElementById('step1Error');
+      const btn = document.getElementById('step1Btn');
+      err.textContent = '';
+
+      if (!email) { err.textContent = 'E-post er påkrevd'; return; }
+      if (pass.length < 6) { err.textContent = 'Passordet må være minst 6 tegn'; return; }
+      if (pass !== confirm) { err.textContent = 'Passordene stemmer ikke overens'; return; }
+
+      btn.disabled = true; btn.textContent = 'Oppretter konto…';
+      const { data, error } = await sb.auth.signUp({ email, password: pass });
+      if (error) { err.textContent = error.message; btn.disabled = false; btn.textContent = 'Neste'; return; }
+
+      newUser = data.user;
+      if (data.session) {
+        showStep(2);
+      } else {
+        showStep('Confirm');
+      }
+    }
+
+    async function submitStep2() {
+      const fullName = document.getElementById('fullName').value.trim();
+      const studioName = document.getElementById('studioName').value.trim();
+      const country = document.getElementById('country').value;
+      const err = document.getElementById('step2Error');
+      const btn = document.getElementById('step2Btn');
+      err.textContent = '';
+
+      if (!studioName) { err.textContent = 'Studionavn er påkrevd'; return; }
+      if (!country) { err.textContent = 'Velg et land'; return; }
+
+      btn.disabled = true; btn.textContent = 'Lagrer…';
+
+      const currency = currencyMap[country] || {};
+
+      if (fullName) {
+        await sb.auth.updateUser({ data: { full_name: fullName } });
+      }
+
+      const { error } = await sb.from('studio_settings').insert({
+        id: crypto.randomUUID(),
+        user_id: newUser.id,
+        studio_name: studioName,
+        country: country,
+        currency_code: currency.code || null,
+        currency_symbol: currency.symbol || null,
+        timezone: currency.tz || null,
+        updated_at: new Date().toISOString(),
+      });
+
+      if (error) { err.textContent = error.message; btn.disabled = false; btn.textContent = 'Kom i gang'; return; }
+
+      window.location.href = '/studio/';
+    }
+  </script>
+</body>
+</html>
