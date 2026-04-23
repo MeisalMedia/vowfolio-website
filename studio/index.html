@@ -778,6 +778,39 @@
       const { data: fresh } = await sb.from('messages').select('*').eq('thread_id', currentThreadId).order('created_at', { ascending: true });
       currentMessages = fresh || [];
       renderMessageBubbles();
+
+      // Deliver as email if this is a photographer → client wedding thread
+      if (role === 'photographer' && thread?.wedding_id) {
+        deliverMessageAsEmail(thread.wedding_id, currentThreadId, body).catch(err => console.warn('email delivery failed', err));
+      }
+    }
+
+    async function deliverMessageAsEmail(weddingId, threadId, body) {
+      let clientEmail = null, clientName = 'there';
+      const { data: contacts } = await sb.from('crm_contacts').select('primary_name, email').eq('linked_wedding_id', weddingId).limit(1);
+      if (contacts?.[0]?.email) { clientEmail = contacts[0].email; if (contacts[0].primary_name) clientName = contacts[0].primary_name; }
+      if (!clientEmail) {
+        const { data: intakes } = await sb.from('wedding_intake_forms').select('email, partner1_name').eq('wedding_id', weddingId).limit(1);
+        if (intakes?.[0]?.email) { clientEmail = intakes[0].email; if (intakes[0].partner1_name) clientName = intakes[0].partner1_name; }
+      }
+      if (!clientEmail) return;
+
+      const photographerName = studioName || currentUser.email || 'Your photographer';
+      const escaped = body.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      const html = `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 8px 0">From ${esc(photographerName)}</p><h2 style="color:#3D3229;font-size:18px;margin:0 0 14px 0">Hi ${esc(clientName)},</h2><p style="color:#2C2C2E;font-size:15px;line-height:1.6;margin:0">${escaped}</p><hr style="border:none;border-top:1px solid #E8E0D6;margin:20px 0"/><p style="color:#8A7D6E;font-size:12px;margin:0">Reply to this email and your photographer will see it directly in the app.</p></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sent via VowFolio</p></div>`;
+
+      const { data: { session } } = await sb.auth.getSession();
+      const token = session?.access_token || SUPABASE_KEY;
+      await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
+        body: JSON.stringify({
+          to: clientEmail,
+          subject: `New message from ${photographerName}`,
+          html,
+          replyTo: `thread-${String(threadId).toLowerCase()}@vowfolio.com`,
+        }),
+      });
     }
 
     // ── Kontakter ──
