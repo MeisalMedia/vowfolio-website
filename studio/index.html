@@ -2079,16 +2079,18 @@
     async function saveKontakt() {
       const name = document.getElementById('kName').value.trim();
       if (!name) { showToast('Navn er påkrevd'); return; }
+      // crm_contacts har NOT NULL tekst-felter med '' default — send tomme strenger, ikke null,
+      // ellers bryter insert constraintene. wedding_date og linked_wedding_id er nullable.
       const { data, error } = await sb.from('crm_contacts').insert({
         primary_name: name,
-        partner_name: document.getElementById('kPartner').value.trim() || null,
-        email: document.getElementById('kEmail').value.trim() || null,
-        phone: document.getElementById('kPhone').value.trim() || null,
+        partner_name: document.getElementById('kPartner').value.trim(),
+        email: document.getElementById('kEmail').value.trim(),
+        phone: document.getElementById('kPhone').value.trim(),
         status: document.getElementById('kStatus').value,
-        source: document.getElementById('kSource').value.trim() || null,
+        source: document.getElementById('kSource').value.trim(),
         wedding_date: document.getElementById('kDate').value || null,
-        venue_name: document.getElementById('kVenue').value.trim() || null,
-        notes: document.getElementById('kNotes').value.trim() || null,
+        venue_name: document.getElementById('kVenue').value.trim(),
+        notes: document.getElementById('kNotes').value.trim(),
       }).select().single();
       if (error) { showToast('Feil: ' + error.message); return; }
       await loadData();
