@@ -1249,13 +1249,10 @@
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
           const w = weddings.find(x => x.id === c.linked_wedding_id);
-          const wDate = c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'2-digit' }) : null;
-          const subtitleParts = [c.venue_name, wDate].filter(Boolean);
-          const subtitle = subtitleParts.length ? subtitleParts.join(' · ') : (c.email || '');
           html += `<div onclick="navigate('kontaktDetail','${c.id}')" style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--white);border-radius:10px;box-shadow:0 1px 4px rgba(61,50,41,0.04);cursor:pointer;transition:transform 0.12s, box-shadow 0.12s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 10px rgba(61,50,41,0.08)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(61,50,41,0.04)'">`;
           html += `<div style="flex:1;min-width:0">`;
           html += `<div style="font-size:14px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
-          if (subtitle) html += `<div style="font-size:12px;color:#8A7D72;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(subtitle)}</div>`;
+          if (c.venue_name) html += `<div style="font-size:12px;color:#8A7D72;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.venue_name)}</div>`;
           html += `</div>`;
           html += `<div style="display:flex;gap:6px;flex-shrink:0">`;
           if (c.source) html += `<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500;white-space:nowrap">${esc(c.source)}</span>`;
@@ -1264,14 +1261,12 @@
         }
         html += `</div>`;
       } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>E-post</th><th>Bryllupsdato</th><th>Kilde</th></tr></thead><tbody>`;
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Lokale</th><th>Kilde</th></tr></thead><tbody>`;
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
-          const wDate = c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' }) : '—';
           html += `<tr onclick="navigate('kontaktDetail','${c.id}')">`;
           html += `<td><div style="display:flex;align-items:center;gap:10px"><div class="contact-avatar" style="width:30px;height:30px;font-size:12px">${(c.primary_name||'?')[0].toUpperCase()}</div><span style="font-weight:500">${esc(displayName)}</span></div></td>`;
-          html += `<td style="color:#8A7D72">${esc(c.email||'—')}</td>`;
-          html += `<td style="color:#8A7D72">${wDate}</td>`;
+          html += `<td style="color:#8A7D72">${esc(c.venue_name||'—')}</td>`;
           html += `<td style="color:#8A7D72">${esc(c.source||'—')}</td>`;
           html += `</tr>`;
         }
