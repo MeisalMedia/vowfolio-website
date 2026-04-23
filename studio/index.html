@@ -79,18 +79,6 @@
     .stat-card .stat-icon { display: none; color: #A09080; margin-bottom: 6px; }
     .stat-card .stat-short { display: none; font-size: 10px; font-weight: 600; color: #A09080; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 4px; }
 
-    /* ── Action rows (Hjem inbox) ── */
-    .action-row { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--white); border-radius: 12px; box-shadow: 0 2px 8px rgba(61,50,41,0.04); cursor: pointer; transition: transform 0.12s, box-shadow 0.12s; }
-    .action-row:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(61,50,41,0.08); }
-    .action-row-sub { padding: 10px 18px 10px 60px; background: transparent; box-shadow: none; margin-top: -6px; }
-    .action-row-sub:hover { background: var(--white); transform: none; box-shadow: 0 1px 4px rgba(61,50,41,0.04); }
-    .action-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-    .action-icon-sm { width: 6px; height: 6px; border-radius: 50%; background: var(--sand); flex-shrink: 0; margin-left: 15px; }
-    .action-body { flex: 1; min-width: 0; }
-    .action-title { font-size: 14px; font-weight: 600; color: var(--espresso); margin-bottom: 2px; }
-    .action-sub { font-size: 12px; color: #8A7D72; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .action-sub strong { color: var(--espresso); font-weight: 600; }
-
     /* ── Section headers ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .section-header h3 { font-size: 14px; font-weight: 600; color: var(--espresso); }
@@ -353,8 +341,6 @@
     let templates = [], documents = [], weddings = [], contacts = [];
     let shotTemplates = [], taskTemplates = [];
     let messageThreads = [];
-    let payments = [];
-    let lastMessageByThread = {};
     let studioName = '';
     let studioSettings = null;
     let quillEditor = null;
@@ -386,7 +372,7 @@
       navigate('hjem');
     }
     async function loadData() {
-      const [t, d, w, c, s, mt, st, tt, pay] = await Promise.all([
+      const [t, d, w, c, s, mt, st, tt] = await Promise.all([
         sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
         sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
@@ -395,36 +381,11 @@
         sb.from('message_threads').select('*').order('last_message_at', { ascending: false }),
         sb.from('shot_templates').select('*').order('created_at', { ascending: false }),
         sb.from('task_templates').select('*').order('updated_at', { ascending: false }),
-        sb.from('payments').select('*'),
       ]);
       templates = t.data || []; documents = d.data || []; weddings = w.data || [];
       contacts = c.data || []; studioSettings = s.data?.[0] || null; studioName = studioSettings?.studio_name || '';
       messageThreads = mt.data || [];
       shotTemplates = st.data || []; taskTemplates = tt.data || [];
-      payments = pay.data || [];
-
-      // Fetch latest message per thread so we can classify "venter på deg" vs "venter på kunde"
-      lastMessageByThread = {};
-      if (messageThreads.length > 0) {
-        const threadIds = messageThreads.map(x => x.id);
-        const { data: msgs } = await sb.from('messages')
-          .select('thread_id, sender_role, sender_id, created_at, body')
-          .in('thread_id', threadIds)
-          .order('created_at', { ascending: false });
-        for (const m of (msgs || [])) {
-          if (!lastMessageByThread[m.thread_id]) lastMessageByThread[m.thread_id] = m;
-        }
-      }
-    }
-
-    function threadWaitingStatus(thread) {
-      const last = lastMessageByThread[thread.id];
-      if (!last) return 'idle';
-      const mine = last.sender_id === currentUser?.id || last.sender_role === 'photographer';
-      if (!mine || (thread.unread_count || 0) > 0) return 'awaiting_you';
-      const ageDays = (Date.now() - new Date(last.created_at).getTime()) / 86400000;
-      if (ageDays > 14) return 'idle';
-      return 'awaiting_client';
     }
 
     // ── Navigation ──
@@ -476,126 +437,50 @@
       }
     }
 
-    // ── Hjem (Action Inbox) ──
+    // ── Hjem ──
     function renderHjem(el) {
-      const today = new Date(); today.setHours(0,0,0,0);
+      const today = new Date();
+      const upcoming = weddings.filter(w => w.wedding_date && new Date(w.wedding_date) >= today)
+        .sort((a, b) => new Date(a.wedding_date) - new Date(b.wedding_date));
+      const nextWedding = upcoming[0];
+      const daysUntil = nextWedding ? Math.ceil((new Date(nextWedding.wedding_date) - today) / 86400000) : null;
+      const draftDocs = documents.filter(d => d.status === 'draft').length;
+      const signedDocs = documents.filter(d => d.status === 'fully_signed').length;
       const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' });
-      const dfShort = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short' });
-      const curr = studioSettings?.currency_symbol || 'kr';
-      const fmt = n => Number(n||0).toLocaleString('nb-NO');
-
-      const waitingMessages = messageThreads.filter(t => threadWaitingStatus(t) === 'awaiting_you');
-      const pendingContracts = documents.filter(d => ['sent','viewed','signed_by_client'].includes(d.status));
-      const overduePayments = payments.filter(p => {
-        if (p.status === 'paid') return false;
-        if (!p.due_date) return false;
-        return new Date(p.due_date) < today;
-      });
-      const upcomingWeek = weddings.filter(w => {
-        if (!w.wedding_date) return false;
-        const d = new Date(w.wedding_date); d.setHours(0,0,0,0);
-        const days = (d - today) / 86400000;
-        return days >= 0 && days <= 7;
-      }).sort((a,b) => new Date(a.wedding_date) - new Date(b.wedding_date));
-      const totalActions = waitingMessages.length + pendingContracts.length + overduePayments.length;
 
       let html = `<div class="main-header"><h2>Hjem</h2></div><div class="main-content">`;
 
-      if (totalActions === 0 && upcomingWeek.length === 0) {
-        html += `<div class="card" style="text-align:center;padding:64px 20px">
-          <div style="font-size:44px;margin-bottom:12px">✨</div>
-          <div style="font-size:17px;font-weight:600;margin-bottom:6px">Alt er under kontroll</div>
-          <div style="font-size:13px;color:#8A7D72">Ingen handlinger venter akkurat nå.</div>
-        </div></div>`;
-        el.innerHTML = html; return;
-      }
+      // Stats row
+      const iconCamera = `<svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg>`;
+      const iconPen = `<svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>`;
+      const iconCheck = `<svg width="20" height="20" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>`;
+      html += `<div class="stat-grid">`;
+      html += `<div class="stat-card"><div class="stat-icon">${iconCamera}</div><div class="label">Kommende oppdrag</div><div class="value">${upcoming.length}</div><div class="stat-short">Oppdrag</div><div class="sub">${nextWedding ? 'Neste: ' + df(nextWedding.wedding_date) : 'Ingen planlagt'}</div></div>`;
+      html += `<div class="stat-card"><div class="stat-icon">${iconPen}</div><div class="label">Kontrakter til signering</div><div class="value">${draftDocs}</div><div class="stat-short">Venter</div><div class="sub">Utkast / ikke sendt</div></div>`;
+      html += `<div class="stat-card"><div class="stat-icon">${iconCheck}</div><div class="label">Signerte kontrakter</div><div class="value">${signedDocs}</div><div class="stat-short">Signert</div></div>`;
+      html += `</div>`;
 
-      if (totalActions > 0) {
-        html += `<div class="section-header" style="margin-bottom:12px"><h3 style="font-size:15px">Trenger deg nå <span style="color:#A09080;font-weight:500">· ${totalActions}</span></h3></div>`;
-        html += `<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">`;
-
-        if (waitingMessages.length > 0) {
-          const first = waitingMessages[0];
-          const firstLast = lastMessageByThread[first.id];
-          const preview = firstLast?.body ? esc((firstLast.body||'').slice(0,60)) + (firstLast.body.length > 60 ? '…' : '') : '';
-          html += `<div class="action-row" onclick="navigate('conversation','${first.id}')">
-            <div class="action-icon" style="background:#E8EFF8;color:#3A6BA5">💬</div>
-            <div class="action-body">
-              <div class="action-title">${waitingMessages.length === 1 ? '1 melding venter på svar' : waitingMessages.length + ' meldinger venter på svar'}</div>
-              <div class="action-sub"><strong>${esc(threadDisplayName(first))}</strong>${preview ? ' · "' + preview + '"' : ''}</div>
-            </div>
-            <button class="btn-primary btn-sm" onclick="event.stopPropagation();navigate('conversation','${first.id}')">Svar</button>
-          </div>`;
-          for (const t of waitingMessages.slice(1, 4)) {
-            const m = lastMessageByThread[t.id];
-            const p = m?.body ? esc(m.body.slice(0,60)) + (m.body.length > 60 ? '…' : '') : '';
-            html += `<div class="action-row action-row-sub" onclick="navigate('conversation','${t.id}')">
-              <div class="action-icon-sm"></div>
-              <div class="action-body"><div class="action-sub"><strong>${esc(threadDisplayName(t))}</strong>${p ? ' · ' + p : ''}</div></div>
-              <button class="btn-outline btn-sm" onclick="event.stopPropagation();navigate('conversation','${t.id}')">Svar</button>
-            </div>`;
-          }
-        }
-
-        if (pendingContracts.length > 0) {
-          const first = pendingContracts[0];
-          const daysSince = Math.floor((Date.now() - new Date(first.created_at).getTime()) / 86400000);
-          html += `<div class="action-row" onclick="navigate('viewDoc','${first.id}')">
-            <div class="action-icon" style="background:#F0EBE4;color:#9B7E5E">📝</div>
-            <div class="action-body">
-              <div class="action-title">${pendingContracts.length === 1 ? '1 kontrakt venter på signatur' : pendingContracts.length + ' kontrakter venter på signatur'}</div>
-              <div class="action-sub"><strong>${esc(first.title)}</strong> · sendt for ${daysSince} ${daysSince === 1 ? 'dag' : 'dager'} siden</div>
-            </div>
-            <button class="btn-primary btn-sm" onclick="event.stopPropagation();navigate('viewDoc','${first.id}')">Åpne</button>
-          </div>`;
-          for (const d of pendingContracts.slice(1, 4)) {
-            const ds = Math.floor((Date.now() - new Date(d.created_at).getTime()) / 86400000);
-            html += `<div class="action-row action-row-sub" onclick="navigate('viewDoc','${d.id}')">
-              <div class="action-icon-sm"></div>
-              <div class="action-body"><div class="action-sub"><strong>${esc(d.title)}</strong> · ${ds} ${ds === 1 ? 'dag' : 'dager'} siden</div></div>
-              <button class="btn-outline btn-sm" onclick="event.stopPropagation();navigate('viewDoc','${d.id}')">Åpne</button>
-            </div>`;
-          }
-        }
-
-        if (overduePayments.length > 0) {
-          const totalOverdue = overduePayments.reduce((s,p) => s + parseFloat(p.amount||0), 0);
-          const first = overduePayments[0];
-          const firstWedding = weddings.find(x => x.id === first.wedding_id);
-          const firstCouple = firstWedding ? (firstWedding.partner2 ? `${firstWedding.partner1} & ${firstWedding.partner2}` : firstWedding.partner1) : '';
-          const daysOverdue = Math.floor((today - new Date(first.due_date)) / 86400000);
-          const clickAttr = firstWedding ? `onclick="navigate('oppdragDetail','${firstWedding.id}')"` : '';
-          html += `<div class="action-row" ${clickAttr}>
-            <div class="action-icon" style="background:#FDECEA;color:#C0392B">💰</div>
-            <div class="action-body">
-              <div class="action-title">${overduePayments.length === 1 ? '1 forfalt betaling' : overduePayments.length + ' forfalte betalinger'} · ${fmt(totalOverdue)} ${curr}</div>
-              <div class="action-sub"><strong>${esc(firstCouple || first.title || '')}</strong> · ${fmt(parseFloat(first.amount||0))} ${curr} · forfalt ${daysOverdue} ${daysOverdue === 1 ? 'dag' : 'dager'} siden</div>
-            </div>
-            ${firstWedding ? `<button class="btn-primary btn-sm" onclick="event.stopPropagation();navigate('oppdragDetail','${firstWedding.id}')">Åpne</button>` : ''}
-          </div>`;
-        }
-
+      // Next assignment highlight
+      if (nextWedding) {
+        const couple = nextWedding.partner2 ? `${nextWedding.partner1} & ${nextWedding.partner2}` : nextWedding.partner1;
+        html += `<div class="card" style="margin-bottom:24px;border-left:3px solid var(--rose);border-radius:0 12px 12px 0;cursor:pointer" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
+        html += `<div style="font-size:11px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Neste oppdrag — ${daysUntil === 0 ? 'i dag' : daysUntil + ' dager'}</div>`;
+        html += `<div style="font-size:18px;font-weight:600;font-family:'Playfair Display',serif">${esc(couple)}</div>`;
+        if (nextWedding.venue) html += `<div style="font-size:13px;color:#8A7D72;margin-top:4px">📍 ${esc(nextWedding.venue)}</div>`;
         html += `</div>`;
       }
 
-      if (upcomingWeek.length > 0) {
-        html += `<div class="section-header" style="margin-bottom:12px"><h3 style="font-size:15px">Denne uken · ${upcomingWeek.length}</h3></div>`;
-        html += `<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">`;
-        for (const w of upcomingWeek) {
-          const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
-          const d = new Date(w.wedding_date); d.setHours(0,0,0,0);
-          const days = Math.round((d - today) / 86400000);
-          const dayLabel = days === 0 ? 'I dag' : days === 1 ? 'I morgen' : `Om ${days} dager`;
-          html += `<div class="action-row" onclick="navigate('oppdragDetail','${w.id}')">
-            <div class="action-icon" style="background:#E8F4EA;color:#4A8A55">📅</div>
-            <div class="action-body">
-              <div class="action-title">${esc(couple)}</div>
-              <div class="action-sub">${dayLabel} · ${dfShort(w.wedding_date)}${w.venue ? ' · ' + esc(w.venue) : ''}</div>
-            </div>
-            <button class="btn-outline btn-sm" onclick="event.stopPropagation();navigate('oppdragDetail','${w.id}')">Åpne</button>
-          </div>`;
+      // Recent documents
+      const recentDocs = documents.slice(0, 5);
+      html += `<div class="section-header"><h3>Siste dokumenter</h3><a onclick="navigate('oppdrag')">Se alle →</a></div>`;
+      if (recentDocs.length === 0) {
+        html += `<div class="card" style="text-align:center;padding:32px;color:#A09080;font-size:14px">Ingen dokumenter enda</div>`;
+      } else {
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Tittel</th><th>Status</th><th>Opprettet</th></tr></thead><tbody>`;
+        for (const doc of recentDocs) {
+          html += `<tr onclick="navigate('viewDoc','${doc.id}')"><td><strong>${esc(doc.title)}</strong></td><td>${statusBadge(doc.status)}</td><td style="color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short'})}</td></tr>`;
         }
-        html += `</div>`;
+        html += `</tbody></table></div>`;
       }
 
       html += `</div>`;
@@ -621,31 +506,6 @@
         archived:  { label: 'Arkivert', bg: '#F0EBE4', color: '#9B7E5E' },
       };
       return map[status] || map.inquiry;
-    }
-
-    function contextualAction(w) {
-      const today = new Date(); today.setHours(0,0,0,0);
-      const thread = messageThreads.find(t => t.wedding_id === w.id);
-      if (thread && threadWaitingStatus(thread) === 'awaiting_you') {
-        const m = lastMessageByThread[thread.id];
-        const preview = m?.body ? '"' + m.body.slice(0, 50) + (m.body.length > 50 ? '…' : '') + '"' : 'Ny melding';
-        return { activity: '💬 ' + preview, tone: '#3A6BA5', label: 'Svar', onclick: `navigate('conversation','${thread.id}')` };
-      }
-      const overdue = payments.find(p => p.wedding_id === w.id && p.status !== 'paid' && p.due_date && new Date(p.due_date) < today);
-      if (overdue) {
-        const days = Math.floor((today - new Date(overdue.due_date)) / 86400000);
-        return { activity: `💰 ${esc(overdue.title)} — forfalt ${days} ${days === 1 ? 'dag' : 'dager'} siden`, tone: '#C0392B', label: 'Påminn', onclick: `navigate('oppdragDetail','${w.id}')` };
-      }
-      const pending = documents.find(d => d.wedding_id === w.id && ['sent','viewed','signed_by_client'].includes(d.status));
-      if (pending) {
-        const days = Math.floor((Date.now() - new Date(pending.created_at).getTime()) / 86400000);
-        return { activity: `📝 ${esc(pending.title)} — venter på signatur (${days}d)`, tone: '#9B7E5E', label: 'Åpne', onclick: `navigate('viewDoc','${pending.id}')` };
-      }
-      if (thread && threadWaitingStatus(thread) === 'awaiting_client') {
-        return { activity: '💬 Venter på svar fra kunde', tone: '#8A7D72', fallback: 'Åpne' };
-      }
-      const wDocs = documents.filter(d => d.wedding_id === w.id);
-      return { activity: null, fallback: `${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}` };
     }
 
     function renderOppdrag(el, filterOverride) {
@@ -691,26 +551,16 @@
         html += `<div class="card-grid card-grid-auto">`;
         for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+          const wDocs = documents.filter(d => d.wedding_id === w.id);
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
-          const action = contextualAction(w);
           html += `<div class="oppdrag-card" onclick="navigate('oppdragDetail','${w.id}')">`;
           html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
           html += `<div class="couple">${esc(couple)}</div>`;
           html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap;flex-shrink:0">${st.label}</span>`;
           html += `</div>`;
           html += `<div class="meta"><span>📅 ${wDate}</span>${w.venue ? `<span>📍 ${esc(w.venue)}</span>` : ''}</div>`;
-          if (action.activity) {
-            html += `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--sand);font-size:12px;color:${action.tone || '#8A7D72'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${action.activity}</div>`;
-          }
-          html += `<div class="footer">`;
-          html += `<span></span>`;
-          if (action.label) {
-            html += `<button class="btn-primary btn-sm" onclick="event.stopPropagation();${action.onclick}">${action.label}</button>`;
-          } else {
-            html += `<span style="font-size:12px;color:#8A7D72">${action.fallback || 'Åpne'}</span>`;
-          }
-          html += `</div>`;
+          html += `<div class="footer"><span style="font-size:12px;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</span></div>`;
           html += `</div>`;
         }
         html += `</div>`;
@@ -1022,53 +872,22 @@
       if (messageThreads.length === 0) {
         html += `<div class="empty-state" style="padding:80px 20px"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><h3>Ingen meldinger enda</h3><p>Meldinger synkroniseres fra appen.</p></div>`;
       } else {
-        const awaitingYou = [], awaitingClient = [], idle = [];
+        html += `<div style="background:var(--white)">`;
         for (const t of messageThreads) {
-          const s = threadWaitingStatus(t);
-          if (s === 'awaiting_you') awaitingYou.push(t);
-          else if (s === 'awaiting_client') awaitingClient.push(t);
-          else idle.push(t);
-        }
-
-        const renderThread = (t) => {
           const name = threadDisplayName(t);
           const sub = threadSubtitle(t);
           const preview = t.last_message_preview || 'Ingen meldinger enda';
           const time = relativeTime(t.last_message_at);
           const unread = t.unread_count || 0;
           const initial = (name[0]||'?').toUpperCase();
-          let row = `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='var(--white)'">`;
-          row += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0">${initial}</div>`;
-          row += `<div style="flex:1;min-width:0">`;
-          row += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${unread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${unread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${unread?600:400}">${time}</div></div>`;
-          if (sub) row += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
-          row += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${unread?'var(--espresso)':'#8A7D72'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
-          if (unread) row += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unread}</div>`;
-          row += `</div></div></div>`;
-          return row;
-        };
-
-        const sectionHeader = (title, count, tone) => {
-          const dot = tone === 'you' ? '#C0392B' : tone === 'client' ? '#9B7E5E' : '#B0A090';
-          return `<div style="padding:16px 24px 10px;display:flex;align-items:center;gap:8px;background:var(--cream);border-bottom:1px solid var(--sand)">
-            <div style="width:8px;height:8px;border-radius:50%;background:${dot}"></div>
-            <div style="font-size:11px;font-weight:700;color:var(--espresso);text-transform:uppercase;letter-spacing:0.6px">${title}</div>
-            <div style="font-size:12px;color:#A09080">${count}</div>
-          </div>`;
-        };
-
-        html += `<div style="background:var(--white)">`;
-        if (awaitingYou.length > 0) {
-          html += sectionHeader('Venter på deg', awaitingYou.length, 'you');
-          for (const t of awaitingYou) html += renderThread(t);
-        }
-        if (awaitingClient.length > 0) {
-          html += sectionHeader('Venter på kunde', awaitingClient.length, 'client');
-          for (const t of awaitingClient) html += renderThread(t);
-        }
-        if (idle.length > 0) {
-          html += sectionHeader('Stille', idle.length, 'idle');
-          for (const t of idle) html += renderThread(t);
+          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='var(--white)'">`;
+          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0">${initial}</div>`;
+          html += `<div style="flex:1;min-width:0">`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${unread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${unread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${unread?600:400}">${time}</div></div>`;
+          if (sub) html += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${unread?'var(--espresso)':'#8A7D72'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
+          if (unread) html += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unread}</div>`;
+          html += `</div></div></div>`;
         }
         html += `</div>`;
       }
