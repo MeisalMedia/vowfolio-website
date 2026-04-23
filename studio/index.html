@@ -609,7 +609,6 @@
         <div class="tab active" id="dtab-info" onclick="switchOppdragTab('info')">Info</div>
         <div class="tab" id="dtab-dokumenter" onclick="switchOppdragTab('dokumenter')">Dokumenter</div>
         <div class="tab" id="dtab-betalinger" onclick="switchOppdragTab('betalinger')">Betalinger</div>
-        <div class="tab" id="dtab-meldinger" onclick="switchOppdragTab('meldinger')">Meldinger</div>
       </div>`;
 
       html += `<div id="oppdragTabContent" style="flex:1;overflow-y:auto;padding:24px 28px"></div>`;
@@ -628,7 +627,6 @@
       if (tab === 'info') renderOppdragInfoTab();
       else if (tab === 'dokumenter') renderOppdragDokumenterTab();
       else if (tab === 'betalinger') renderOppdragBetalingerTab();
-      else if (tab === 'meldinger') renderOppdragMeldingerTab();
     }
 
     function renderOppdragInfoTab() {
@@ -1666,13 +1664,24 @@
 
       let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px"><button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button><h2>Ny kontrakt</h2></div></div>`;
       html += `<div class="main-content"><div class="create-form">`;
-      html += `<div class="form-group"><label>Mal</label><select id="createTemplate">${tOpts}</select></div>`;
-      html += `<div class="form-group"><label>Bryllup / Oppdrag</label><select id="createWedding" onchange="previewCreate()">${wOpts}</select></div>`;
+      html += `<div class="form-group"><label>Mal</label><select id="createTemplate" onchange="updateContractTitle()">${tOpts}</select></div>`;
+      html += `<div class="form-group"><label>Bryllup / Oppdrag</label><select id="createWedding" onchange="updateContractTitle();previewCreate()">${wOpts}</select></div>`;
+      html += `<div class="form-group"><label>Tittel på kontrakten</label><input type="text" id="createTitle" placeholder="f.eks. Kontrakt – Navn"></div>`;
       html += `<div id="createPreview" style="margin-top:20px"></div>`;
       html += `<button class="btn-primary" style="margin-top:20px" onclick="createDocument()">Opprett kontrakt</button>`;
       html += `</div></div>`;
       el.innerHTML = html;
-      if (preselectedWeddingId) previewCreate();
+      if (preselectedWeddingId) { updateContractTitle(); previewCreate(); }
+    }
+    function updateContractTitle() {
+      const wid = document.getElementById('createWedding')?.value;
+      const titleEl = document.getElementById('createTitle');
+      if (!titleEl) return;
+      const w = wid ? weddings.find(x => x.id === wid) : null;
+      if (w) {
+        const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+        titleEl.value = `Kontrakt – ${couple}`;
+      }
     }
     function previewCreate() {
       const wid = document.getElementById('createWedding').value;
@@ -1690,7 +1699,8 @@
       const t = templates.find(x=>x.id===tid), w = wid?weddings.find(x=>x.id===wid):null;
       const c = wid?contacts.find(x=>x.linked_wedding_id===wid):null;
       const resolved = resolvePlaceholders(t.content, w, c||{});
-      const { data: doc, error } = await sb.from('document_instances').insert({ template_id:tid, wedding_id:wid||null, contact_id:c?.id||null, type:t.type||'contract', title:t.title, content:resolved, status:'draft' }).select().single();
+      const customTitle = document.getElementById('createTitle')?.value.trim() || t.title;
+      const { data: doc, error } = await sb.from('document_instances').insert({ template_id:tid, wedding_id:wid||null, contact_id:c?.id||null, type:t.type||'contract', title:customTitle, content:resolved, status:'draft' }).select().single();
       if (error) { showToast('Feil: '+error.message); return; }
       const clientName = c?.primary_name||w?.partner1||'';
       await sb.from('document_signers').insert([
