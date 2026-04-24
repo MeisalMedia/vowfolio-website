@@ -50,8 +50,6 @@
 
     /* ── Main ── */
     .main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; height: 100vh; }
-    .main-header { padding: 18px 28px; border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; background: var(--white); flex-shrink: 0; }
-    .main-header h2 { font-family: 'Playfair Display', serif; font-size: 20px; }
     .main-content { padding: 28px; flex: 1; overflow-y: auto; }
 
     /* ── Buttons ── */
@@ -227,8 +225,6 @@
       }
       .sidebar.open { transform: translateX(0); }
       .main { height: auto; flex: 1; overflow: visible; }
-      .main-header { padding: 14px 16px; }
-      .main-header h2 { font-size: 18px; }
       .main-content { padding: 16px; }
       .card-grid-2, .card-grid-3 { grid-template-columns: 1fr; }
       .card-grid-auto { grid-template-columns: 1fr; }
@@ -724,7 +720,7 @@
         { key: 'booked', label: 'Booket' },
       ];
 
-      let html = `<div class="main-header"><h2>Oppdrag</h2><button class="btn-primary" onclick="navigate('createDoc')">+ Ny kontrakt</button></div><div class="main-content">`;
+      let html = `<div class="main-content">`;
 
       // Filter + view toggle bar
       html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap">`;
@@ -734,6 +730,7 @@
         html += `<button onclick="renderOppdrag(document.getElementById('mainContent'),'${chip.key}')" style="padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;border:1.5px solid ${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--sand)'};background:${active?(chip.key==='inquiry'?'#4A7FB5':'var(--sage)'):'var(--white)'};color:${active?'var(--white)':'#7A6A5A'}">${chip.label} <span style="opacity:0.7">${counts[chip.key]||0}</span></button>`;
       }
       html += `</div>`;
+      html += `<button class="btn-primary btn-sm" onclick="navigate('createDoc')" style="margin-left:8px">+ Ny kontrakt</button>`;
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
       html += `<button onclick="oppdragView='kort';renderOppdrag(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${oppdragView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
       html += `<button onclick="oppdragView='liste';renderOppdrag(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
@@ -791,15 +788,13 @@
       const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
       const st = weddingStatusInfo(w);
 
-      let html = `<div class="main-header">
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      let html = `<div style="padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
           <button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button>
-          <div>
-            <h2 style="margin-bottom:2px">${esc(couple)}</h2>
-            <span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
-          </div>
+          <div style="font-family:'Playfair Display',serif;font-size:17px">${esc(couple)}</div>
+          <span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
         </div>
-        <button class="btn-primary" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
+        <button class="btn-primary btn-sm" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
       </div>`;
 
       html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
@@ -1065,7 +1060,7 @@
     }
 
     function renderMeldinger(el) {
-      let html = `<div class="main-header"><h2>Meldinger</h2></div><div class="main-content" style="padding:0">`;
+      let html = `<div class="main-content" style="padding:0">`;
       if (messageThreads.length === 0) {
         html += `<div class="empty-state" style="padding:80px 20px"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg></div><h3>Ingen meldinger enda</h3><p>Meldinger synkroniseres fra appen.</p></div>`;
       } else {
@@ -1103,12 +1098,10 @@
       const name = threadDisplayName(thread);
       const sub = threadSubtitle(thread);
 
-      let html = `<div class="main-header">
-        <div style="display:flex;align-items:center;gap:14px;flex:1;min-width:0">
-          <button class="btn-outline btn-sm" onclick="navigate('meldinger')">←</button>
-          <div class="contact-avatar" style="width:36px;height:36px;font-size:13px;flex-shrink:0">${(name[0]||'?').toUpperCase()}</div>
-          <div style="min-width:0"><div style="font-family:'Playfair Display',serif;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>${sub ? `<div style="font-size:12px;color:#8A7D72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>` : ''}</div>
-        </div>
+      let html = `<div style="padding:10px 20px;background:var(--white);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <button class="btn-outline btn-sm" onclick="navigate('meldinger')">←</button>
+        <div class="contact-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0">${(name[0]||'?').toUpperCase()}</div>
+        <div style="min-width:0"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>${sub ? `<div style="font-size:11px;color:#8A7D72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>` : ''}</div>
       </div>`;
       html += `<div id="msgScroll" style="flex:1;overflow-y:auto;padding:20px 24px;background:var(--cream)"><div id="msgList" style="display:flex;flex-direction:column;gap:4px;max-width:720px;margin:0 auto">Laster...</div></div>`;
       html += `<div style="padding:12px 24px;background:var(--white);border-top:1px solid var(--sand);display:flex;gap:10px;align-items:flex-end;flex-shrink:0">
@@ -1244,11 +1237,12 @@
           (c.email||'').toLowerCase().includes(search);
       });
 
-      let html = `<div class="main-header"><h2>Kontakter</h2><div style="display:flex;gap:8px"><button class="btn-primary" onclick="showKontaktModal()">+ Legg til</button></div></div><div class="main-content">`;
+      let html = `<div class="main-content">`;
 
       // Search + view toggle bar
       html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">`;
       html += `<input type="text" placeholder="Søk navn eller e-post..." value="${esc(kontaktSearch)}" oninput="kontaktSearch=this.value;renderKontakter(document.getElementById('mainContent'))" style="padding:9px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);min-width:220px;flex:1;max-width:320px">`;
+      html += `<button class="btn-primary btn-sm" onclick="showKontaktModal()">+ Legg til</button>`;
       // View toggle
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
       html += `<button onclick="kontaktView='kort';renderKontakter(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${kontaktView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
@@ -1299,13 +1293,11 @@
       const couple = w ? (w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1) : null;
       const df = d => new Date(d).toLocaleDateString('nb-NO', { day:'numeric', month:'long', year:'numeric' });
 
-      let html = `<div class="main-header">
-        <div style="display:flex;align-items:center;gap:14px">
+      let html = `<div class="main-content"><div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
           <button class="btn-outline btn-sm" onclick="navigate('kontakter')">← Tilbake</button>
-          <h2>${esc(c.primary_name||'')}</h2>
+          <span style="font-family:'Playfair Display',serif;font-size:17px">${esc(c.primary_name||'')}</span>
           <span style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
-        </div>
-      </div><div class="main-content">`;
+        </div>`;
 
       html += `<div class="detail-grid">`;
 
@@ -1463,7 +1455,8 @@
     // ── Kontrakter (documents) ──
     function renderKontrakter(el) {
       const statusLabels = { draft:'Utkast', sent:'Sendt', viewed:'Sett', signed_by_client:'Klient signert', signed_by_photographer:'Fotograf signert', fully_signed:'Ferdig signert', archived:'Arkivert' };
-      let html = `<div class="main-header"><h2>Kontrakter</h2><button class="btn-primary" onclick="navigate('createDoc')">+ Ny kontrakt</button></div><div class="main-content">`;
+      let html = `<div class="main-content">`;
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:16px"><button class="btn-primary btn-sm" onclick="navigate('createDoc')">+ Ny kontrakt</button></div>`;
       if (documents.length === 0) {
         html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><h3>Ingen kontrakter enda</h3><p>Opprett en kontrakt fra en mal.</p><button class="btn-primary" onclick="navigate('createDoc')">Opprett kontrakt</button></div>`;
       } else {
@@ -1494,14 +1487,15 @@
       const addLabels = { kontrakt: '+ Ny kontraktsmal', shot: '+ Ny shotliste', oppgave: '+ Ny oppgavemal' };
       const addActions = { kontrakt: "navigate('newTemplate')", shot: "navigate('newShotTemplate')", oppgave: "navigate('newTaskTemplate')" };
 
-      let html = `<div class="main-header"><h2>Maler</h2><button class="btn-primary" onclick="${addActions[malerTab]}">${addLabels[malerTab]}</button></div><div class="main-content">`;
+      let html = `<div class="main-content">`;
 
-      // Tabs
-      html += `<div class="tabs">`;
+      // Tabs + add button
+      html += `<div class="tabs" style="display:flex;align-items:center">`;
       for (const t of tabs) {
         const active = malerTab === t.key;
         html += `<div class="tab${active?' active':''}" onclick="renderMaler(document.getElementById('mainContent'),'${t.key}')">${t.label} <span style="opacity:0.5;font-weight:400">${t.count}</span></div>`;
       }
+      html += `<div style="margin-left:auto;padding-right:4px"><button class="btn-primary btn-sm" onclick="${addActions[malerTab]}">${addLabels[malerTab]}</button></div>`;
       html += `</div>`;
 
       if (malerTab === 'kontrakt') {
@@ -1573,7 +1567,7 @@
       const fieldLabel = 'font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px';
       const fieldInput = 'width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso)';
 
-      let html = `<div class="main-header"><h2>Innstillinger</h2><button class="btn-primary" onclick="saveStudioSettings()">Lagre</button></div><div class="main-content">`;
+      let html = `<div class="main-content"><div style="display:flex;justify-content:flex-end;margin-bottom:20px"><button class="btn-primary" onclick="saveStudioSettings()">Lagre</button></div>`;
 
       html += `<div class="settings-section"><h3>Studio-profil</h3><div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">`;
       html += `<div><label style="${fieldLabel}">Studio-navn</label><input type="text" value="${esc(settingsDraft.studio_name)}" oninput="settingsDraft.studio_name=this.value" placeholder="f.eks. Ole Foto" style="${fieldInput}"></div>`;
@@ -1655,8 +1649,8 @@
         { key: 'eventAfter',  label: 'Etter bryllupet', footer: 'Dager etter bryllupsdagen',       before: false, trig: 'event' },
       ];
 
-      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'oppgave'})">← Tilbake</button><input class="title-input" id="taskTmplName" placeholder="Navn på mal..." value="${esc(s.name)}" oninput="taskEditorState.name=this.value"></div><div style="display:flex;gap:8px"><button class="btn-primary" onclick="saveTaskTemplate()">Lagre</button></div></div>`;
-      html += `<div class="main-content">`;
+      let html = `<div class="main-content">`;
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'oppgave'})">← Tilbake</button><input class="title-input" id="taskTmplName" placeholder="Navn på mal..." value="${esc(s.name)}" oninput="taskEditorState.name=this.value" style="flex:1"><button class="btn-primary btn-sm" onclick="saveTaskTemplate()">Lagre</button></div>`;
       html += `<div class="card" style="margin-bottom:16px;display:flex;gap:20px;flex-wrap:wrap;align-items:center"><div><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Prosjekttype</label><select onchange="taskEditorState.project_type=this.value" style="padding:8px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;background:var(--white)">${['wedding','couple','family','other'].map(v=>`<option value="${v}"${s.project_type===v?' selected':''}>${{wedding:'Bryllup',couple:'Par',family:'Familie',other:'Annet'}[v]}</option>`).join('')}</select></div><label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" ${s.auto_apply?'checked':''} onchange="taskEditorState.auto_apply=this.checked"> Brukes automatisk på nye oppdrag</label></div>`;
 
       for (const stage of stages) {
@@ -1759,8 +1753,8 @@
 
     function renderShotEditorBody(el) {
       const s = shotEditorState;
-      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'shot'})">← Tilbake</button><input class="title-input" id="shotTmplName" placeholder="Navn på shotliste..." value="${esc(s.name)}" oninput="shotEditorState.name=this.value"></div><div><button class="btn-primary" onclick="saveShotTemplate()">Lagre</button></div></div>`;
-      html += `<div class="main-content">`;
+      let html = `<div class="main-content">`;
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><button class="btn-outline btn-sm" onclick="navigate('maler',{tab:'shot'})">← Tilbake</button><input class="title-input" id="shotTmplName" placeholder="Navn på shotliste..." value="${esc(s.name)}" oninput="shotEditorState.name=this.value" style="flex:1"><button class="btn-primary btn-sm" onclick="saveShotTemplate()">Lagre</button></div>`;
       html += `<div class="card" style="margin-bottom:16px"><label style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px">Beskrivelse</label><input type="text" placeholder="Kort beskrivelse (valgfritt)" value="${esc(s.description)}" oninput="shotEditorState.description=this.value" style="width:100%;padding:9px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit"></div>`;
 
       if (s.categories.length === 0) {
@@ -1845,15 +1839,14 @@
         ['{{venue_address}}','Adresse'],['{{studio_name}}','Studio'],['{{package_price}}','Pris'],
         ['{{today_date}}','Dagens dato'],
       ];
-      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px;flex:1">`;
+      let html = `<div class="main-content" style="display:flex;flex-direction:column;height:100%">`;
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-shrink:0">`;
       html += `<button class="btn-outline btn-sm" onclick="navigate('maler')">← Tilbake</button>`;
-      html += `<input class="title-input" id="tmplTitle" placeholder="Maltittel..." value="${esc(tmpl?.title||'')}">`;
-      html += `</div><div style="display:flex;align-items:center;gap:10px">`;
+      html += `<input class="title-input" id="tmplTitle" placeholder="Maltittel..." value="${esc(tmpl?.title||'')}" style="flex:1">`;
       html += `<span class="save-indicator" id="saveStatus">Klar</span>`;
       if (tmpl) html += `<button class="btn-danger btn-sm" onclick="deleteTemplate('${tmpl.id}')">Slett</button>`;
-      html += `<button class="btn-primary" onclick="saveTemplate('${tmpl?.id||''}')">${tmpl ? 'Lagre' : 'Opprett'}</button>`;
-      html += `</div></div>`;
-      html += `<div class="main-content" style="display:flex;flex-direction:column;height:calc(100vh - 61px)">`;
+      html += `<button class="btn-primary btn-sm" onclick="saveTemplate('${tmpl?.id||''}')">${tmpl ? 'Lagre' : 'Opprett'}</button>`;
+      html += `</div>`;
       html += `<div class="editor-container">`;
       html += `<div class="placeholder-bar"><span style="font-size:11px;color:#8A7D72;font-weight:600">SETT INN:</span>`;
       for (const [ph, label] of placeholders) {
@@ -1925,8 +1918,8 @@
       let tOpts = '<option value="">Velg mal...</option>';
       for (const t of templates) { tOpts += `<option value="${t.id}">${esc(t.title)}</option>`; }
 
-      let html = `<div class="main-header"><div style="display:flex;align-items:center;gap:14px"><button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button><h2>Ny kontrakt</h2></div></div>`;
-      html += `<div class="main-content"><div class="create-form">`;
+      let html = `<div class="main-content"><div class="create-form">`;
+      html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:20px"><button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button><span style="font-family:'Playfair Display',serif;font-size:17px">Ny kontrakt</span></div>`;
       html += `<div class="form-group"><label>Mal</label><select id="createTemplate" onchange="updateContractTitle()">${tOpts}</select></div>`;
       html += `<div class="form-group"><label>Bryllup / Oppdrag</label><select id="createWedding" onchange="updateContractTitle();previewCreate()">${wOpts}</select></div>`;
       html += `<div class="form-group"><label>Tittel på kontrakten</label><input type="text" id="createTitle" placeholder="f.eks. Kontrakt – Navn"></div>`;
@@ -1982,15 +1975,15 @@
       const backTarget = w ? `navigate('oppdragDetail','${w.id}')` : `navigate('oppdrag')`;
       const statusLabels = { draft:'Utkast', sent:'Sendt', viewed:'Sett', signed_by_client:'Klient signert', fully_signed:'Ferdig signert' };
 
-      let html = `<div class="main-header">
-        <div style="display:flex;align-items:center;gap:14px">
+      let html = `<div class="main-content"><div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:12px">
           <button class="btn-outline btn-sm" onclick="${backTarget}">← Tilbake</button>
-          <h2>${esc(doc.title)}</h2>
+          <span style="font-family:'Playfair Display',serif;font-size:17px">${esc(doc.title)}</span>
         </div>
         <div style="display:flex;gap:8px">
-          ${doc.status==='draft' ? `<button class="btn-secondary" onclick="sendToSigning('${docId}')">Send til signering</button>` : ''}
+          ${doc.status==='draft' ? `<button class="btn-secondary btn-sm" onclick="sendToSigning('${docId}')">Send til signering</button>` : ''}
         </div>
-      </div><div class="main-content">`;
+      </div>`;
 
       html += `<div class="signers-card" style="margin-bottom:20px">`;
       html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-weight:600;font-size:14px">Signeringsstatus</span>${statusBadge(doc.status)}</div>`;
