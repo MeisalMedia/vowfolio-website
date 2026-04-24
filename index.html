@@ -171,16 +171,31 @@
 
     /* ─── HERO ─────────────────────────────────────────── */
     .hero-wrap {
-      background: var(--cream);
-      padding: 140px 0 80px;
+      background: url('/app-screens/hero-bg.jpg') center center / cover no-repeat;
+      position: relative;
+      padding: 140px 0 100px;
       text-align: center;
+    }
+    .hero-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        rgba(12,8,4,0.62) 0%,
+        rgba(12,8,4,0.42) 50%,
+        rgba(12,8,4,0.68) 100%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
     }
     .hero-badge {
       display: inline-block;
       font-size: 12px;
       font-weight: 600;
-      color: var(--sage);
-      background: rgba(107,143,113,0.1);
+      color: rgba(255,255,255,0.85);
+      background: rgba(255,255,255,0.12);
       padding: 6px 16px;
       border-radius: 20px;
       margin-bottom: 28px;
@@ -191,17 +206,18 @@
       font-size: clamp(30px, 5.5vw, 52px);
       font-weight: 700;
       line-height: 1.15;
-      color: var(--espresso);
+      color: #FFFFFF;
       max-width: 760px;
       margin: 0 auto 22px;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.3);
     }
     .hero-h1 em {
       font-style: italic;
-      color: var(--taupe);
+      color: #D4A96A;
     }
     .hero-sub {
       font-size: clamp(16px, 2.2vw, 19px);
-      color: var(--espresso);
+      color: rgba(255,255,255,0.92);
       font-weight: 500;
       max-width: 580px;
       margin: 0 auto 10px;
@@ -209,7 +225,7 @@
     }
     .hero-support {
       font-size: 15px;
-      color: var(--muted);
+      color: rgba(255,255,255,0.68);
       max-width: 480px;
       margin: 0 auto 10px;
       line-height: 1.65;
@@ -218,7 +234,7 @@
       font-family: 'Playfair Display', serif;
       font-style: italic;
       font-size: 16px;
-      color: var(--faint);
+      color: rgba(255,255,255,0.52);
       max-width: 500px;
       margin: 0 auto 36px;
     }
@@ -226,8 +242,8 @@
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      background: var(--espresso);
-      color: var(--white);
+      background: #F0E6DA;
+      color: #1A1008;
       padding: 16px 36px;
       border-radius: 12px;
       font-size: 16px;
@@ -235,27 +251,27 @@
       text-decoration: none;
       transition: background 0.2s, transform 0.1s;
     }
-    .hero-cta:hover { background: #2A2118; transform: translateY(-1px); }
+    .hero-cta:hover { background: #FFFFFF; transform: translateY(-1px); }
     .hero-descriptor {
       font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--faint);
+      color: rgba(255,255,255,0.42);
       margin-bottom: 24px;
     }
     .hero-micro {
       margin-top: 14px;
       font-size: 13px;
-      color: var(--faint);
+      color: rgba(255,255,255,0.42);
       letter-spacing: 0.3px;
     }
     .hero-founder {
       margin-top: 10px;
       font-family: 'Playfair Display', serif;
       font-size: 13px;
-      color: var(--taupe);
-      opacity: 0.85;
+      color: rgba(255,255,255,0.48);
+      opacity: 1;
     }
 
     /* ─── PAIN ─────────────────────────────────────────── */
@@ -510,6 +526,35 @@
       margin: 0 auto 36px;
       line-height: 1.5;
       text-align: center;
+    }
+    .world-photos {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin: 40px 0 36px;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .world-photos img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      display: block;
+      filter: saturate(0.85);
+      transition: filter 0.3s;
+    }
+    .world-photos img:hover { filter: saturate(1); }
+    /* Pocket image */
+    .pocket-img {
+      margin-top: 36px;
+      border-radius: 16px;
+      overflow: hidden;
+      max-width: 560px;
+    }
+    .pocket-img img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     /* ─── APP ADVANTAGE ────────────────────────────────── */
@@ -937,6 +982,7 @@
       .objection-wrap { padding: 40px 0 56px; }
       .objection-inner { padding: 28px 22px; }
       .world-wrap { padding: 60px 0 56px; }
+      .world-photos { grid-template-columns: repeat(2, 1fr); }
       .pocket-wrap { padding: 60px 0 56px; }
       .pocket-icons { flex-direction: column; align-items: flex-start; }
       .shots-wrap { padding: 40px 0 56px; }
@@ -974,7 +1020,7 @@
 
   <!-- ─── 1. HERO ───────────────────────────────────────── -->
   <div class="hero-wrap">
-    <div class="section-inner" style="text-align:center;">
+    <div class="hero-inner section-inner" style="text-align:center;">
       <div class="hero-badge" data-lang="en">Built by a wedding photographer</div>
       <div class="hero-badge" data-lang="no">Bygget av en bryllupsfotograf</div>
 
@@ -1180,6 +1226,13 @@
       <p class="world-kicker" data-lang="en">Whether you're shooting a shinto ceremony in Kyoto or a barn wedding in the Norwegian mountains: VowFolio keeps up with you.</p>
       <p class="world-kicker" data-lang="no">Om du fotograferer et shinto-bryllup i Kyoto eller en låvefest i Valdres: VowFolio holder følge med deg.</p>
 
+      <div class="world-photos">
+        <img src="/app-screens/world-barn.jpg" alt="Barn wedding">
+        <img src="/app-screens/world-urban.jpg" alt="Urban wedding">
+        <img src="/app-screens/world-beach.jpg" alt="Beach wedding">
+        <img src="/app-screens/world-cultural.jpg" alt="Cultural wedding">
+      </div>
+
       <div style="text-align:center;">
         <div class="world-flags">🇳🇴 🇬🇧 🇸🇪 🇩🇰 🇩🇪 🇪🇸 🇫🇷</div>
         <div class="world-langs" data-lang="en">Norwegian · English · Swedish · Danish · German · Spanish · French</div>
@@ -1210,6 +1263,10 @@
 
       <p class="pocket-close" data-lang="en">Other tools live in a browser. VowFolio lives in your pocket.</p>
       <p class="pocket-close" data-lang="no">Andre verktøy lever i en nettleser. VowFolio lever i lomma.</p>
+
+      <div class="pocket-img">
+        <img src="/app-screens/pocket-phone.jpg" alt="Photographer checking VowFolio on iPhone during a wedding shoot" loading="lazy">
+      </div>
 
       <div class="pocket-icons">
         <div class="pocket-icon-pill">
