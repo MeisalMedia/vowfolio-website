@@ -8,5 +8,6 @@
 /q/* /session-quiz 200
 /editor/* /editor 200
 /editor /editor 200
+/pricing / 302
 /privacy /privacy 200
 /terms /terms 200
