@@ -403,7 +403,7 @@
       const [t, d, w, c, s, mt, st, tt, pay] = await Promise.all([
         sb.from('document_templates').select('*').order('updated_at', { ascending: false }),
         sb.from('document_instances').select('*').order('created_at', { ascending: false }),
-        sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value').order('wedding_date', { ascending: true }),
+        sb.from('weddings').select('id, partner1, partner2, wedding_date, venue, venue_address, contract_value, project_type').order('wedding_date', { ascending: true }),
         sb.from('crm_contacts').select('id, primary_name, partner_name, email, phone, venue_name, venue_address, linked_wedding_id, status, source, notes, wedding_date, updated_at').order('updated_at', { ascending: false }),
         sb.from('studio_settings').select('*').limit(1),
         sb.from('message_threads').select('*').order('last_message_at', { ascending: false }),
@@ -678,6 +678,17 @@
     let activeOppdragTab = 'info';
     let detailWeddingId = null;
 
+    function projectTypeInfo(type) {
+      const map = {
+        wedding:    { label: 'Bryllup',    bg: '#F5EBE8', color: '#B36B5E' },
+        couple:     { label: 'Par',        bg: '#EEE6DC', color: '#9B7E5E' },
+        family:     { label: 'Familie',    bg: '#E8F4EA', color: '#4A8A55' },
+        portrait:   { label: 'Portrett',   bg: '#EAF0F8', color: '#5577A0' },
+        commercial: { label: 'Kommersielt',bg: '#F0EBE4', color: '#7A6A5A' },
+      };
+      return map[type] || { label: 'Bryllup', bg: '#F5EBE8', color: '#B36B5E' };
+    }
+
     function weddingStatusInfo(w) {
       const c = contacts.find(x => x.linked_wedding_id === w.id);
       const status = c?.status || 'inquiry';
@@ -737,29 +748,32 @@
           const wDocs = documents.filter(d => d.wedding_id === w.id);
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
+          const pt = projectTypeInfo(w.project_type);
           html += `<div class="oppdrag-card" onclick="navigate('oppdragDetail','${w.id}')">`;
           html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
           html += `<div class="couple">${esc(couple)}</div>`;
-          html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap;flex-shrink:0">${st.label}</span>`;
-          html += `</div>`;
+          html += `<div style="display:flex;gap:6px;flex-shrink:0">`;
+          html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color};white-space:nowrap">${pt.label}</span>`;
+          html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap">${st.label}</span>`;
+          html += `</div></div>`;
           html += `<div class="meta"><span>📅 ${wDate}</span>${w.venue ? `<span>📍 ${esc(w.venue)}</span>` : ''}</div>`;
           html += `<div class="footer"><span style="font-size:12px;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</span></div>`;
           html += `</div>`;
         }
         html += `</div>`;
       } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Par</th><th>Status</th><th>Dato</th><th>Lokale</th><th>Dokumenter</th></tr></thead><tbody>`;
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Type</th><th>Status</th><th>Dato</th><th>Lokale</th></tr></thead><tbody>`;
         for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
-          const wDocs = documents.filter(d => d.wedding_id === w.id);
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
+          const pt = projectTypeInfo(w.project_type);
           html += `<tr onclick="navigate('oppdragDetail','${w.id}')">`;
           html += `<td><strong>${esc(couple)}</strong></td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color}">${pt.label}</span></td>`;
           html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
           html += `<td style="color:#8A7D72">${wDate}</td>`;
           html += `<td style="color:#8A7D72">${esc(w.venue||'—')}</td>`;
-          html += `<td style="color:#8A7D72">${wDocs.length}</td>`;
           html += `</tr>`;
         }
         html += `</tbody></table></div>`;
