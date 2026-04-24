@@ -242,6 +242,13 @@
       color: var(--faint);
       letter-spacing: 0.3px;
     }
+    .hero-founder {
+      margin-top: 10px;
+      font-family: 'Playfair Display', serif;
+      font-size: 13px;
+      color: var(--taupe);
+      opacity: 0.85;
+    }
 
     /* ─── PAIN ─────────────────────────────────────────── */
     .pain-wrap {
@@ -675,6 +682,12 @@
       font-weight: 600;
       color: var(--sage);
     }
+    .proof-scarcity {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--faint);
+      font-style: italic;
+    }
 
     /* ─── FAQ ──────────────────────────────────────────── */
     .faq-wrap {
@@ -939,8 +952,8 @@
     <div class="nav-inner">
       <a href="/" class="logo">VowFolio</a>
       <div class="nav-links">
-        <a href="/pricing" class="nav-link" data-lang="en">Pricing</a>
-        <a href="/pricing" class="nav-link" data-lang="no">Priser</a>
+        <a href="#" class="nav-link" data-lang="en" data-open-pricing>Pricing</a>
+        <a href="#" class="nav-link" data-lang="no" data-open-pricing>Priser</a>
         <div class="lang-toggle" role="group" aria-label="Language">
           <button class="lang-btn" data-lang-btn="no" type="button">NO</button>
           <button class="lang-btn" data-lang-btn="en" type="button">EN</button>
@@ -974,6 +987,8 @@
 
       <p class="hero-micro" data-lang="en">Invitation only · 7 languages · iOS private preview</p>
       <p class="hero-micro" data-lang="no">Invitasjonsbasert · 7 språk · iOS i private preview</p>
+      <p class="hero-founder" data-lang="en"><em>Founder pricing locks permanently for everyone who joins the private preview.</em></p>
+      <p class="hero-founder" data-lang="no"><em>Grunnlegger-pris låses permanent for alle som kommer inn i privat preview.</em></p>
     </div>
   </div>
 
@@ -1278,10 +1293,11 @@
       </div>
 
       <div class="proof-bar">
-        <!-- Update [XX] with real numbers when available -->
         <div class="proof-bar-inner" data-lang="en">Tested across 14 weddings · 0 forgotten shotlists</div>
         <div class="proof-bar-inner" data-lang="no">Testet på 14 bryllup · 0 glemte shotlister</div>
       </div>
+      <p class="proof-scarcity" data-lang="en">Private preview is limited to a small group of photographers in 2026.</p>
+      <p class="proof-scarcity" data-lang="no">Privat preview er begrenset til en liten gruppe fotografer i 2026.</p>
     </div>
   </div>
 
@@ -1375,12 +1391,23 @@
 
         <details class="faq-item">
           <summary>
+            <span data-lang="en">What will it cost?</span>
+            <span data-lang="no">Hva kommer det til å koste?</span>
+          </summary>
+          <div class="faq-answer">
+            <span data-lang="en">We haven't set a public price yet — we'll do that closer to launch, based on what photographers tell us is actually worth it. What we can promise: everyone who joins private preview now locks in founder pricing permanently. You'll never pay more than what we introduce to you at invitation — even when we set higher pricing for new users later.</span>
+            <span data-lang="no">Vi har ikke landet på offentlig pris ennå — det gjør vi nærmere lansering, basert på hva fotografer faktisk sier er verdt det. Det vi derimot kan love: alle som kommer inn i privat preview nå, låser grunnlegger-pris permanent. Du kommer aldri til å betale mer enn det vi introduserer til deg ved invitasjon — selv om vi setter høyere pris for nye brukere etterpå.</span>
+          </div>
+        </details>
+
+        <details class="faq-item">
+          <summary>
             <span data-lang="en">Is there a free trial?</span>
             <span data-lang="no">Er det en gratis prøveperiode?</span>
           </summary>
           <div class="faq-answer">
-            <span data-lang="en">During private preview, access is by invitation. Photographers who come in now lock in the founder price — permanently. Reach out and we'll talk.</span>
-            <span data-lang="no">I private preview-fasen er tilgang invitasjonsbasert. Fotografer som kommer inn nå låser grunnlegger-prisen permanent. Ta kontakt, så prater vi.</span>
+            <span data-lang="en">In private preview, you use VowFolio without payment while we build together. When we launch publicly, you'll receive a founder pricing offer before we open to everyone. No surprises.</span>
+            <span data-lang="no">I privat preview bruker du VowFolio uten betaling mens vi utvikler sammen. Når vi lanserer offentlig, får du som tidlig bruker tilbud om grunnlegger-pris før vi åpner for alle. Ingen overraskelser.</span>
           </div>
         </details>
 
@@ -1417,18 +1444,18 @@
 
       <p class="final-body" data-lang="en" style="margin-top:-8px;">
         VowFolio is in private preview. Invitation only.<br>
-        Founder pricing locks permanently for everyone who comes in now.
+        <strong style="color:#C8B49A;">Founder pricing locks forever</strong> — before we set public pricing at launch.
       </p>
       <p class="final-body" data-lang="no" style="margin-top:-8px;">
         VowFolio er i privat preview. Invitasjonsbasert.<br>
-        Grunnlegger-pris låses permanent for alle som kommer inn nå.
+        <strong style="color:#C8B49A;">Grunnlegger-pris låses for alltid</strong> — før vi setter offentlig pris ved lansering.
       </p>
 
       <a href="#" class="final-cta-btn" data-lang="en" data-open-access>Request an invitation →</a>
       <a href="#" class="final-cta-btn" data-lang="no" data-open-access>Be om invitasjon →</a>
 
-      <p class="final-sub" data-lang="en">7 languages · iOS · Nordic photographers first, the rest of the world right behind.</p>
-      <p class="final-sub" data-lang="no">7 språk · iOS · Norske fotografer først, resten av verden rett bak.</p>
+      <p class="final-sub" data-lang="en">No credit card required · iOS · 7 languages</p>
+      <p class="final-sub" data-lang="no">Ingen kredittkort nødvendig · iOS · 7 språk</p>
 
 
     </div>
@@ -1439,6 +1466,25 @@
     <span data-lang="en">Get early access</span>
     <span data-lang="no">Få tidlig tilgang</span>
   </a>
+
+  <!-- ─── PRICING INFO MODAL ──────────────────────────────── -->
+  <div class="access-backdrop" id="pricing-backdrop" role="dialog" aria-modal="true" onclick="if(event.target.id==='pricing-backdrop')closePricingModal()">
+    <div class="access-modal">
+      <button class="access-close" onclick="closePricingModal()" aria-label="Close" type="button">×</button>
+      <div class="access-eyebrow" data-lang="en">Pricing</div>
+      <div class="access-eyebrow" data-lang="no">Priser</div>
+      <h3 class="access-title" data-lang="en">Pricing comes at launch.</h3>
+      <h3 class="access-title" data-lang="no">Pris kommer ved lansering.</h3>
+      <p class="access-body" data-lang="en">VowFolio is in private preview. Photographers who get access now lock in founder pricing permanently — even after we open to everyone.<br><br>When public pricing is set, early users hear about it first.</p>
+      <p class="access-body" data-lang="no">VowFolio er i privat preview. Fotografer som får tilgang nå låser grunnlegger-pris permanent — også etter vi åpner for alle.<br><br>Når offentlig pris er satt, informerer vi tidlige brukere først.</p>
+      <a href="#" class="access-submit" style="display:block;text-align:center;text-decoration:none;padding:14px 24px;" data-open-access>
+        <span data-lang="en">Request an invitation →</span>
+        <span data-lang="no">Be om invitasjon →</span>
+      </a>
+      <div class="access-small" data-lang="en">No credit card required. No public pricing yet.</div>
+      <div class="access-small" data-lang="no">Ingen kredittkort nødvendig. Ingen offentlig pris ennå.</div>
+    </div>
+  </div>
 
   <!-- ─── ACCESS MODAL ──────────────────────────────────── -->
   <div class="access-backdrop" id="access-backdrop" role="dialog" aria-modal="true" aria-labelledby="access-title" onclick="if(event.target.id==='access-backdrop')closeAccessModal()">
@@ -1589,6 +1635,25 @@
         e.preventDefault();
         openAccessModal();
       }
+    });
+  </script>
+
+  <!-- ─── PRICING MODAL SCRIPT ────────────────────────────── -->
+  <script>
+    function openPricingModal() {
+      document.getElementById('pricing-backdrop').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closePricingModal() {
+      document.getElementById('pricing-backdrop').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('click', function(e) {
+      const trigger = e.target.closest('[data-open-pricing]');
+      if (trigger) { e.preventDefault(); openPricingModal(); }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('pricing-backdrop').classList.contains('show')) closePricingModal();
     });
   </script>
 
