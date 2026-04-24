@@ -236,6 +236,14 @@
       transition: background 0.2s, transform 0.1s;
     }
     .hero-cta:hover { background: #2A2118; transform: translateY(-1px); }
+    .hero-descriptor {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 24px;
+    }
     .hero-micro {
       margin-top: 14px;
       font-size: 13px;
@@ -669,18 +677,18 @@
       font-weight: 500;
       color: var(--taupe);
     }
-    .proof-bar {
-      text-align: center;
-      margin-top: 8px;
+    .proof-statement-wrap {
+      background: var(--cream);
+      padding: 120px 0;
+      border-top: 1px solid var(--taupe);
+      border-bottom: 1px solid var(--taupe);
     }
-    .proof-bar-inner {
-      display: inline-block;
-      background: rgba(107,143,113,0.1);
-      border-radius: 12px;
-      padding: 14px 28px;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--sage);
+    .proof-statement {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 5vw, 52px);
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--espresso);
     }
     .proof-scarcity {
       margin-top: 12px;
@@ -970,6 +978,9 @@
       <div class="hero-badge" data-lang="en">Built by a wedding photographer</div>
       <div class="hero-badge" data-lang="no">Bygget av en bryllupsfotograf</div>
 
+      <p class="hero-descriptor" data-lang="en">iPhone app for wedding photographers · Day plan · Shot list · Crew · Client portal</p>
+      <p class="hero-descriptor" data-lang="no">iPhone-app for bryllupsfotografer · Dagplan · Shotliste · Crew · Klientportal</p>
+
       <h1 class="hero-h1" data-lang="en">The one app you reach for<br>when <em>she walks down the aisle.</em></h1>
       <h1 class="hero-h1" data-lang="no">Den ene appen du åpner<br>når <em>bruden går ned kirkegulvet.</em></h1>
 
@@ -1025,10 +1036,10 @@
       </div>
 
       <div class="pain-break" data-lang="en">
-        It's not because you're a bad photographer. It's because you're working without a system that keeps pace with you.
+        You don't forget because you're bad.<br>You forget because your system is.
       </div>
       <div class="pain-break" data-lang="no">
-        Det er ikke fordi du er en dårlig fotograf. Det er fordi du jobber uten et system som holder følge med deg.
+        Du glemmer ikke fordi du er dårlig.<br>Du glemmer fordi systemet ditt er det.
       </div>
 
       <p class="pain-apps" data-lang="en">Notes app. WhatsApp. A Google Doc. An email you searched for yesterday.<br>You're holding it together with willpower and caffeine.</p>
@@ -1109,23 +1120,23 @@
       <div class="cost-grid">
         <div class="cost-stat">
           <div class="cost-val">3 t</div>
-          <div class="cost-desc" data-lang="en">per wedding spent coordinating across apps instead of shooting</div>
-          <div class="cost-desc" data-lang="no">per oppdrag brukt på koordinering på tvers av apper</div>
+          <div class="cost-desc" data-lang="en">hunting for info the couple already sent you</div>
+          <div class="cost-desc" data-lang="no">å lete etter info paret allerede har sendt deg</div>
         </div>
         <div class="cost-stat">
           <div class="cost-val">47</div>
-          <div class="cost-desc" data-lang="en">messages on average per wedding between you, the couple, and crew</div>
-          <div class="cost-desc" data-lang="no">meldinger i snitt per bryllup mellom deg, paret og crewet</div>
+          <div class="cost-desc" data-lang="en">messages per wedding — because nothing lives in one place</div>
+          <div class="cost-desc" data-lang="no">meldinger per bryllup — fordi ingenting bor på samme sted</div>
         </div>
         <div class="cost-stat">
-          <div class="cost-val">1 ↓</div>
-          <div class="cost-desc" data-lang="en">missed shotlist moment per year — at minimum</div>
-          <div class="cost-desc" data-lang="no">glemt shotliste-punkt i året — minst</div>
+          <div class="cost-val">1</div>
+          <div class="cost-desc" data-lang="en">missed shot list item per year — at least. You don't know which one until after.</div>
+          <div class="cost-desc" data-lang="no">glemt shotliste-punkt i året — minst. Du vet ikke hvilket før etterpå.</div>
         </div>
         <div class="cost-stat">
           <div class="cost-val">1 natt</div>
-          <div class="cost-desc" data-lang="en">of bad sleep before every major shoot</div>
-          <div class="cost-desc" data-lang="no">med dårlig søvn før hver store shoot</div>
+          <div class="cost-desc" data-lang="en">of lost sleep before every major shoot — because your brain doesn't trust the system</div>
+          <div class="cost-desc" data-lang="no">søvnløs før hver store shoot — fordi hjernen ikke stoler på systemet</div>
         </div>
       </div>
 
@@ -1236,21 +1247,29 @@
       <div class="shot-caption">
         <div class="shot-caption-title" data-lang="en">Day plan</div>
         <div class="shot-caption-title" data-lang="no">Dagplan</div>
-        <div class="shot-caption-body" data-lang="en">The whole day in your pocket. Your crew sees exactly what you see.</div>
+        <div class="shot-caption-body" data-lang="en">The whole day in your pocket. Your crew sees what you see.</div>
         <div class="shot-caption-body" data-lang="no">Hele dagen i lomma. Crewet ser det samme som deg.</div>
       </div>
       <div class="shot-caption">
         <div class="shot-caption-title" data-lang="en">Dashboard</div>
         <div class="shot-caption-title" data-lang="no">Dashboard</div>
-        <div class="shot-caption-body" data-lang="en">Everything your couple shared. Ready before you lift the camera.</div>
+        <div class="shot-caption-body" data-lang="en">Everything the couple shared. Ready before you lift the camera.</div>
         <div class="shot-caption-body" data-lang="no">Alt paret delte. Klart før du tar opp kameraet.</div>
       </div>
       <div class="shot-caption">
-        <div class="shot-caption-title" data-lang="en">Shotlist</div>
+        <div class="shot-caption-title" data-lang="en">Shot list</div>
         <div class="shot-caption-title" data-lang="no">Shotliste</div>
-        <div class="shot-caption-body" data-lang="en">47 wishes. One tap to check off. Nothing forgotten.</div>
+        <div class="shot-caption-body" data-lang="en">47 requests. One tap to check off. Nothing forgotten.</div>
         <div class="shot-caption-body" data-lang="no">47 ønsker. Én tap å huke av. Ingenting glemt.</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ─── PROOF STATEMENT ─────────────────────────────────── -->
+  <div class="proof-statement-wrap">
+    <div class="section-inner" style="text-align:center;">
+      <p class="proof-statement" data-lang="en">Tested across 14 weddings.<br>0 missed shot lists.</p>
+      <p class="proof-statement" data-lang="no">Testet på 14 bryllup.<br>0 glemte shotlister.</p>
     </div>
   </div>
 
@@ -1280,10 +1299,6 @@
         </div>
       </div>
 
-      <div class="proof-bar">
-        <div class="proof-bar-inner" data-lang="en">Tested across 14 weddings · 0 forgotten shotlists</div>
-        <div class="proof-bar-inner" data-lang="no">Testet på 14 bryllup · 0 glemte shotlister</div>
-      </div>
       <p class="proof-scarcity" data-lang="en">Private preview is limited to a small group of photographers in 2026.</p>
       <p class="proof-scarcity" data-lang="no">Privat preview er begrenset til en liten gruppe fotografer i 2026.</p>
     </div>
@@ -1422,12 +1437,12 @@
       <h2 class="final-h2" data-lang="no">Neste bryllup er om 14 dager.</h2>
 
       <p class="final-body" data-lang="en">
-        You can hold it together with Notes and WhatsApp, the way you always have.
-        Or you can try something built for <em><strong>exactly this job.</strong></em>
+        You can do it the way you always have — with Notes, WhatsApp, and a bit of luck.
+        Or you can have it all in your pocket, <em><strong>where you are when it counts.</strong></em>
       </p>
       <p class="final-body" data-lang="no">
-        Du kan holde det sammen med Notater og WhatsApp, slik du alltid har gjort.
-        Eller du kan prøve noe som ble bygget for <em><strong>akkurat denne jobben.</strong></em>
+        Du kan gjøre det slik du alltid har gjort — med Notater, WhatsApp og litt flaks.
+        Eller du kan ha alt i lomma, <em><strong>der du er når det teller.</strong></em>
       </p>
 
       <p class="final-body" data-lang="en" style="margin-top:-8px;">
