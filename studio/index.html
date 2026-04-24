@@ -564,7 +564,7 @@
       const paidThisMonth = payments.filter(p => p.status === 'paid' && p.paid_date && new Date(p.paid_date).getFullYear() === year && new Date(p.paid_date).getMonth() === month)
         .reduce((s,p) => s + parseFloat(p.amount||0), 0);
 
-      let html = `<div class="main-header"><h2>Hjem</h2></div><div class="main-content">`;
+      let html = `<div class="main-content" style="padding-top:24px">`;
 
       // 1. Trenger deg nå (maks 3 synlige; "Vis alle" hvis flere)
       html += `<div class="hjem-section-title">Trenger deg nå${todos.length > 0 ? ` <span class="count">· ${todos.length}</span>` : ''}</div>`;
