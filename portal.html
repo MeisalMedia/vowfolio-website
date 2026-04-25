@@ -890,19 +890,7 @@ function render(data) {
     </div>
   `).join('');
 
-  app.innerHTML = `
-    <div class="wedding-header">
-      <div class="wedding-couple">${escapeHtml(coupleName)}</div>
-      ${metaParts.length ? `<div class="wedding-meta">${metaParts.join(' · ')}</div>` : ''}
-    </div>
-
-    ${renderCountdown(w.weddingDate, s)}
-
-    ${renderDayPlan((s.dayPlan && s.dayPlan.items) || [])}
-
-    <div class="section-title">${tr('nextSteps')}</div>
-
-    ${intake.submitted ? `
+  const intakeTileHtml = intake.submitted ? `
     <button class="tile" id="intake-tile" onclick="toggleIntake(this)">
       <div class="tile-icon sage">📋</div>
       <div class="tile-body">
@@ -931,8 +919,9 @@ function render(data) {
       </div>
       <div class="tile-arrow">›</div>
     </button>
-    `}
+    `;
 
+  const contractTileHtml = `
     <button class="tile" ${contractDisabled ? 'disabled' : ''} onclick="${contractTarget}">
       <div class="tile-icon gold">📝</div>
       <div class="tile-body">
@@ -941,7 +930,9 @@ function render(data) {
       </div>
       <div class="tile-arrow">›</div>
     </button>
+    `;
 
+  const depositTileHtml = `
     <button class="tile" onclick="toggleDeposit(this)">
       <div class="tile-icon muted">💳</div>
       <div class="tile-body">
@@ -958,6 +949,29 @@ function render(data) {
         ${deposit.finalPaymentDueDate ? `<div class="expand-row"><span>${tr('finalDue')}</span><strong>${formatDate(deposit.finalPaymentDueDate)}</strong></div>` : ''}
       </div>
     </div>
+    `;
+
+  const sortableTiles = [
+    { done: !!intake.submitted, html: intakeTileHtml },
+    { done: contract.status === 'signed', html: contractTileHtml },
+    { done: !!deposit.paid, html: depositTileHtml },
+  ];
+  sortableTiles.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
+  const sortedTilesHtml = sortableTiles.map(t => t.html).join('');
+
+  app.innerHTML = `
+    <div class="wedding-header">
+      <div class="wedding-couple">${escapeHtml(coupleName)}</div>
+      ${metaParts.length ? `<div class="wedding-meta">${metaParts.join(' · ')}</div>` : ''}
+    </div>
+
+    ${renderCountdown(w.weddingDate, s)}
+
+    ${renderDayPlan((s.dayPlan && s.dayPlan.items) || [])}
+
+    <div class="section-title">${tr('nextSteps')}</div>
+
+    ${sortedTilesHtml}
 
     ${delivTotal > 0 ? `
     <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
