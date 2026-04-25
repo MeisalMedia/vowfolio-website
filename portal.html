@@ -20,13 +20,10 @@
     .lang-toggle button.active{background:#3D3229;color:#fff}
     .lang-toggle button.inactive{background:#FAFAF8;color:#8A7D6E}
 
-    .hero{border-radius:20px;overflow:hidden;margin-bottom:20px;position:relative;aspect-ratio:3/1;background:linear-gradient(135deg,#D9C9B2,#9B7E5E 60%,#6B8F71);box-shadow:0 4px 20px rgba(61,50,41,0.12)}
-    @media (max-width:640px){.hero{aspect-ratio:3.5/1;border-radius:16px;margin-bottom:16px}}
-    .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,0.45));pointer-events:none}
-    .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .hero-content{position:absolute;left:0;right:0;bottom:0;padding:20px 22px;color:#fff;z-index:1}
-    .hero-couple{font-family:'Playfair Display',serif;font-size:28px;line-height:1.1;margin-bottom:6px;text-shadow:0 1px 8px rgba(0,0,0,0.3)}
-    .hero-meta{font-size:13px;opacity:0.92;text-shadow:0 1px 6px rgba(0,0,0,0.3)}
+    .wedding-header{text-align:center;padding:4px 0 28px}
+    .wedding-couple{font-family:'Playfair Display',serif;font-size:36px;line-height:1.2;color:#3D3229;margin-bottom:10px}
+    .wedding-meta{font-size:14px;color:#9B7E5E;letter-spacing:0.2px}
+    @media (max-width:640px){.wedding-couple{font-size:28px}.wedding-header{padding:0 0 22px}}
 
     .countdown{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px}
     .count-row{display:flex;justify-content:center;gap:16px}
@@ -804,9 +801,6 @@ function render(data) {
   // Update brand
   if (p.name) document.getElementById('brand-name').textContent = p.name;
 
-  const heroSrc = w.coverImagePath || p.portalHeroUrl;
-  const heroBg = heroSrc ? `<img src="${escapeHtml(heroSrc)}" alt="">` : '';
-
   const metaParts = [];
   if (w.venue) metaParts.push(escapeHtml(w.venue));
   if (w.weddingDate) metaParts.push(formatDate(w.weddingDate));
@@ -897,12 +891,9 @@ function render(data) {
   `).join('');
 
   app.innerHTML = `
-    <div class="hero">
-      ${heroBg}
-      <div class="hero-content">
-        <div class="hero-couple">${escapeHtml(coupleName)}</div>
-        <div class="hero-meta">${metaParts.join(' · ')}</div>
-      </div>
+    <div class="wedding-header">
+      <div class="wedding-couple">${escapeHtml(coupleName)}</div>
+      ${metaParts.length ? `<div class="wedding-meta">${metaParts.join(' · ')}</div>` : ''}
     </div>
 
     ${renderCountdown(w.weddingDate, s)}
