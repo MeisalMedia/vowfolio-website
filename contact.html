@@ -293,8 +293,15 @@
 
       // Hero image (hidden if show_branding is explicitly false)
       if (studio && studio.portal_hero_url && config.show_branding !== false) {
-        document.getElementById('heroContainer').innerHTML =
-          '<div class="hero-img" style="background-image:url(\'' + studio.portal_hero_url + '\')"></div>';
+        try {
+          var heroUrl = new URL(studio.portal_hero_url);
+          if (heroUrl.protocol === 'https:' || heroUrl.protocol === 'http:') {
+            var heroDiv = document.createElement('div');
+            heroDiv.className = 'hero-img';
+            heroDiv.style.backgroundImage = 'url("' + heroUrl.href.replace(/"/g, '%22') + '")';
+            document.getElementById('heroContainer').replaceChildren(heroDiv);
+          }
+        } catch (_) { /* invalid URL — skip hero image */ }
       }
 
       // Build fields
