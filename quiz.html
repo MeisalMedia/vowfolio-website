@@ -116,7 +116,7 @@ const t = {
     church: 'Church', civil: 'Civil', outdoor: 'Outdoor',
     s4title: 'Key Times', s4desc: 'Help us plan the day. Leave blank if unsure.',
     ceremony: 'Ceremony', reception: 'Reception', gettingReady: 'Getting Ready',
-    guestArrival: 'Guest Arrival', speeches: 'Speeches', cakeCutting: 'Cake Cutting', firstDance: 'First Dance',
+    guestArrival: 'Guests arrive at venue', speeches: 'Speeches', cakeCutting: 'Cake Cutting', firstDance: 'First Dance',
     s5title: 'Locations', s5desc: 'Where will things happen?',
     ceremonyLoc: 'Ceremony Location', ceremonyLocP: 'Church or venue name & address',
     receptionLoc: 'Reception Location', receptionLocP: 'Venue name & address',
@@ -158,7 +158,7 @@ const t = {
     church: 'Kirke', civil: 'Sivil', outdoor: 'Utendørs',
     s4title: 'Viktige tidspunkter', s4desc: 'Hjelp oss planlegge dagen. La stå tomt hvis usikker.',
     ceremony: 'Seremoni', reception: 'Mottak', gettingReady: 'Forberedelser',
-    guestArrival: 'Gjestene ankommer', speeches: 'Taler', cakeCutting: 'Kakekutting', firstDance: 'Første dans',
+    guestArrival: 'Gjestene ankommer lokalet', speeches: 'Taler', cakeCutting: 'Kakekutting', firstDance: 'Første dans',
     s5title: 'Lokasjoner', s5desc: 'Hvor skal ting skje?',
     ceremonyLoc: 'Seremonisted', ceremonyLocP: 'Kirke eller lokale — navn og adresse',
     receptionLoc: 'Mottakssted', receptionLocP: 'Navn og adresse',
@@ -355,8 +355,18 @@ function addSuggestion(key, text) {
 }
 
 // Steps
+function setLangAndRender(l) { setLang(l); renderStep(); }
+
 function stepNames() {
-  return '<div class="step-title">' + L('s0title') + '</div><div class="step-desc">' + L('s0desc') + '</div>'
+  var noSel = lang === 'no';
+  var noStyle = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;transition:all 0.2s;border:2px solid ' + (noSel ? '#6B8F71' : '#E8DFD1') + ';background:' + (noSel ? '#6B8F71' : '#FAFAF8') + ';color:' + (noSel ? '#fff' : '#8A7D6E');
+  var enStyle = 'flex:1;padding:14px;border-radius:12px;font-size:15px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer;transition:all 0.2s;border:2px solid ' + (!noSel ? '#6B8F71' : '#E8DFD1') + ';background:' + (!noSel ? '#6B8F71' : '#FAFAF8') + ';color:' + (!noSel ? '#fff' : '#8A7D6E');
+  var langPicker = '<div style="display:flex;gap:10px;margin-bottom:24px">'
+    + '<button onclick="setLangAndRender(\'no\')" style="' + noStyle + '">🇳🇴 Norsk</button>'
+    + '<button onclick="setLangAndRender(\'en\')" style="' + enStyle + '">🇬🇧 English</button>'
+    + '</div>';
+  return langPicker
+    + '<div class="step-title">' + L('s0title') + '</div><div class="step-desc">' + L('s0desc') + '</div>'
     + field('partner1Name', L('partner1'), 'text', L('firstName'))
     + field('partner1Phone', '', 'tel', L('phonePh1'))
     + field('partner2Name', L('partner2'), 'text', L('firstName'))
@@ -368,13 +378,16 @@ function stepGuests() {
 }
 function stepCeremony() {
   return '<div class="step-title">' + L('s3title') + '</div><div class="step-desc">' + L('s3desc') + '</div>'
-    + chipSelect('ceremonyType', [L('church'), L('civil'), L('outdoor')]);
+    + chipSelect('ceremonyType', [L('church'), L('civil'), L('outdoor')])
+    + '<div style="margin-top:18px">'
+    + field('ceremonyAddress', L('ceremonyLoc'), 'text', L('ceremonyLocP'))
+    + '</div>';
 }
 function stepTiming() {
   return '<div class="step-title">' + L('s4title') + '</div><div class="step-desc">' + L('s4desc') + '</div>'
     + timeField('gettingReadyTime', L('gettingReady'))
-    + timeField('guestArrivalTime', L('guestArrival'))
     + timeField('ceremonyTime', L('ceremony'))
+    + timeField('guestArrivalTime', L('guestArrival'))
     + timeField('receptionTime', L('reception'))
     + timeField('speechesTime', L('speeches'))
     + timeField('cakeCuttingTime', L('cakeCutting'))
@@ -382,7 +395,6 @@ function stepTiming() {
 }
 function stepLocations() {
   return '<div class="step-title">' + L('s5title') + '</div><div class="step-desc">' + L('s5desc') + '</div>'
-    + field('ceremonyAddress', L('ceremonyLoc'), 'text', L('ceremonyLocP'))
     + field('receptionAddress', L('receptionLoc'), 'text', L('receptionLocP'))
     + field('gettingReadyLocation', L('gettingReadyLoc'), 'text', L('gettingReadyLocP'));
 }
@@ -475,6 +487,7 @@ async function submit() {
   });
   formData.coordinator = coordLines.join('\n');
 
+  formData.language = lang;
   try {
     const res = await fetch(API + '?action=quiz-submit', {
       method: 'POST',
