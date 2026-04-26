@@ -185,10 +185,6 @@
     .dayplan-event-title{font-size:15px;font-weight:600;color:#3D3229;line-height:1.35}
     .dayplan-item:first-child .dayplan-event-title{font-size:16px;font-weight:700}
     .dayplan-event-notes{font-size:13px;color:rgba(194,132,122,0.88);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
-    a.dayplan-event-notes{display:inline-flex;align-items:center;gap:5px;text-decoration:none;transition:color 0.15s}
-    a.dayplan-event-notes:hover{color:#9B5A50}
-    a.dayplan-event-notes:hover .dayplan-pin{opacity:1}
-    .dayplan-pin{width:12px;height:12px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s}
     .tile-group.done{opacity:0.65}
     .tile-group.done .tile{box-shadow:none;background:#F8F5F0}
     .tile-group.done .tile-expand{box-shadow:none;background:#F8F5F0}
@@ -755,10 +751,13 @@ function deriveNextStep(s) {
 
 function renderDayPlan(items) {
   if (!items || !items.length) return '';
-  const pinSvg = '<svg class="dayplan-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
   const rows = items.map(it => {
+    // Notes is plain free-text — render as plain text. Address-as-Maps-link
+    // was removed because notes like "Victoria Hotell" are ambiguous and
+    // Maps would point to the wrong place. A dedicated "Steder for dagen"
+    // section with structured venues will replace this.
     const notesHtml = it.notes
-      ? `<a class="dayplan-event-notes" href="${escapeHtml(mapsUrl(it.notes))}" target="_blank" rel="noopener">${pinSvg}${escapeHtml(it.notes)}</a>`
+      ? `<div class="dayplan-event-notes">${escapeHtml(it.notes)}</div>`
       : '';
     return `
     <div class="dayplan-item">
