@@ -1930,7 +1930,9 @@ async function restoreChatState() {
 }
 
 setLang(lang);
-loadOverview().then(restoreChatState);
+loadOverview()
+  .then(restoreChatState)
+  .catch(err => console.error('[portal] loadOverview/restoreChatState failed:', err));
 </script>
 </body>
 </html>

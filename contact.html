@@ -421,7 +421,12 @@
     function notifyHeight() {
       try {
         var h = document.documentElement.scrollHeight;
-        window.parent.postMessage({ vowfolioHeight: h }, '*');
+        // Target the parent at its own origin rather than the wildcard `*`
+        // so the height ping isn't broadcast to unrelated frames.
+        var targetOrigin = (window.parent && window.parent !== window && document.referrer)
+          ? new URL(document.referrer).origin
+          : window.location.origin;
+        window.parent.postMessage({ vowfolioHeight: h }, targetOrigin);
       } catch(e) {}
     }
   </script>

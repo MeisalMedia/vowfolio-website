@@ -169,8 +169,12 @@
 
     // ---- Init ----
     (async () => {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session) { currentUser = session.user; showApp(); }
+      try {
+        const { data: { session } } = await sb.auth.getSession();
+        if (session) { currentUser = session.user; showApp(); }
+      } catch (err) {
+        console.error('[editor] auth init failed:', err);
+      }
     })();
 
     // ---- Auth ----
