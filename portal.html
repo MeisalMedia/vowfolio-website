@@ -252,7 +252,7 @@
     .auth-desc{font-size:14px;color:#6B5E4F;line-height:1.5;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto}
     .auth-input{width:100%;padding:14px 16px;border:1px solid #E8DFD1;border-radius:12px;font-size:15px;font-family:inherit;background:#FAFAF8;color:#3D3229;transition:border-color 0.15s,background 0.15s}
     .auth-input:focus{outline:none;border-color:#9B7E5E;background:#fff}
-    .auth-input.code-input{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:22px;letter-spacing:5px;text-align:center;padding:16px 8px}
+    .auth-input.code-input{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:24px;letter-spacing:8px;text-align:center;padding:16px 8px}
     .auth-input:disabled{opacity:0.6;cursor:not-allowed}
     .auth-btn{width:100%;padding:14px 16px;background:#3D3229;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:14px;transition:background 0.15s}
     .auth-btn:hover:not(:disabled){background:#2A1F18}
@@ -488,7 +488,7 @@ const t = {
     authSending: 'Sending...',
     authCodeTitle: 'Enter your code',
     authCodeDesc: 'We have sent a code to your email. It expires in 60 minutes.',
-    authCodePlaceholder: '00000000',
+    authCodePlaceholder: '000000',
     authVerify: 'Verify',
     authVerifying: 'Verifying...',
     authChangeEmail: 'Use a different email',
@@ -696,7 +696,7 @@ const t = {
     authSending: 'Sender...',
     authCodeTitle: 'Skriv inn koden',
     authCodeDesc: 'Vi har sendt en kode til e-posten din. Koden utløper om 60 minutter.',
-    authCodePlaceholder: '00000000',
+    authCodePlaceholder: '000000',
     authVerify: 'Bekreft',
     authVerifying: 'Bekrefter...',
     authChangeEmail: 'Bruk en annen e-post',
@@ -920,7 +920,7 @@ function showError(title, desc) {
 }
 
 // ── Auth UI (full-page) ─────────────────────────────────────────────
-const OTP_LENGTH = 8;                       // matches Supabase auth config (email_otp_length)
+const OTP_LENGTH = 6;                       // matches Supabase auth config (email_otp_length)
 const OTP_LIFETIME_MS = 60 * 60 * 1000;     // 60 min — Supabase default
 const OTP_RESEND_COOLDOWN_MS = 60 * 1000;   // 60s between resend attempts
 
