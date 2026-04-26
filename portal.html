@@ -495,6 +495,7 @@ const t = {
     authResend: 'Resend code',
     authSendNewCode: 'Send new code',
     authNewCodeSent: 'A new code has been sent.',
+    authResumed: 'Welcome back. Enter the code from your email.',
     authCodeSentTo: 'Code sent to',
     authExpiresIn: 'Code expires in',
     authExpiredCode: 'The code has expired. Request a new code to continue.',
@@ -702,6 +703,7 @@ const t = {
     authResend: 'Send ny kode',
     authSendNewCode: 'Send ny kode',
     authNewCodeSent: 'En ny kode er sendt.',
+    authResumed: 'Velkommen tilbake. Skriv inn koden fra e-posten din.',
     authCodeSentTo: 'Koden sendt til',
     authExpiresIn: 'Koden utløper om',
     authExpiredCode: 'Koden er utløpt. Be om en ny kode for å fortsette.',
@@ -850,6 +852,43 @@ function authHeaders() {
   return s?.access_token ? { 'Authorization': `Bearer ${s.access_token}` } : {};
 }
 
+// ── Auth-progress persistens (overlever iOS-tab-eviction når brukeren bytter til Mail-app) ──
+// SessionStorage er per-tab og overlever reload, men ikke tab-close.
+// Vi lagrer kun ikke-sensitiv metadata (e-post + timestamps), aldri OTP-koden.
+const AUTH_PROGRESS_KEY = sessionKey ? `${sessionKey}_auth_progress` : null;
+
+function saveAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return;
+  try {
+    sessionStorage.setItem(AUTH_PROGRESS_KEY, JSON.stringify({
+      email: authState.email,
+      codeRequestedAt: authState.codeRequestedAt,
+      resendCooldownUntil: authState.resendCooldownUntil,
+      savedAt: Date.now(),
+    }));
+  } catch {}
+}
+
+function loadAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return null;
+  try {
+    const raw = sessionStorage.getItem(AUTH_PROGRESS_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    // Ignorer hvis eldre enn 60 min (OTP er uansett utløpt)
+    if (Date.now() - (data.savedAt || 0) > 60 * 60 * 1000) {
+      sessionStorage.removeItem(AUTH_PROGRESS_KEY);
+      return null;
+    }
+    return data;
+  } catch { return null; }
+}
+
+function clearAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return;
+  try { sessionStorage.removeItem(AUTH_PROGRESS_KEY); } catch {}
+}
+
 // Wrapped fetch that injects Bearer JWT and auto-refreshes on 401 auth_required.
 async function authedFetch(url, init = {}) {
   const buildHeaders = (extra) => ({ ...(init.headers || {}), ...extra });
@@ -910,6 +949,7 @@ function showAuthScreen(step, errorOrInfo, isInfo) {
     authState.resendCooldownUntil = 0;
     authState.codeExpired = false;
     if (!authState.email) authState.email = '';
+    clearAuthProgress();
     stopAuthTicker();
   }
   renderAuthScreen();
@@ -1097,6 +1137,7 @@ async function submitEmailStep() {
       resendCooldownUntil: now + OTP_RESEND_COOLDOWN_MS,
       codeExpired: false,
     };
+    saveAuthProgress();
     renderAuthScreen();
   } catch (e) {
     authState.error = tr('authConnError');
@@ -1136,6 +1177,7 @@ async function resendOtp() {
       resendCooldownUntil: now + OTP_RESEND_COOLDOWN_MS,
       codeExpired: false,
     };
+    saveAuthProgress();
     renderAuthScreen();
   } catch {
     authState = { ...authState, loading: false, error: tr('authConnError') };
@@ -1181,6 +1223,7 @@ async function submitCodeStep() {
       expires_at: data.expires_at,
       email: authState.email,
     });
+    clearAuthProgress();
     authState.loading = false;
     loadOverview();
   } catch (e) {
@@ -1207,6 +1250,7 @@ async function logout() {
     }
   }
   clearSession();
+  clearAuthProgress();
   showAuthScreen('email', tr('authLoggedOut'), true);
 }
 
@@ -2453,9 +2497,33 @@ async function restoreChatState() {
 }
 
 setLang(lang);
-loadOverview()
-  .then(restoreChatState)
-  .catch(err => console.error('[portal] loadOverview/restoreChatState failed:', err));
+
+// On init: if there's a saved auth-progress (user got OTP, switched to Mail,
+// browser killed the tab), restore the code-input step so they don't have to
+// start over. Only kicks in when there's no valid session yet.
+(function initPortal() {
+  const inProgress = loadAuthProgress();
+  const hasSession = !!getSession();
+  if (!hasSession && inProgress?.email) {
+    authState = {
+      ...authState,
+      step: 'code',
+      email: inProgress.email,
+      codeRequestedAt: inProgress.codeRequestedAt || 0,
+      resendCooldownUntil: inProgress.resendCooldownUntil || 0,
+      error: null,
+      info: tr('authResumed'),
+      loading: false,
+      codeExpired: false,
+    };
+    renderAuthScreen();
+    updateFooterLogout();
+    return;
+  }
+  loadOverview()
+    .then(restoreChatState)
+    .catch(err => console.error('[portal] loadOverview/restoreChatState failed:', err));
+})();
 </script>
 </body>
 </html>
