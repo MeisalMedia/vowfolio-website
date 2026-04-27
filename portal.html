@@ -195,6 +195,23 @@
     .dayplan-event-title{font-size:15px;font-weight:600;color:#3D3229;line-height:1.35}
     .dayplan-item:first-child .dayplan-event-title{font-size:16px;font-weight:700}
     .dayplan-event-notes{font-size:13px;color:rgba(194,132,122,0.88);margin-top:5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+
+    /* Venues — "Steder for dagen". Reference material; hidden when empty. */
+    .venues-card{background:#fff;border-radius:16px;padding:18px 20px 14px;margin-bottom:14px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
+    .venues-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .venues-icon{width:36px;height:36px;border-radius:10px;background:#F4E8D8;color:#9B7E5E;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .venues-header-text{flex:1;min-width:0}
+    .venues-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;line-height:1.2;font-weight:600}
+    .venues-list{display:flex;flex-direction:column;margin-top:2px}
+    .venue-item{padding:14px 0;border-top:1px solid #EFE7DA}
+    .venue-item:first-child{border-top:none;padding-top:6px}
+    .venue-name{font-size:15px;font-weight:600;color:#3D3229;line-height:1.3}
+    .venue-address{font-size:13px;color:#9B8D7E;margin-top:4px;line-height:1.45}
+    .venue-notes{font-size:13px;color:rgba(61,50,41,0.72);margin-top:6px;line-height:1.5;font-style:italic;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+    .venue-action{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:7px 14px;border-radius:999px;background:#F8F2E9;color:#9B7E5E;font-size:12.5px;font-weight:600;text-decoration:none;letter-spacing:0.2px;border:1px solid #EFE3CF;transition:background 0.15s}
+    .venue-action:hover{background:#F2E8D6}
+    .venue-action-icon{font-size:13px}
+
     .tile-group.done{opacity:0.65}
     .tile-group.done .tile{box-shadow:none;background:#F8F5F0}
     .tile-group.done .tile-expand{box-shadow:none;background:#F8F5F0}
@@ -401,6 +418,9 @@ const t = {
     dayPlanTitle: 'Your wedding day',
     dayPlanEvent: 'event',
     dayPlanEvents: 'events',
+
+    venuesTitle: 'Places for the day',
+    venuesOpenInMaps: 'Open in Maps',
 
     moodboardTitle: 'Moodboard',
     moodboardStatusEmpty: 'Share photos that inspire you',
@@ -609,6 +629,9 @@ const t = {
     dayPlanTitle: 'Bryllupsdagen deres',
     dayPlanEvent: 'punkt',
     dayPlanEvents: 'punkter',
+
+    venuesTitle: 'Steder for dagen',
+    venuesOpenInMaps: 'Åpne i kart',
 
     moodboardTitle: 'Moodboard',
     moodboardStatusEmpty: 'Del bilder som inspirerer dere',
@@ -1367,6 +1390,43 @@ function deriveNextStep(s) {
   return { text: tr('nextAllSet'), ok: true };
 }
 
+function renderVenues(venues) {
+  if (!venues || !venues.length) return '';
+  const rows = venues.map(v => {
+    const addrHtml = v.address && v.address.trim()
+      ? `<div class="venue-address">${escapeHtml(v.address)}</div>`
+      : '';
+    const notesHtml = v.notes && v.notes.trim()
+      ? `<div class="venue-notes">${escapeHtml(v.notes)}</div>`
+      : '';
+    const url = mapsUrlForVenue(v);
+    const actionHtml = url
+      ? `<a class="venue-action" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+           <span class="venue-action-icon">📍</span>${escapeHtml(tr('venuesOpenInMaps'))}
+         </a>`
+      : '';
+    return `
+      <div class="venue-item">
+        <div class="venue-name">${escapeHtml(v.name || '')}</div>
+        ${addrHtml}
+        ${notesHtml}
+        ${actionHtml}
+      </div>
+    `;
+  }).join('');
+  return `
+    <div class="venues-card">
+      <div class="venues-header">
+        <div class="venues-icon">📍</div>
+        <div class="venues-header-text">
+          <div class="venues-title">${escapeHtml(tr('venuesTitle'))}</div>
+        </div>
+      </div>
+      <div class="venues-list">${rows}</div>
+    </div>
+  `;
+}
+
 function renderDayPlan(items) {
   if (!items || !items.length) return '';
   const rows = items.map(it => {
@@ -1432,6 +1492,35 @@ function mapsUrl(query) {
   return isApple
     ? `https://maps.apple.com/?q=${encoded}`
     : `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+}
+
+// Venue → Maps URL.
+//
+// IMPORTANT: ordering is intentional and must NOT be "simplified" to
+// address-only or name-only. The pre-058d095 day-plan regression came
+// from passing only a name as a query — Maps had to guess and often
+// pinned the wrong "Victoria Hotell". Coord > address > nothing.
+function mapsUrlForVenue(venue) {
+  if (!venue) return null;
+  const ua = navigator.userAgent || '';
+  const isApple = /iPhone|iPad|iPod|Macintosh/.test(ua);
+  if (venue.coordinate && typeof venue.coordinate.latitude === 'number' && typeof venue.coordinate.longitude === 'number') {
+    const la = venue.coordinate.latitude;
+    const lo = venue.coordinate.longitude;
+    if (isApple) {
+      const q = encodeURIComponent(venue.name || '');
+      return `https://maps.apple.com/?ll=${la},${lo}&q=${q}`;
+    }
+    return `https://www.google.com/maps/search/?api=1&query=${la},${lo}`;
+  }
+  const addr = venue.address ? String(venue.address).trim() : '';
+  if (addr) {
+    const encoded = encodeURIComponent(addr);
+    return isApple
+      ? `https://maps.apple.com/?q=${encoded}`
+      : `https://www.google.com/maps/search/?api=1&query=${encoded}`;
+  }
+  return null;  // Name alone is not enough — caller must hide the button.
 }
 
 function escapeHtml(s) {
@@ -1631,6 +1720,8 @@ function render(data) {
     ${renderCountdown(w.weddingDate, s)}
 
     ${renderDayPlan((s.dayPlan && s.dayPlan.items) || [])}
+
+    ${renderVenues(data.venues || [])}
 
     <div class="section-title">${tr('nextSteps')}</div>
 
