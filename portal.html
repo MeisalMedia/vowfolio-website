@@ -199,6 +199,22 @@
     .tile-group.done .tile{box-shadow:none;background:#F8F5F0}
     .tile-group.done .tile-expand{box-shadow:none;background:#F8F5F0}
 
+    /* Studio-style: single card with row separators (used for the next-steps list) */
+    .tile-list{background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(61,50,41,0.06);overflow:hidden;margin-bottom:10px}
+    .tile-list .tile-row + .tile-row{border-top:1px solid #E8DFD1}
+    .tile-list .tile{background:transparent;box-shadow:none;border-radius:0;padding:16px 18px;margin-bottom:0}
+    .tile-list .tile:not(:disabled):hover{transform:none;box-shadow:none;background:rgba(248,245,240,0.6)}
+    .tile-list .tile.expanded{box-shadow:none;border-radius:0;margin-bottom:0}
+    .tile-list .tile-expand{box-shadow:none;border-radius:0;background:transparent;margin-top:0;margin-bottom:0}
+    .tile-list .tile.expanded + .tile-expand,
+    .tile-list .tile.expanded + .tile-expand.chat-expand,
+    .tile-list .tile.expanded + .tile-expand.moodboard-expand,
+    .tile-list .tile.expanded + .tile-expand.deliveries-expand,
+    .tile-list .tile.expanded + .tile-expand.meetings-expand{box-shadow:none;border-radius:0;margin-top:0;margin-bottom:0}
+    .tile-list .tile-row.tile-group{margin:0}
+    .tile-list .tile-row.tile-group.done .tile{background:#F8F5F0}
+    .tile-list .tile-row.tile-group.done .tile-expand{background:#F8F5F0}
+
     /* Deliveries (expandable when photographer has added any) */
     .tile.expanded + .tile-expand.deliveries-expand{max-height:520px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;box-shadow:-2px 0 12px rgba(61,50,41,0.04),2px 0 12px rgba(61,50,41,0.04),0 2px 12px rgba(61,50,41,0.06)}
     .deliveries-body{padding:2px 14px 12px;display:flex;flex-direction:column}
@@ -1603,7 +1619,7 @@ function render(data) {
   ];
   sortableTiles.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const sortedTilesHtml = sortableTiles.map(t =>
-    `<div class="tile-group${t.done ? ' done' : ''}">${t.html}</div>`
+    `<div class="tile-row tile-group${t.done ? ' done' : ''}">${t.html}</div>`
   ).join('');
 
   app.innerHTML = `
@@ -1618,30 +1634,10 @@ function render(data) {
 
     <div class="section-title">${tr('nextSteps')}</div>
 
+    <div class="tile-list">
     ${sortedTilesHtml}
 
-    ${delivTotal > 0 ? `
-    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
-      <div class="tile-icon sage">📦</div>
-      <div class="tile-body">
-        <div class="tile-title">${tr('deliveriesTitle')}</div>
-        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
-      </div>
-      <div class="tile-chev">▾</div>
-    </button>
-    <div class="tile-expand deliveries-expand">
-      <div class="deliveries-body">
-        <div class="delivery-progress">
-          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${Math.round(delivDone/delivTotal*100)}%"></div></div>
-          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
-        </div>
-        <div class="deliveries-scroll" id="deliveries-scroll">
-          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
-        </div>
-      </div>
-    </div>
-    ` : ''}
-
+    <div class="tile-row">
     <button class="tile" id="moodboard-tile" onclick="toggleMoodboard(this)">
       <div class="tile-icon gold">💐</div>
       <div class="tile-body">
@@ -1664,7 +1660,9 @@ function render(data) {
         <input type="file" id="moodboard-file" class="moodboard-hidden-input" accept="image/*" multiple onchange="handleMoodboardFiles(event)">
       </div>
     </div>
+    </div>
 
+    <div class="tile-row">
     <button class="tile" id="chat-tile" onclick="toggleChat(this)">
       <div class="tile-icon sage">💬</div>
       <div class="tile-body">
@@ -1690,8 +1688,34 @@ function render(data) {
         </div>
       </div>
     </div>
+    </div>
+
+    ${delivTotal > 0 ? `
+    <div class="tile-row">
+    <button class="tile" id="deliveries-tile" onclick="toggleDeliveries(this)">
+      <div class="tile-icon sage">📦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('deliveriesTitle')}</div>
+        <div class="tile-status ${delivStatusClass}">${delivStatusText}</div>
+      </div>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand deliveries-expand">
+      <div class="deliveries-body">
+        <div class="delivery-progress">
+          <div class="delivery-bar-outer"><div class="delivery-bar-inner" style="width:${Math.round(delivDone/delivTotal*100)}%"></div></div>
+          <div class="delivery-bar-label">${delivDone}/${delivTotal}</div>
+        </div>
+        <div class="deliveries-scroll" id="deliveries-scroll">
+          <div class="delivery-empty">${escapeHtml(tr('deliveriesLoading'))}</div>
+        </div>
+      </div>
+    </div>
+    </div>
+    ` : ''}
 
     ${meetingsCount > 0 ? `
+    <div class="tile-row">
     <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
       <div class="tile-icon gold">🗓️</div>
       <div class="tile-body">
@@ -1707,7 +1731,9 @@ function render(data) {
         </div>
       </div>
     </div>
+    </div>
     ` : ''}
+    </div>
 
     <div class="photog-card">
       <div class="section-title" style="margin:0 0 12px">${tr('yourPhotog')}</div>
