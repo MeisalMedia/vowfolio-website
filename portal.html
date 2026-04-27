@@ -937,6 +937,11 @@ let authState = {
 let authTickerInterval = null;
 
 function showAuthScreen(step, errorOrInfo, isInfo) {
+  // Stop background polling while auth screen is active — the poller calling
+  // loadOverview() while on the code-input step is what caused the 503 to
+  // wipe the auth UI (poll fires ~15s after "Send kode" when page loaded 15s earlier).
+  stopOverviewPolling();
+  stopChatPolling();
   authState = {
     ...authState,
     step: step || 'email',
@@ -1227,7 +1232,12 @@ async function submitCodeStep() {
     });
     clearAuthProgress();
     authState.loading = false;
-    loadOverview();
+    loadOverview().then(() => {
+      // Restart polling now that auth succeeded. showAuthScreen() stopped it;
+      // if loadOverview() re-showed auth (wrong_email / 503), stopOverviewPolling()
+      // will have been called again inside showAuthScreen(), so this is safe.
+      startOverviewPolling();
+    });
   } catch (e) {
     authState.error = tr('authConnError');
     authState.loading = false;
@@ -1294,6 +1304,13 @@ async function loadOverview() {
     if (res.status === 403 && data.error === 'wrong_email') {
       clearSession();
       showAuthScreen('email', tr('authNotAuthorized'));
+      return;
+    }
+    if (res.status === 503) {
+      // Transient Supabase infrastructure error — do not wipe the UI.
+      // The overview poller will retry in 30s; a direct call (post-auth) will
+      // retry once the user next interacts or the poller fires.
+      console.warn('[portal] Supabase 503 on overview, skipping render');
       return;
     }
     if (!res.ok || data.error) {
