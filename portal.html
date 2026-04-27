@@ -1875,7 +1875,7 @@ function openChatFromFab() {
 async function openIntake() {
   if (!token) return;
   try {
-    const res = await fetch(`${API}?action=open-intake`, {
+    const res = await authedFetch(`${API}?action=open-intake`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -1892,7 +1892,7 @@ async function openIntake() {
 async function openSignedContract(documentId) {
   if (!token || !documentId) return;
   try {
-    const res = await fetch(`${API}?action=view-signed-contract`, {
+    const res = await authedFetch(`${API}?action=view-signed-contract`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, document_id: documentId }),
@@ -1929,7 +1929,7 @@ function showSignedContractSheet(viewUrl, downloadUrl, title) {
 async function openContract(documentId) {
   if (!token || !documentId) return;
   try {
-    const res = await fetch(`${API}?action=open-contract`, {
+    const res = await authedFetch(`${API}?action=open-contract`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, document_id: documentId }),
@@ -2041,7 +2041,7 @@ async function fetchMessages(initial) {
   try {
     const params = new URLSearchParams({ action: 'messages', token });
     if (!initial && chatLastFetchedAt) params.set('since', chatLastFetchedAt);
-    const res = await fetch(`${API}?${params.toString()}`);
+    const res = await authedFetch(`${API}?${params.toString()}`);
     const data = await res.json();
     if (!res.ok || data.error) return;
     const incoming = data.messages || [];
@@ -2061,7 +2061,7 @@ async function fetchMessages(initial) {
 async function markRead() {
   if (!token) return;
   try {
-    await fetch(`${API}?action=mark-read`, {
+    await authedFetch(`${API}?action=mark-read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -2154,7 +2154,7 @@ async function sendChat() {
   errEl.classList.add('hidden');
 
   try {
-    const res = await fetch(`${API}?action=send-message`, {
+    const res = await authedFetch(`${API}?action=send-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, body }),
@@ -2211,7 +2211,7 @@ async function fetchMoodboard() {
   if (!token) return;
   const scroll = document.getElementById('moodboard-scroll');
   try {
-    const res = await fetch(`${API}?action=moodboard&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=moodboard&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="moodboard-empty">${escapeHtml(tr('moodboardErrorGeneric'))}</div>`;
@@ -2284,7 +2284,7 @@ async function handleMoodboardFiles(event) {
       const form = new FormData();
       form.append('token', token);
       form.append('file', blob, 'inspiration.jpg');
-      const res = await fetch(`${API}?action=moodboard-upload`, { method: 'POST', body: form });
+      const res = await authedFetch(`${API}?action=moodboard-upload`, { method: 'POST', body: form });
       const data = await res.json();
       // Replace placeholder
       moodboardImages = moodboardImages.filter(m => m.id !== tempId);
@@ -2310,7 +2310,7 @@ async function deleteMoodboardImage(id) {
   moodboardImages = moodboardImages.filter(m => m.id !== id);
   renderMoodboard();
   try {
-    const res = await fetch(`${API}?action=moodboard-delete`, {
+    const res = await authedFetch(`${API}?action=moodboard-delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, image_id: id }),
@@ -2426,7 +2426,7 @@ async function fetchDeliveries() {
   if (!token) return;
   const scroll = document.getElementById('deliveries-scroll');
   try {
-    const res = await fetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
@@ -2496,7 +2496,7 @@ async function fetchMeetings() {
   if (!token) return;
   const scroll = document.getElementById('meetings-scroll');
   try {
-    const res = await fetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
@@ -2620,7 +2620,7 @@ async function fetchIntake() {
   if (!token) return;
   const scroll = document.getElementById('intake-scroll');
   try {
-    const res = await fetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
