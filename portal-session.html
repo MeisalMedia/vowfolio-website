@@ -363,6 +363,9 @@ const t = {
     dayPlanEvent: 'event',
     dayPlanEvents: 'events',
 
+    galleryTitle: 'Gallery',
+    galleryStatus: 'Open your finished gallery',
+
     moodboardTitle: 'Moodboard',
     moodboardStatusEmpty: 'Share photos that inspire you',
     moodboardStatusCount1: '1 photo',
@@ -563,6 +566,9 @@ const t = {
     dayPlanTitle: 'Bryllupsdagen deres',
     dayPlanEvent: 'punkt',
     dayPlanEvents: 'punkter',
+
+    galleryTitle: 'Galleri',
+    galleryStatus: 'Åpne det ferdige galleriet',
 
     moodboardTitle: 'Moodboard',
     moodboardStatusEmpty: 'Del bilder som inspirerer dere',
@@ -1500,6 +1506,17 @@ function render(data) {
         </div>
       </div>
     </div>
+    ` : ''}
+
+    ${w.galleryUrl ? `
+    <a class="tile" href="${escapeHtml(w.galleryUrl)}" target="_blank" rel="noopener" style="text-decoration:none">
+      <div class="tile-icon gold">📷</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('galleryTitle')}</div>
+        <div class="tile-status">${tr('galleryStatus')}</div>
+      </div>
+      <div class="tile-arrow">↗</div>
+    </a>
     ` : ''}
 
     <button class="tile" id="moodboard-tile" onclick="toggleMoodboard(this)">
