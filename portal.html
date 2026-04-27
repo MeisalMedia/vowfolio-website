@@ -315,6 +315,79 @@
     /* Footer logout link (only shown when authenticated) */
     .footer-logout{display:inline-block;margin-left:14px;color:#9B7E5E;font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;padding:0}
     .footer-logout:hover{color:#7A6048}
+
+    /* Group photos quiz modal */
+    .gp-modal{position:fixed;inset:0;background:rgba(28,24,20,0.65);z-index:9000;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+    .gp-modal.open{display:flex}
+    .gp-sheet{background:#FAF6EF;width:100%;max-width:560px;max-height:92vh;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -10px 40px rgba(0,0,0,0.18);animation:gpSlideUp 0.32s cubic-bezier(0.32,0.72,0.34,1.0)}
+    @keyframes gpSlideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    .gp-header{padding:18px 22px 12px;border-bottom:1px solid rgba(155,126,94,0.12);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .gp-step-label{font-size:12px;color:#9B8A75;font-weight:500;letter-spacing:0.5px}
+    .gp-close{background:none;border:none;font-size:24px;color:#9B8A75;cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px}
+    .gp-close:hover{background:rgba(155,126,94,0.08)}
+    .gp-progress{display:flex;gap:5px;padding:0 22px 14px}
+    .gp-progress-bar{flex:1;height:3px;background:rgba(155,126,94,0.15);border-radius:2px;overflow:hidden}
+    .gp-progress-bar.done{background:#9B7E5E}
+    .gp-progress-bar.current{background:#9B7E5E}
+    .gp-body{flex:1;overflow-y:auto;padding:8px 22px 18px;-webkit-overflow-scrolling:touch}
+    .gp-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:500;color:#3F2E1E;margin:8px 0 8px;line-height:1.25}
+    .gp-desc{font-size:14px;color:#5C4A3A;line-height:1.5;margin-bottom:18px}
+    .gp-banner{background:#F4ECDD;border:1px solid rgba(155,126,94,0.2);border-radius:12px;padding:14px;margin-bottom:18px}
+    .gp-banner-title{font-weight:600;color:#3F2E1E;font-size:13px;margin-bottom:4px}
+    .gp-banner-text{font-size:12px;color:#5C4A3A;line-height:1.5;white-space:pre-wrap}
+    .gp-fam-options{display:flex;flex-direction:column;gap:10px}
+    .gp-fam-option{background:#fff;border:2px solid rgba(155,126,94,0.15);border-radius:14px;padding:14px 16px;cursor:pointer;transition:all 0.15s;text-align:left;width:100%;font-family:inherit}
+    .gp-fam-option:hover{border-color:rgba(155,126,94,0.4)}
+    .gp-fam-option.selected{border-color:#6B8F71;background:#F0F5EE}
+    .gp-fam-option-title{font-weight:600;color:#3F2E1E;font-size:15px;margin-bottom:3px}
+    .gp-fam-option-sub{font-size:12px;color:#7A6648}
+    .gp-items{display:flex;flex-direction:column;gap:8px}
+    .gp-item{background:#fff;border:1px solid rgba(155,126,94,0.15);border-radius:12px;padding:11px 12px;display:flex;align-items:center;gap:10px;transition:background 0.15s}
+    .gp-item.must-have{background:#F4ECDD;border-color:rgba(184,142,77,0.35)}
+    .gp-item-checkbox{width:22px;height:22px;border-radius:6px;border:2px solid rgba(155,126,94,0.3);background:#fff;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#6B8F71}
+    .gp-item-checkbox.checked{background:#6B8F71;border-color:#6B8F71;color:#fff}
+    .gp-item-checkbox svg{width:14px;height:14px;display:none}
+    .gp-item-checkbox.checked svg{display:block}
+    .gp-item-input{flex:1;border:none;background:transparent;font-size:14px;color:#3F2E1E;font-family:inherit;padding:6px 0;outline:none;min-width:0}
+    .gp-item-input:focus{background:rgba(155,126,94,0.05);border-radius:6px;padding:6px 8px;margin:-6px -8px}
+    .gp-item-text{flex:1;font-size:14px;color:#3F2E1E;padding:6px 0}
+    .gp-item-notes{font-size:12px;color:#7A6648;margin-top:3px;font-style:italic}
+    .gp-item-people{font-size:11px;color:#9B8A75;background:rgba(155,126,94,0.1);padding:2px 7px;border-radius:8px;flex-shrink:0}
+    .gp-item-star{background:none;border:none;font-size:20px;color:rgba(155,126,94,0.35);cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1;transition:color 0.15s,transform 0.15s}
+    .gp-item-star:hover{color:#B88E4D}
+    .gp-item-star.active{color:#B88E4D}
+    .gp-item-star.disabled{cursor:not-allowed;opacity:0.3}
+    .gp-item-remove{background:none;border:none;color:#B85C5C;cursor:pointer;padding:4px 8px;font-size:16px;flex-shrink:0;border-radius:6px}
+    .gp-item-remove:hover{background:rgba(184,92,92,0.08)}
+    .gp-add-btn{background:#fff;border:1.5px dashed rgba(155,126,94,0.35);border-radius:12px;padding:13px;color:#9B7E5E;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;width:100%;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+    .gp-add-btn:hover{border-color:#9B7E5E;background:rgba(155,126,94,0.04)}
+    .gp-add-form{background:#fff;border:1px solid rgba(155,126,94,0.2);border-radius:12px;padding:12px;margin-top:8px;display:flex;flex-direction:column;gap:8px}
+    .gp-add-form input,.gp-add-form textarea{border:1px solid rgba(155,126,94,0.2);border-radius:8px;padding:9px 11px;font-size:14px;font-family:inherit;color:#3F2E1E;background:#FAF6EF;outline:none;width:100%;box-sizing:border-box}
+    .gp-add-form input:focus,.gp-add-form textarea:focus{border-color:#9B7E5E}
+    .gp-add-form-row{display:flex;gap:8px}
+    .gp-add-form-row input{flex:1}
+    .gp-add-form-actions{display:flex;gap:8px;justify-content:flex-end}
+    .gp-add-form-cancel{background:none;border:none;color:#9B8A75;cursor:pointer;font-size:13px;padding:7px 12px;font-family:inherit}
+    .gp-add-form-save{background:#6B8F71;color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+    .gp-musthave-counter{background:#F4ECDD;border-radius:10px;padding:9px 12px;font-size:13px;color:#3F2E1E;margin-bottom:14px;text-align:center}
+    .gp-musthave-counter strong{color:#B88E4D}
+    .gp-summary-section{margin-bottom:18px}
+    .gp-summary-heading{font-size:13px;font-weight:600;color:#9B7E5E;letter-spacing:0.5px;margin-bottom:8px;text-transform:uppercase}
+    .gp-time-estimate{background:#F0F5EE;border-radius:12px;padding:14px;text-align:center;margin-bottom:18px}
+    .gp-time-estimate-num{font-family:'Cormorant Garamond',Georgia,serif;font-size:28px;color:#3F2E1E;font-weight:500;margin-bottom:2px}
+    .gp-time-estimate-sub{font-size:12px;color:#5C4A3A;line-height:1.5}
+    .gp-edit-hint{font-size:12px;color:#7A6648;text-align:center;margin-top:14px;padding:0 8px;line-height:1.5}
+    .gp-footer{padding:14px 22px 18px;border-top:1px solid rgba(155,126,94,0.12);background:#FAF6EF;display:flex;gap:10px;flex-shrink:0}
+    .gp-btn{flex:1;padding:13px 16px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all 0.15s}
+    .gp-btn-back{background:#fff;color:#5C4A3A;border:1px solid rgba(155,126,94,0.2)}
+    .gp-btn-back:hover{background:rgba(155,126,94,0.05)}
+    .gp-btn-next{background:#3F2E1E;color:#FAF6EF}
+    .gp-btn-next:hover{background:#5C4A3A}
+    .gp-btn-submit{background:#6B8F71;color:#fff}
+    .gp-btn-submit:hover{background:#5B7B61}
+    .gp-btn:disabled{opacity:0.5;cursor:not-allowed}
+    .gp-error{background:#FCE8E8;color:#B85C5C;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:12px;text-align:center}
+    .gp-loading{text-align:center;padding:40px 20px;color:#9B8A75;font-size:14px}
   </style>
 </head>
 <body>
@@ -338,6 +411,17 @@
   <span class="chat-fab-badge hidden" id="chat-fab-badge">0</span>
 </button>
 
+<div class="gp-modal" id="gp-modal" onclick="gpModalBgClick(event)">
+  <div class="gp-sheet" onclick="event.stopPropagation()">
+    <div class="gp-header">
+      <div class="gp-step-label" id="gp-step-label"></div>
+      <button class="gp-close" onclick="closeGroupPhotos()" aria-label="Close">×</button>
+    </div>
+    <div class="gp-progress" id="gp-progress"></div>
+    <div class="gp-body" id="gp-body"></div>
+    <div class="gp-footer" id="gp-footer"></div>
+  </div>
+</div>
 
 <script>
 const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal';
@@ -497,6 +581,58 @@ const t = {
     lVip: 'VIPs',
     lFamily: 'Family notes',
     lExtra: 'Anything else',
+
+    // Group photos quiz
+    gpTileTitle: 'Group photos',
+    gpTileNotStarted: 'Plan your family shots',
+    gpTileInProgress: 'photos selected — continue',
+    gpTileSubmitted: 'photos sent',
+    gpStepOf: 'Step',
+    gpClose: 'Close',
+    gpStep1Title: 'How big is the family for photos?',
+    gpStep1Desc: 'This helps us suggest which group shots you might want.',
+    gpFamCore: 'Core family',
+    gpFamCoreSub: 'Parents and siblings',
+    gpFamExtended: 'Extended family',
+    gpFamExtendedSub: 'Plus grandparents, aunts and uncles',
+    gpFamLarge: 'Large family',
+    gpFamLargeSub: 'All relatives — many group photos',
+    gpStep2Title: 'Suggested group photos',
+    gpStep2Desc: 'We\'ve added common shots for you. Tap to edit the name, untick to skip.',
+    gpStep3Title: 'Add your own',
+    gpStep3Desc: 'Anyone else you want photographed? Add them here.',
+    gpStep3AddBtn: 'Add group photo',
+    gpStep3PlaceholderTitle: 'e.g. Aunt Solveig with the couple',
+    gpStep3PlaceholderNotes: 'Notes (optional) — e.g. "She\'s 85, take this one first"',
+    gpStep3PeopleCount: 'People (optional)',
+    gpStep3Cancel: 'Cancel',
+    gpStep3Save: 'Add',
+    gpStep4Title: 'Mark your must-haves',
+    gpStep4Desc: 'Pick up to 5 photos you absolutely don\'t want to miss. The photographer prioritises these if time runs short.',
+    gpStep4Counter: 'of 5 must-haves selected',
+    gpStep5Title: 'Review and send',
+    gpStep5MustHaveHeading: 'Must-haves',
+    gpStep5OtherHeading: 'Other group photos',
+    gpStep5TimeLabel: 'Plan about',
+    gpStep5TimeUnit: 'min',
+    gpStep5TimeContext: 'after the ceremony for these photos.',
+    gpStep5EditHint: 'You can update this list up to 7 days before the wedding.',
+    gpBack: 'Back',
+    gpNext: 'Next',
+    gpSubmit: 'Send to photographer',
+    gpResubmit: 'Update list',
+    gpEmpty: 'Add at least one group photo before sending.',
+    gpTooManyMustHave: 'You can only mark up to 5 must-haves.',
+    gpSendError: 'Could not send the list. Please try again.',
+    gpLoadError: 'Could not load the quiz. Please try again.',
+    gpPrefillBannerTitle: 'We found earlier VIP notes',
+    gpPrefillBannerText: 'These didn\'t auto-fill cleanly. Copy and paste below if you\'d like to use them:',
+    gpSubmittedTitle: 'Sent to your photographer',
+    gpSubmittedDesc: 'Thank you. You can update the list up to 7 days before the wedding.',
+    gpSubmittedEdit: 'Edit list',
+    gpSubmittedClose: 'Close',
+    gpItemPlaceholder: 'Photo name',
+    gpAddNotesLabel: 'Add note',
 
     faqTitle: 'Questions couples often ask',
     faq1q: 'When will I receive my photos?',
@@ -711,6 +847,58 @@ const t = {
     lVip: 'Viktige personer',
     lFamily: 'Familienotater',
     lExtra: 'Noe annet',
+
+    // Gruppebilde-quiz
+    gpTileTitle: 'Gruppebilder',
+    gpTileNotStarted: 'Planlegg familiebildene',
+    gpTileInProgress: 'bilder valgt — fortsett',
+    gpTileSubmitted: 'bilder sendt',
+    gpStepOf: 'Steg',
+    gpClose: 'Lukk',
+    gpStep1Title: 'Hvor stor familie planlegger dere bilder med?',
+    gpStep1Desc: 'Dette hjelper oss å foreslå hvilke gruppebilder dere kanskje vil ha.',
+    gpFamCore: 'Kjernefamilie',
+    gpFamCoreSub: 'Foreldre og søsken',
+    gpFamExtended: 'Utvidet familie',
+    gpFamExtendedSub: 'Pluss besteforeldre, onkler og tanter',
+    gpFamLarge: 'Stor familie',
+    gpFamLargeSub: 'Alle slektninger — mange gruppebilder',
+    gpStep2Title: 'Forslag til gruppebilder',
+    gpStep2Desc: 'Vi har lagt til vanlige bilder for dere. Trykk for å redigere navnet, fjern haken for å hoppe over.',
+    gpStep3Title: 'Legg til egne',
+    gpStep3Desc: 'Andre dere vil ha bilder av? Legg dem til her.',
+    gpStep3AddBtn: 'Legg til gruppebilde',
+    gpStep3PlaceholderTitle: 'f.eks. Onkel Bjørn med brudeparet',
+    gpStep3PlaceholderNotes: 'Notater (valgfritt) — f.eks. "Han er 85, ta dette først"',
+    gpStep3PeopleCount: 'Antall personer (valgfritt)',
+    gpStep3Cancel: 'Avbryt',
+    gpStep3Save: 'Legg til',
+    gpStep4Title: 'Marker viktigste bilder',
+    gpStep4Desc: 'Velg opptil 5 bilder dere absolutt ikke kan miste. Fotografen tar disse først hvis tiden blir knapp.',
+    gpStep4Counter: 'av 5 må-haves valgt',
+    gpStep5Title: 'Sjekk og send',
+    gpStep5MustHaveHeading: 'Må-haves',
+    gpStep5OtherHeading: 'Andre gruppebilder',
+    gpStep5TimeLabel: 'Sett av ca.',
+    gpStep5TimeUnit: 'min',
+    gpStep5TimeContext: 'etter seremonien til disse bildene.',
+    gpStep5EditHint: 'Dere kan endre listen frem til 7 dager før bryllupet.',
+    gpBack: 'Tilbake',
+    gpNext: 'Neste',
+    gpSubmit: 'Send til fotograf',
+    gpResubmit: 'Oppdater liste',
+    gpEmpty: 'Legg til minst ett gruppebilde før dere sender.',
+    gpTooManyMustHave: 'Dere kan markere maks 5 må-haves.',
+    gpSendError: 'Kunne ikke sende listen. Prøv igjen.',
+    gpLoadError: 'Kunne ikke laste quizen. Prøv igjen.',
+    gpPrefillBannerTitle: 'Vi fant tidligere VIP-notater',
+    gpPrefillBannerText: 'Disse lot seg ikke fylle inn automatisk. Kopier dem inn manuelt under hvis dere vil bruke dem:',
+    gpSubmittedTitle: 'Sendt til fotografen',
+    gpSubmittedDesc: 'Tusen takk. Dere kan endre listen frem til 7 dager før bryllupet.',
+    gpSubmittedEdit: 'Rediger liste',
+    gpSubmittedClose: 'Lukk',
+    gpItemPlaceholder: 'Bildenavn',
+    gpAddNotesLabel: 'Legg til notat',
 
     faqTitle: 'Spørsmål par ofte stiller',
     faq1q: 'Når får vi bildene?',
@@ -1843,6 +2031,17 @@ function render(data) {
     </div>
     </div>
     ` : ''}
+
+    <div class="tile-row">
+    <button class="tile" id="group-photos-tile" onclick="openGroupPhotos()">
+      <div class="tile-icon sage">👨‍👩‍👧‍👦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('gpTileTitle')}</div>
+        <div class="tile-status" id="group-photos-status">${tr('gpTileNotStarted')}</div>
+      </div>
+      <div class="tile-arrow">↗</div>
+    </button>
+    </div>
     </div>
 
     <div class="photog-card">
@@ -2727,8 +2926,545 @@ setLang(lang);
   }
   loadOverview()
     .then(restoreChatState)
+    .then(loadGroupPhotosStatus)
     .catch(err => console.error('[portal] loadOverview/restoreChatState failed:', err));
 })();
+
+// ============================================================
+// Group photos quiz
+// ============================================================
+
+const GP_TOTAL_STEPS = 5;
+const GP_MAX_MUST_HAVE = 5;
+
+let gpState = null;
+
+function gpInitState() {
+  return {
+    loaded: false,
+    loading: false,
+    error: null,
+    step: 1,
+    familySize: null,
+    items: [],
+    prefillSkipped: false,
+    vipListRaw: null,
+    submitted: false,
+    isSubmitting: false,
+    showSubmittedScreen: false,
+    addingNew: false,
+    addingTitle: '',
+    addingNotes: '',
+    addingPeople: '',
+  };
+}
+
+function gpDraftKey() { return 'gp_draft_' + (token || 'unknown'); }
+
+function gpSaveDraft() {
+  if (!gpState) return;
+  if (gpState.submitted && !gpState.showSubmittedScreen) {
+    // After re-submission completes, draft is cleared elsewhere
+    return;
+  }
+  try {
+    localStorage.setItem(gpDraftKey(), JSON.stringify({
+      step: gpState.step,
+      familySize: gpState.familySize,
+      items: gpState.items,
+    }));
+  } catch (_) {}
+}
+
+function gpLoadDraft() {
+  try {
+    const raw = localStorage.getItem(gpDraftKey());
+    if (!raw) return null;
+    const d = JSON.parse(raw);
+    return d && Array.isArray(d.items) ? d : null;
+  } catch (_) { return null; }
+}
+
+function gpClearDraft() {
+  try { localStorage.removeItem(gpDraftKey()); } catch (_) {}
+}
+
+function gpSuggestions(familySize) {
+  const NO = {
+    core: ['Brudens foreldre', 'Brudgommens foreldre', 'Begges foreldre sammen', 'Brudens søsken', 'Brudgommens søsken', 'Brudepiker'],
+    extended: ['Brudens foreldre', 'Brudgommens foreldre', 'Begges foreldre sammen', 'Alle besteforeldre', 'Brudens søsken', 'Brudgommens søsken', 'Brudepiker', 'Hele familien'],
+    large: ['Brudens foreldre', 'Brudgommens foreldre', 'Begges foreldre sammen', 'Alle besteforeldre', 'Brudens søsken', 'Brudgommens søsken', 'Brudepiker', 'Forlovere', 'Onkler og tanter', 'Hele familien'],
+  };
+  const EN = {
+    core: ['Bride\'s parents', 'Groom\'s parents', 'Both sets of parents together', 'Bride\'s siblings', 'Groom\'s siblings', 'Bridesmaids'],
+    extended: ['Bride\'s parents', 'Groom\'s parents', 'Both sets of parents together', 'All grandparents', 'Bride\'s siblings', 'Groom\'s siblings', 'Bridesmaids', 'Whole family'],
+    large: ['Bride\'s parents', 'Groom\'s parents', 'Both sets of parents together', 'All grandparents', 'Bride\'s siblings', 'Groom\'s siblings', 'Bridesmaids', 'Groomsmen', 'Aunts and uncles', 'Whole family'],
+  };
+  return (lang === 'no' ? NO : EN)[familySize] || [];
+}
+
+async function loadGroupPhotosStatus() {
+  if (!token) return;
+  try {
+    const res = await authedFetch(`${API}?action=group-photos-quiz&token=${encodeURIComponent(token)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data.error) return;
+    const el = document.getElementById('group-photos-status');
+    if (!el) return;
+    if (data.submitted) {
+      el.textContent = `${data.items.length} ${tr('gpTileSubmitted')}`;
+    } else {
+      const draft = gpLoadDraft();
+      const draftCount = draft && draft.items ? draft.items.length : 0;
+      const apiCount = (data.items || []).length;
+      const count = Math.max(draftCount, apiCount);
+      if (count > 0) {
+        el.textContent = `${count} ${tr('gpTileInProgress')}`;
+      } else {
+        el.textContent = tr('gpTileNotStarted');
+      }
+    }
+  } catch (e) { console.error('[gp] status load failed:', e); }
+}
+
+async function openGroupPhotos() {
+  const modal = document.getElementById('gp-modal');
+  if (!modal) return;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (!gpState || !gpState.loaded) {
+    gpState = gpInitState();
+    gpState.loading = true;
+    gpRender();
+    try {
+      const res = await authedFetch(`${API}?action=group-photos-quiz&token=${encodeURIComponent(token)}`);
+      const data = await res.json();
+      if (data.error) {
+        gpState.loading = false;
+        gpState.error = tr('gpLoadError');
+        gpRender();
+        return;
+      }
+      gpState.loading = false;
+      gpState.loaded = true;
+      gpState.submitted = !!data.submitted;
+      gpState.prefillSkipped = !!data.prefillSkipped;
+      gpState.vipListRaw = data.vipListRaw || null;
+      const apiItems = (data.items || []).map(i => ({
+        title: i.title || '',
+        notes: i.notes || '',
+        must_have: !!i.must_have,
+        people_count: typeof i.people_count === 'number' ? i.people_count : null,
+      }));
+      const draft = gpLoadDraft();
+      if (gpState.submitted) {
+        gpState.items = apiItems;
+        gpState.showSubmittedScreen = true;
+      } else if (draft && draft.items.length > 0) {
+        gpState.items = draft.items;
+        gpState.familySize = draft.familySize || null;
+        gpState.step = draft.step || 1;
+      } else if (apiItems.length > 0) {
+        // pre-filled from vip_list
+        gpState.items = apiItems;
+        gpState.step = 2; // skip family size — they have items already
+      }
+      gpRender();
+    } catch (e) {
+      gpState.loading = false;
+      gpState.error = tr('gpLoadError');
+      gpRender();
+    }
+  } else {
+    gpRender();
+  }
+}
+
+function closeGroupPhotos() {
+  const modal = document.getElementById('gp-modal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  gpSaveDraft();
+}
+
+function gpModalBgClick(e) {
+  if (e.target.id === 'gp-modal') closeGroupPhotos();
+}
+
+function gpEscape(s) { return escapeHtml(s == null ? '' : String(s)); }
+
+function gpRender() {
+  if (!gpState) return;
+  const stepLabel = document.getElementById('gp-step-label');
+  const progress = document.getElementById('gp-progress');
+  const body = document.getElementById('gp-body');
+  const footer = document.getElementById('gp-footer');
+
+  if (gpState.loading) {
+    stepLabel.textContent = '';
+    progress.innerHTML = '';
+    body.innerHTML = `<div class="gp-loading">${gpEscape(tr('moodboardLoading') || 'Loading…')}</div>`;
+    footer.innerHTML = '';
+    return;
+  }
+
+  if (gpState.showSubmittedScreen) {
+    stepLabel.textContent = '';
+    progress.innerHTML = '';
+    body.innerHTML = `
+      <div style="text-align:center;padding:30px 8px 20px">
+        <div style="font-size:48px;margin-bottom:12px">✓</div>
+        <div class="gp-title" style="margin-bottom:6px">${gpEscape(tr('gpSubmittedTitle'))}</div>
+        <div class="gp-desc" style="margin-bottom:18px">${gpEscape(tr('gpSubmittedDesc'))}</div>
+        <div class="gp-summary-section">
+          <div class="gp-summary-heading">${gpState.items.length} ${gpEscape(tr('gpStep5OtherHeading')).toLowerCase()}</div>
+          ${gpState.items.map(i => `
+            <div class="gp-item ${i.must_have ? 'must-have' : ''}" style="cursor:default">
+              ${i.must_have ? '<span style="color:#B88E4D;font-size:16px">★</span>' : '<span style="width:16px"></span>'}
+              <div class="gp-item-text">${gpEscape(i.title)}${i.notes ? `<div class="gp-item-notes">${gpEscape(i.notes)}</div>` : ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    footer.innerHTML = `
+      <button class="gp-btn gp-btn-back" onclick="gpEditAfterSubmit()">${gpEscape(tr('gpSubmittedEdit'))}</button>
+      <button class="gp-btn gp-btn-next" onclick="closeGroupPhotos()">${gpEscape(tr('gpSubmittedClose'))}</button>
+    `;
+    return;
+  }
+
+  if (gpState.error) {
+    body.innerHTML = `<div class="gp-error">${gpEscape(gpState.error)}</div>`;
+    footer.innerHTML = `<button class="gp-btn gp-btn-next" onclick="closeGroupPhotos()">${gpEscape(tr('gpClose'))}</button>`;
+    return;
+  }
+
+  stepLabel.textContent = `${gpEscape(tr('gpStepOf'))} ${gpState.step}/${GP_TOTAL_STEPS}`;
+  progress.innerHTML = '';
+  for (let i = 1; i <= GP_TOTAL_STEPS; i++) {
+    const cls = i < gpState.step ? 'done' : (i === gpState.step ? 'current' : '');
+    progress.innerHTML += `<div class="gp-progress-bar ${cls}"></div>`;
+  }
+
+  if (gpState.step === 1) gpRenderStep1(body, footer);
+  else if (gpState.step === 2) gpRenderStep2(body, footer);
+  else if (gpState.step === 3) gpRenderStep3(body, footer);
+  else if (gpState.step === 4) gpRenderStep4(body, footer);
+  else if (gpState.step === 5) gpRenderStep5(body, footer);
+}
+
+function gpRenderStep1(body, footer) {
+  const fam = gpState.familySize;
+  body.innerHTML = `
+    <div class="gp-title">${gpEscape(tr('gpStep1Title'))}</div>
+    <div class="gp-desc">${gpEscape(tr('gpStep1Desc'))}</div>
+    <div class="gp-fam-options">
+      <button class="gp-fam-option ${fam === 'core' ? 'selected' : ''}" onclick="gpPickFamily('core')">
+        <div class="gp-fam-option-title">${gpEscape(tr('gpFamCore'))}</div>
+        <div class="gp-fam-option-sub">${gpEscape(tr('gpFamCoreSub'))}</div>
+      </button>
+      <button class="gp-fam-option ${fam === 'extended' ? 'selected' : ''}" onclick="gpPickFamily('extended')">
+        <div class="gp-fam-option-title">${gpEscape(tr('gpFamExtended'))}</div>
+        <div class="gp-fam-option-sub">${gpEscape(tr('gpFamExtendedSub'))}</div>
+      </button>
+      <button class="gp-fam-option ${fam === 'large' ? 'selected' : ''}" onclick="gpPickFamily('large')">
+        <div class="gp-fam-option-title">${gpEscape(tr('gpFamLarge'))}</div>
+        <div class="gp-fam-option-sub">${gpEscape(tr('gpFamLargeSub'))}</div>
+      </button>
+    </div>
+  `;
+  footer.innerHTML = `
+    <button class="gp-btn gp-btn-next" onclick="gpStepNext()" ${fam ? '' : 'disabled'}>${gpEscape(tr('gpNext'))}</button>
+  `;
+}
+
+function gpPickFamily(size) {
+  gpState.familySize = size;
+  // Pre-fill items with suggestions if items list is empty
+  if (gpState.items.length === 0) {
+    gpState.items = gpSuggestions(size).map(title => ({
+      title, notes: '', must_have: false, people_count: null,
+    }));
+  }
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpRenderStep2(body, footer) {
+  let banner = '';
+  if (gpState.prefillSkipped && gpState.vipListRaw) {
+    banner = `
+      <div class="gp-banner">
+        <div class="gp-banner-title">${gpEscape(tr('gpPrefillBannerTitle'))}</div>
+        <div class="gp-banner-text">${gpEscape(tr('gpPrefillBannerText'))}</div>
+        <div class="gp-banner-text" style="margin-top:8px;padding:8px;background:#fff;border-radius:8px;font-style:italic">${gpEscape(gpState.vipListRaw)}</div>
+      </div>
+    `;
+  }
+  const itemsHtml = gpState.items.map((it, idx) => `
+    <div class="gp-item">
+      <button class="gp-item-checkbox checked" onclick="gpRemoveItem(${idx})" aria-label="Remove">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+      <input class="gp-item-input" value="${gpEscape(it.title)}" oninput="gpUpdateItemTitle(${idx}, this.value)" onblur="gpSaveDraft()" placeholder="${gpEscape(tr('gpItemPlaceholder'))}">
+    </div>
+  `).join('');
+  body.innerHTML = `
+    <div class="gp-title">${gpEscape(tr('gpStep2Title'))}</div>
+    <div class="gp-desc">${gpEscape(tr('gpStep2Desc'))}</div>
+    ${banner}
+    <div class="gp-items">${itemsHtml || `<div class="gp-desc" style="text-align:center;padding:20px 0">—</div>`}</div>
+  `;
+  footer.innerHTML = `
+    <button class="gp-btn gp-btn-back" onclick="gpStepBack()">${gpEscape(tr('gpBack'))}</button>
+    <button class="gp-btn gp-btn-next" onclick="gpStepNext()">${gpEscape(tr('gpNext'))}</button>
+  `;
+}
+
+function gpUpdateItemTitle(idx, val) {
+  if (gpState.items[idx]) gpState.items[idx].title = val;
+}
+
+function gpRemoveItem(idx) {
+  gpState.items.splice(idx, 1);
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpRenderStep3(body, footer) {
+  const customItems = gpState.items.map((it, idx) => `
+    <div class="gp-item">
+      <div class="gp-item-text">
+        ${gpEscape(it.title)}
+        ${it.notes ? `<div class="gp-item-notes">${gpEscape(it.notes)}</div>` : ''}
+      </div>
+      ${it.people_count ? `<span class="gp-item-people">${it.people_count}</span>` : ''}
+      <button class="gp-item-remove" onclick="gpRemoveItem(${idx})" aria-label="Remove">×</button>
+    </div>
+  `).join('');
+  let addForm = '';
+  if (gpState.addingNew) {
+    addForm = `
+      <div class="gp-add-form">
+        <input type="text" id="gp-add-title" value="${gpEscape(gpState.addingTitle)}" placeholder="${gpEscape(tr('gpStep3PlaceholderTitle'))}" oninput="gpState.addingTitle=this.value" autofocus>
+        <textarea id="gp-add-notes" rows="2" placeholder="${gpEscape(tr('gpStep3PlaceholderNotes'))}" oninput="gpState.addingNotes=this.value">${gpEscape(gpState.addingNotes)}</textarea>
+        <div class="gp-add-form-row">
+          <input type="number" min="1" max="50" value="${gpEscape(gpState.addingPeople)}" placeholder="${gpEscape(tr('gpStep3PeopleCount'))}" oninput="gpState.addingPeople=this.value" style="width:140px">
+        </div>
+        <div class="gp-add-form-actions">
+          <button class="gp-add-form-cancel" onclick="gpCancelAdd()">${gpEscape(tr('gpStep3Cancel'))}</button>
+          <button class="gp-add-form-save" onclick="gpSaveAdd()">${gpEscape(tr('gpStep3Save'))}</button>
+        </div>
+      </div>
+    `;
+  } else {
+    addForm = `<button class="gp-add-btn" onclick="gpStartAdd()">+ ${gpEscape(tr('gpStep3AddBtn'))}</button>`;
+  }
+  body.innerHTML = `
+    <div class="gp-title">${gpEscape(tr('gpStep3Title'))}</div>
+    <div class="gp-desc">${gpEscape(tr('gpStep3Desc'))}</div>
+    <div class="gp-items">${customItems}</div>
+    ${addForm}
+  `;
+  footer.innerHTML = `
+    <button class="gp-btn gp-btn-back" onclick="gpStepBack()">${gpEscape(tr('gpBack'))}</button>
+    <button class="gp-btn gp-btn-next" onclick="gpStepNext()">${gpEscape(tr('gpNext'))}</button>
+  `;
+}
+
+function gpStartAdd() {
+  gpState.addingNew = true;
+  gpState.addingTitle = '';
+  gpState.addingNotes = '';
+  gpState.addingPeople = '';
+  gpRender();
+}
+
+function gpCancelAdd() {
+  gpState.addingNew = false;
+  gpRender();
+}
+
+function gpSaveAdd() {
+  const title = (gpState.addingTitle || '').trim();
+  if (!title) return;
+  const peopleNum = parseInt(gpState.addingPeople, 10);
+  gpState.items.push({
+    title: title.slice(0, 200),
+    notes: (gpState.addingNotes || '').trim().slice(0, 500),
+    must_have: false,
+    people_count: isNaN(peopleNum) ? null : peopleNum,
+  });
+  gpState.addingNew = false;
+  gpState.addingTitle = '';
+  gpState.addingNotes = '';
+  gpState.addingPeople = '';
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpRenderStep4(body, footer) {
+  const mustCount = gpState.items.filter(i => i.must_have).length;
+  const reachedMax = mustCount >= GP_MAX_MUST_HAVE;
+  const itemsHtml = gpState.items.map((it, idx) => {
+    const star = it.must_have ? '★' : '☆';
+    const cls = it.must_have ? 'active' : (reachedMax ? 'disabled' : '');
+    return `
+      <div class="gp-item ${it.must_have ? 'must-have' : ''}">
+        <button class="gp-item-star ${cls}" onclick="gpToggleMustHave(${idx})" aria-label="Star">${star}</button>
+        <div class="gp-item-text">${gpEscape(it.title)}${it.notes ? `<div class="gp-item-notes">${gpEscape(it.notes)}</div>` : ''}</div>
+      </div>
+    `;
+  }).join('');
+  body.innerHTML = `
+    <div class="gp-title">${gpEscape(tr('gpStep4Title'))}</div>
+    <div class="gp-desc">${gpEscape(tr('gpStep4Desc'))}</div>
+    <div class="gp-musthave-counter"><strong>${mustCount}</strong> ${gpEscape(tr('gpStep4Counter'))}</div>
+    <div class="gp-items">${itemsHtml}</div>
+  `;
+  footer.innerHTML = `
+    <button class="gp-btn gp-btn-back" onclick="gpStepBack()">${gpEscape(tr('gpBack'))}</button>
+    <button class="gp-btn gp-btn-next" onclick="gpStepNext()">${gpEscape(tr('gpNext'))}</button>
+  `;
+}
+
+function gpToggleMustHave(idx) {
+  const it = gpState.items[idx];
+  if (!it) return;
+  if (!it.must_have) {
+    const count = gpState.items.filter(x => x.must_have).length;
+    if (count >= GP_MAX_MUST_HAVE) return;
+  }
+  it.must_have = !it.must_have;
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpEstimateMinutes() {
+  const must = gpState.items.filter(i => i.must_have).length;
+  const other = gpState.items.length - must;
+  const raw = (must * 3) + (other * 2);
+  return Math.max(5, Math.ceil(raw / 5) * 5);
+}
+
+function gpRenderStep5(body, footer) {
+  const must = gpState.items.filter(i => i.must_have);
+  const other = gpState.items.filter(i => !i.must_have);
+  const mins = gpEstimateMinutes();
+  const itemRow = (it) => `
+    <div class="gp-item ${it.must_have ? 'must-have' : ''}" style="cursor:default">
+      ${it.must_have ? '<span style="color:#B88E4D;font-size:16px">★</span>' : '<span style="width:16px"></span>'}
+      <div class="gp-item-text">${gpEscape(it.title)}${it.notes ? `<div class="gp-item-notes">${gpEscape(it.notes)}</div>` : ''}${it.people_count ? `<div class="gp-item-notes">${it.people_count} ${gpEscape(tr('gpStep3PeopleCount')).toLowerCase()}</div>` : ''}</div>
+    </div>
+  `;
+  body.innerHTML = `
+    <div class="gp-title">${gpEscape(tr('gpStep5Title'))}</div>
+    <div class="gp-time-estimate">
+      <div class="gp-time-estimate-num">${gpEscape(tr('gpStep5TimeLabel'))} ${mins} ${gpEscape(tr('gpStep5TimeUnit'))}</div>
+      <div class="gp-time-estimate-sub">${gpEscape(tr('gpStep5TimeContext'))}</div>
+    </div>
+    ${must.length > 0 ? `
+      <div class="gp-summary-section">
+        <div class="gp-summary-heading">★ ${gpEscape(tr('gpStep5MustHaveHeading'))}</div>
+        <div class="gp-items">${must.map(itemRow).join('')}</div>
+      </div>
+    ` : ''}
+    ${other.length > 0 ? `
+      <div class="gp-summary-section">
+        <div class="gp-summary-heading">${gpEscape(tr('gpStep5OtherHeading'))}</div>
+        <div class="gp-items">${other.map(itemRow).join('')}</div>
+      </div>
+    ` : ''}
+    <div class="gp-edit-hint">${gpEscape(tr('gpStep5EditHint'))}</div>
+    ${gpState.error ? `<div class="gp-error" style="margin-top:14px">${gpEscape(gpState.error)}</div>` : ''}
+  `;
+  footer.innerHTML = `
+    <button class="gp-btn gp-btn-back" onclick="gpStepBack()">${gpEscape(tr('gpBack'))}</button>
+    <button class="gp-btn gp-btn-submit" onclick="gpSubmit()" ${gpState.isSubmitting || gpState.items.length === 0 ? 'disabled' : ''}>${gpEscape(gpState.submitted ? tr('gpResubmit') : tr('gpSubmit'))}</button>
+  `;
+}
+
+function gpStepNext() {
+  if (gpState.step === 1 && !gpState.familySize) return;
+  if (gpState.step === 4) {
+    const mustCount = gpState.items.filter(i => i.must_have).length;
+    if (mustCount > GP_MAX_MUST_HAVE) {
+      gpState.error = tr('gpTooManyMustHave');
+      gpRender();
+      return;
+    }
+  }
+  gpState.step = Math.min(GP_TOTAL_STEPS, gpState.step + 1);
+  gpState.error = null;
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpStepBack() {
+  gpState.step = Math.max(1, gpState.step - 1);
+  gpState.error = null;
+  gpSaveDraft();
+  gpRender();
+}
+
+function gpEditAfterSubmit() {
+  gpState.showSubmittedScreen = false;
+  gpState.step = 2; // Go straight to editing
+  gpRender();
+}
+
+async function gpSubmit() {
+  if (gpState.isSubmitting) return;
+  if (gpState.items.length === 0) {
+    gpState.error = tr('gpEmpty');
+    gpRender();
+    return;
+  }
+  const mustCount = gpState.items.filter(i => i.must_have).length;
+  if (mustCount > GP_MAX_MUST_HAVE) {
+    gpState.error = tr('gpTooManyMustHave');
+    gpRender();
+    return;
+  }
+  gpState.isSubmitting = true;
+  gpState.error = null;
+  gpRender();
+  try {
+    const cleanItems = gpState.items.map(i => ({
+      title: (i.title || '').trim().slice(0, 200),
+      notes: (i.notes || '').trim().slice(0, 500),
+      must_have: !!i.must_have,
+      people_count: typeof i.people_count === 'number' ? i.people_count : null,
+    })).filter(i => i.title.length > 0);
+    const res = await authedFetch(`${API}?action=group-photos-submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, items: cleanItems }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      gpState.isSubmitting = false;
+      gpState.error = data.message || tr('gpSendError');
+      gpRender();
+      return;
+    }
+    gpState.isSubmitting = false;
+    gpState.submitted = true;
+    gpState.showSubmittedScreen = true;
+    gpClearDraft();
+    gpRender();
+    // Update tile status
+    const el = document.getElementById('group-photos-status');
+    if (el) el.textContent = `${cleanItems.length} ${tr('gpTileSubmitted')}`;
+  } catch (e) {
+    gpState.isSubmitting = false;
+    gpState.error = tr('gpSendError');
+    gpRender();
+  }
+}
 </script>
 </body>
 </html>
