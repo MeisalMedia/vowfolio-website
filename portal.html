@@ -2510,7 +2510,11 @@ async function restoreChatState() {
   }
   if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
     await expandChat();
-  } else {
+  } else if (lastData) {
+    // Only start polling if loadOverview() actually rendered the portal.
+    // If we're on the auth screen (auth_required), polling would fire 401s
+    // every 30s and reset the user's code-input step (e.g. when they switch
+    // to Mail.app to fetch the OTP and come back).
     startOverviewPolling();
   }
 }
