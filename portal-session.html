@@ -241,6 +241,35 @@
     .intake-actions{margin-top:12px;padding-top:10px;border-top:1px solid #EFE7DA;display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12px;color:#8A7D6E}
     .intake-edit-btn{background:#FAFAF8;border:1px solid #E8DFD1;color:#6B5E4F;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:border-color 0.15s,color 0.15s}
     .intake-edit-btn:hover{border-color:#9B7E5E;color:#3D3229}
+
+    /* Auth screen (shown when portal_email is set and JWT is missing/invalid) */
+    .auth-screen{padding:32px 8px}
+    .auth-card{background:#fff;border-radius:16px;padding:32px 24px;box-shadow:0 2px 12px rgba(61,50,41,0.06);max-width:420px;margin:0 auto;text-align:center}
+    .auth-icon{width:48px;height:48px;border-radius:14px;background:#F4ECDD;color:#9B7E5E;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:22px}
+    .auth-title{font-family:'Playfair Display',serif;font-size:22px;color:#3D3229;margin-bottom:8px}
+    .auth-desc{font-size:14px;color:#6B5E4F;line-height:1.5;margin-bottom:20px;max-width:340px;margin-left:auto;margin-right:auto}
+    .auth-input{width:100%;padding:14px 16px;border:1px solid #E8DFD1;border-radius:12px;font-size:15px;font-family:inherit;background:#FAFAF8;color:#3D3229;transition:border-color 0.15s,background 0.15s}
+    .auth-input:focus{outline:none;border-color:#9B7E5E;background:#fff}
+    .auth-input.code-input{font-family:'SF Mono',Menlo,Consolas,monospace;font-size:24px;letter-spacing:8px;text-align:center;padding:16px 8px}
+    .auth-input:disabled{opacity:0.6;cursor:not-allowed}
+    .auth-btn{width:100%;padding:14px 16px;background:#3D3229;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:14px;transition:background 0.15s}
+    .auth-btn:hover:not(:disabled){background:#2A1F18}
+    .auth-btn:disabled{background:#C4B8A8;cursor:not-allowed}
+    .auth-link-btn{background:none;border:none;color:#9B7E5E;font-size:13px;cursor:pointer;margin-top:12px;font-family:inherit;text-decoration:underline;padding:6px 10px}
+    .auth-link-btn:hover{color:#7A6048}
+    .auth-error{background:#FDF1EE;border:1px solid #F4D6CC;color:#A8483A;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;text-align:left;line-height:1.45}
+    .auth-info{background:#F5FAF4;border:1px solid #DCE8DB;color:#5C8062;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:14px;text-align:left;line-height:1.45}
+    .auth-email-display{font-size:12px;color:#8A7D6E;margin-top:14px;line-height:1.5}
+    .auth-email-display strong{color:#3D3229;font-weight:500;word-break:break-all}
+    .auth-expires-in{display:block;font-size:11px;color:#9B8D7E;margin-top:6px;font-variant-numeric:tabular-nums}
+    .auth-actions-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap}
+    .auth-actions-sep{color:#C4B8A8;font-size:13px}
+    .auth-link-btn:disabled{color:#B0A090;cursor:default;text-decoration:none}
+    .auth-link-btn:disabled:hover{color:#B0A090}
+
+    /* Footer logout link (only shown when authenticated) */
+    .footer-logout{display:inline-block;margin-left:14px;color:#9B7E5E;font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;padding:0}
+    .footer-logout:hover{color:#7A6048}
   </style>
 </head>
 <body>
@@ -262,6 +291,8 @@
 
 <script>
 const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal';
+const SUPABASE_URL = 'https://ubdqueuknaqegipnbsxc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZHF1ZXVrbmFxZWdpcG5ic3hjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyMjY2MTYsImV4cCI6MjA4OTgwMjYxNn0.UiUReWtlh6lGtoon2AwyQblIVEbzW1LMA3PBH8XclD0';
 const app = document.getElementById('app');
 
 let lang = localStorage.getItem('vf_lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
@@ -441,6 +472,32 @@ const t = {
     timeHour: 'h',
     timeDay: 'd',
     timeYesterday: 'yesterday',
+    authTitle: 'Verify your email',
+    authDesc: 'Enter the email address your photographer used to set up this portal. We will send you a one-time code.',
+    authEmailPlaceholder: 'your@email.com',
+    authSendCode: 'Send code',
+    authSending: 'Sending...',
+    authCodeTitle: 'Enter your code',
+    authCodeDesc: 'We have sent a code to your email. It expires in 60 minutes.',
+    authCodePlaceholder: '000000',
+    authVerify: 'Verify',
+    authVerifying: 'Verifying...',
+    authChangeEmail: 'Use a different email',
+    authResend: 'Resend code',
+    authSendNewCode: 'Send new code',
+    authNewCodeSent: 'A new code has been sent.',
+    authResumed: 'Welcome back. Enter the code from your email.',
+    authCodeSentTo: 'Code sent to',
+    authExpiresIn: 'Code expires in',
+    authExpiredCode: 'The code has expired. Request a new code to continue.',
+    authInvalidEmail: 'Please enter a valid email address.',
+    authInvalidCode: 'Invalid code. Please try again.',
+    authRateLimited: 'Too many attempts. Please wait an hour before trying again.',
+    authRateRestart: 'Too many verification attempts. Please request a new code.',
+    authConnError: 'Connection error. Please try again.',
+    authNotAuthorized: 'This email is not authorized for this portal. Contact your photographer.',
+    authLogout: 'Sign out',
+    authLoggedOut: 'You have been signed out.',
   },
   no: {
     loading: 'Laster portalen din...',
@@ -616,6 +673,32 @@ const t = {
     timeHour: 't',
     timeDay: 'd',
     timeYesterday: 'i går',
+    authTitle: 'Bekreft e-posten din',
+    authDesc: 'Skriv inn e-postadressen fotografen din brukte da portalen ble satt opp. Vi sender deg en engangskode.',
+    authEmailPlaceholder: 'din@epost.no',
+    authSendCode: 'Send kode',
+    authSending: 'Sender...',
+    authCodeTitle: 'Skriv inn koden',
+    authCodeDesc: 'Vi har sendt en kode til e-posten din. Koden utløper om 60 minutter.',
+    authCodePlaceholder: '000000',
+    authVerify: 'Bekreft',
+    authVerifying: 'Bekrefter...',
+    authChangeEmail: 'Bruk en annen e-post',
+    authResend: 'Send ny kode',
+    authSendNewCode: 'Send ny kode',
+    authNewCodeSent: 'En ny kode er sendt.',
+    authResumed: 'Velkommen tilbake. Skriv inn koden fra e-posten din.',
+    authCodeSentTo: 'Koden sendt til',
+    authExpiresIn: 'Koden utløper om',
+    authExpiredCode: 'Koden er utløpt. Be om en ny kode for å fortsette.',
+    authInvalidEmail: 'Skriv inn en gyldig e-postadresse.',
+    authInvalidCode: 'Ugyldig kode. Prøv igjen.',
+    authRateLimited: 'For mange forsøk. Vent en time før du prøver igjen.',
+    authRateRestart: 'For mange forsøk. Be om en ny kode.',
+    authConnError: 'Tilkoblingsfeil. Prøv igjen.',
+    authNotAuthorized: 'Denne e-posten har ikke tilgang til portalen. Kontakt fotografen din.',
+    authLogout: 'Logg ut',
+    authLoggedOut: 'Du er logget ut.',
   },
 };
 
@@ -696,6 +779,111 @@ let token = null;
   if (qt) token = qt;
 })();
 
+// ── Session management (portal_email auth flow) ─────────────────────
+// Session is scoped per portal token (each unique URL = independent session).
+// localStorage survives 30+ days; access_token auto-refreshes via Supabase REST.
+const sessionKey = token ? `vf_portal_session_${token.slice(0, 12)}` : null;
+
+function getSession() {
+  if (!sessionKey) return null;
+  try {
+    const raw = localStorage.getItem(sessionKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function saveSession(s) {
+  if (!sessionKey || !s) return;
+  localStorage.setItem(sessionKey, JSON.stringify(s));
+}
+function clearSession() {
+  if (!sessionKey) return;
+  localStorage.removeItem(sessionKey);
+}
+
+// Refresh access_token via Supabase REST. anon key is intentionally public —
+// it only allows operations the user is already entitled to via their refresh_token.
+async function refreshSession() {
+  const s = getSession();
+  if (!s?.refresh_token) return null;
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
+      body: JSON.stringify({ refresh_token: s.refresh_token }),
+    });
+    if (!res.ok) { clearSession(); return null; }
+    const data = await res.json();
+    if (!data.access_token) return null;
+    const updated = {
+      ...s,
+      access_token: data.access_token,
+      refresh_token: data.refresh_token || s.refresh_token,
+      expires_at: data.expires_at || (Math.floor(Date.now() / 1000) + (data.expires_in || 3600)),
+    };
+    saveSession(updated);
+    return updated;
+  } catch { return null; }
+}
+
+function authHeaders() {
+  const s = getSession();
+  return s?.access_token ? { 'Authorization': `Bearer ${s.access_token}` } : {};
+}
+
+// ── Auth-progress persistens (overlever iOS-tab-eviction når brukeren bytter til Mail-app) ──
+const AUTH_PROGRESS_KEY = sessionKey ? `${sessionKey}_auth_progress` : null;
+
+function saveAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return;
+  try {
+    sessionStorage.setItem(AUTH_PROGRESS_KEY, JSON.stringify({
+      email: authState.email,
+      codeRequestedAt: authState.codeRequestedAt,
+      resendCooldownUntil: authState.resendCooldownUntil,
+      savedAt: Date.now(),
+    }));
+  } catch {}
+}
+
+function loadAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return null;
+  try {
+    const raw = sessionStorage.getItem(AUTH_PROGRESS_KEY);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (Date.now() - (data.savedAt || 0) > 60 * 60 * 1000) {
+      sessionStorage.removeItem(AUTH_PROGRESS_KEY);
+      return null;
+    }
+    return data;
+  } catch { return null; }
+}
+
+function clearAuthProgress() {
+  if (!AUTH_PROGRESS_KEY) return;
+  try { sessionStorage.removeItem(AUTH_PROGRESS_KEY); } catch {}
+}
+
+// Wrapped fetch that injects Bearer JWT and auto-refreshes on 401 auth_required.
+async function authedFetch(url, init = {}) {
+  const buildHeaders = (extra) => ({ ...(init.headers || {}), ...extra });
+  let res = await fetch(url, { ...init, headers: buildHeaders(authHeaders()) });
+  if (res.status === 401) {
+    const cloned = res.clone();
+    const data = await cloned.json().catch(() => ({}));
+    if (data.error === 'auth_required') {
+      const refreshed = await refreshSession();
+      if (refreshed) {
+        res = await fetch(url, {
+          ...init,
+          headers: buildHeaders({ 'Authorization': `Bearer ${refreshed.access_token}` }),
+        });
+      }
+    }
+  }
+  return res;
+}
+
 let lastData = null;
 
 function showError(title, desc) {
@@ -706,14 +894,376 @@ function showError(title, desc) {
     </div>`;
 }
 
+// ── Auth UI (full-page) ─────────────────────────────────────────────
+const OTP_LENGTH = 6;
+const OTP_LIFETIME_MS = 60 * 60 * 1000;
+const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
+
+let authState = {
+  step: 'email',
+  email: '',
+  error: null,
+  info: null,
+  loading: false,
+  codeRequestedAt: 0,
+  resendCooldownUntil: 0,
+  codeExpired: false,
+};
+let authTickerInterval = null;
+
+function showAuthScreen(step, errorOrInfo, isInfo) {
+  // Stop background polling while auth screen is active.
+  stopOverviewPolling();
+  stopChatPolling();
+  authState = {
+    ...authState,
+    step: step || 'email',
+    error: !isInfo ? (errorOrInfo || null) : null,
+    info: isInfo ? errorOrInfo : null,
+    loading: false,
+  };
+  if (step === 'email') {
+    authState.codeRequestedAt = 0;
+    authState.resendCooldownUntil = 0;
+    authState.codeExpired = false;
+    if (!authState.email) authState.email = '';
+    clearAuthProgress();
+    stopAuthTicker();
+  }
+  renderAuthScreen();
+  updateFooterLogout();
+}
+
+function startAuthTicker() {
+  if (authTickerInterval) return;
+  authTickerInterval = setInterval(updateAuthTicker, 1000);
+  updateAuthTicker();
+}
+
+function stopAuthTicker() {
+  if (authTickerInterval) {
+    clearInterval(authTickerInterval);
+    authTickerInterval = null;
+  }
+}
+
+function updateAuthTicker() {
+  const expiresEl = document.getElementById('auth-expires-in');
+  const resendBtn = document.getElementById('auth-resend-btn');
+  if (!expiresEl && !resendBtn) {
+    stopAuthTicker();
+    return;
+  }
+  const now = Date.now();
+  if (expiresEl && authState.codeRequestedAt) {
+    const expiresAt = authState.codeRequestedAt + OTP_LIFETIME_MS;
+    const remaining = Math.max(0, Math.floor((expiresAt - now) / 1000));
+    if (remaining <= 0) {
+      expiresEl.textContent = '';
+    } else {
+      const mm = String(Math.floor(remaining / 60)).padStart(2, '0');
+      const ss = String(remaining % 60).padStart(2, '0');
+      expiresEl.textContent = `${tr('authExpiresIn')} ${mm}:${ss}`;
+    }
+  }
+  if (resendBtn && !authState.loading) {
+    const cooldownEnd = authState.resendCooldownUntil || 0;
+    const remaining = Math.max(0, Math.ceil((cooldownEnd - now) / 1000));
+    if (remaining > 0) {
+      resendBtn.disabled = true;
+      resendBtn.textContent = `${tr('authResend')} (${remaining}s)`;
+    } else {
+      resendBtn.disabled = false;
+      resendBtn.textContent = tr('authResend');
+    }
+  }
+}
+
+function renderAuthScreen() {
+  const { step, email, error, info, loading } = authState;
+  const errorHtml = error ? `<div class="auth-error">${escapeHtml(error)}</div>` : '';
+  const infoHtml  = info  ? `<div class="auth-info">${escapeHtml(info)}</div>`   : '';
+
+  if (step === 'email') {
+    app.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-card">
+          <div class="auth-icon">🔐</div>
+          <div class="auth-title">${escapeHtml(tr('authTitle'))}</div>
+          <div class="auth-desc">${escapeHtml(tr('authDesc'))}</div>
+          ${errorHtml}${infoHtml}
+          <input type="email" inputmode="email" autocomplete="email"
+                 class="auth-input" id="auth-email-input"
+                 placeholder="${escapeHtml(tr('authEmailPlaceholder'))}"
+                 value="${escapeHtml(email)}"
+                 ${loading ? 'disabled' : ''}>
+          <button class="auth-btn" id="auth-submit-btn" ${loading ? 'disabled' : ''}>
+            ${escapeHtml(loading ? tr('authSending') : tr('authSendCode'))}
+          </button>
+        </div>
+      </div>`;
+    const input = document.getElementById('auth-email-input');
+    document.getElementById('auth-submit-btn').addEventListener('click', submitEmailStep);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') submitEmailStep(); });
+    setTimeout(() => input.focus(), 50);
+  } else if (step === 'code') {
+    if (authState.codeExpired) {
+      app.innerHTML = `
+        <div class="auth-screen">
+          <div class="auth-card">
+            <div class="auth-icon">⏱️</div>
+            <div class="auth-title">${escapeHtml(tr('authCodeTitle'))}</div>
+            <div class="auth-error">${escapeHtml(tr('authExpiredCode'))}</div>
+            <button class="auth-btn" id="auth-resend-btn-large" ${loading ? 'disabled' : ''}>
+              ${escapeHtml(loading ? tr('authSending') : tr('authSendNewCode'))}
+            </button>
+            <div class="auth-email-display">
+              ${escapeHtml(tr('authCodeSentTo'))} <strong>${escapeHtml(email)}</strong>
+            </div>
+            <button class="auth-link-btn" id="auth-change-email-btn">${escapeHtml(tr('authChangeEmail'))}</button>
+          </div>
+        </div>`;
+      document.getElementById('auth-resend-btn-large').addEventListener('click', resendOtp);
+      document.getElementById('auth-change-email-btn').addEventListener('click', () => showAuthScreen('email'));
+      stopAuthTicker();
+      return;
+    }
+    app.innerHTML = `
+      <div class="auth-screen">
+        <div class="auth-card">
+          <div class="auth-icon">✉️</div>
+          <div class="auth-title">${escapeHtml(tr('authCodeTitle'))}</div>
+          <div class="auth-desc">${escapeHtml(tr('authCodeDesc'))}</div>
+          ${errorHtml}${infoHtml}
+          <input type="text" inputmode="numeric" autocomplete="one-time-code"
+                 class="auth-input code-input" id="auth-code-input"
+                 placeholder="${escapeHtml(tr('authCodePlaceholder'))}"
+                 maxlength="${OTP_LENGTH}"
+                 ${loading ? 'disabled' : ''}>
+          <button class="auth-btn" id="auth-submit-btn" ${loading ? 'disabled' : ''}>
+            ${escapeHtml(loading ? tr('authVerifying') : tr('authVerify'))}
+          </button>
+          <div class="auth-email-display">
+            ${escapeHtml(tr('authCodeSentTo'))} <strong>${escapeHtml(email)}</strong>
+            <span class="auth-expires-in" id="auth-expires-in"></span>
+          </div>
+          <div class="auth-actions-row">
+            <button class="auth-link-btn" id="auth-resend-btn">${escapeHtml(tr('authResend'))}</button>
+            <span class="auth-actions-sep">·</span>
+            <button class="auth-link-btn" id="auth-change-email-btn">${escapeHtml(tr('authChangeEmail'))}</button>
+          </div>
+        </div>
+      </div>`;
+    const input = document.getElementById('auth-code-input');
+    document.getElementById('auth-submit-btn').addEventListener('click', submitCodeStep);
+    document.getElementById('auth-resend-btn').addEventListener('click', resendOtp);
+    document.getElementById('auth-change-email-btn').addEventListener('click', () => showAuthScreen('email'));
+    const otpRegex = new RegExp(`\\d{${OTP_LENGTH}}`);
+    input.addEventListener('input', e => {
+      const v = e.target.value;
+      const fullMatch = v.match(otpRegex);
+      if (fullMatch && fullMatch[0] !== v) {
+        e.target.value = fullMatch[0];
+      } else {
+        e.target.value = v.replace(/\D/g, '').slice(0, OTP_LENGTH);
+      }
+      if (e.target.value.length === OTP_LENGTH && !authState.loading) submitCodeStep();
+    });
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.value.length === OTP_LENGTH) submitCodeStep();
+    });
+    setTimeout(() => input.focus(), 50);
+    startAuthTicker();
+  }
+}
+
+async function submitEmailStep() {
+  const input = document.getElementById('auth-email-input');
+  const email = (input?.value || '').trim().toLowerCase();
+  if (!email || !email.includes('@')) {
+    authState.error = tr('authInvalidEmail');
+    renderAuthScreen();
+    return;
+  }
+  authState = { ...authState, step: 'email', email, error: null, info: null, loading: true };
+  renderAuthScreen();
+  try {
+    const res = await fetch(`${API}?action=request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 429) {
+      authState.error = tr('authRateLimited');
+      authState.loading = false;
+      renderAuthScreen();
+      return;
+    }
+    const now = Date.now();
+    authState = {
+      ...authState,
+      step: 'code', email, error: null, info: null, loading: false,
+      codeRequestedAt: now,
+      resendCooldownUntil: now + OTP_RESEND_COOLDOWN_MS,
+      codeExpired: false,
+    };
+    saveAuthProgress();
+    renderAuthScreen();
+  } catch (e) {
+    authState.error = tr('authConnError');
+    authState.loading = false;
+    renderAuthScreen();
+  }
+}
+
+async function resendOtp() {
+  if (Date.now() < (authState.resendCooldownUntil || 0)) return;
+  if (!authState.email) {
+    showAuthScreen('email');
+    return;
+  }
+  authState = { ...authState, loading: true, error: null, info: null };
+  renderAuthScreen();
+  try {
+    const res = await fetch(`${API}?action=request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email: authState.email }),
+    });
+    if (res.status === 429) {
+      authState = { ...authState, loading: false, error: tr('authRateLimited'), codeExpired: false };
+      renderAuthScreen();
+      return;
+    }
+    const now = Date.now();
+    authState = {
+      ...authState,
+      step: 'code',
+      loading: false,
+      error: null,
+      info: tr('authNewCodeSent'),
+      codeRequestedAt: now,
+      resendCooldownUntil: now + OTP_RESEND_COOLDOWN_MS,
+      codeExpired: false,
+    };
+    saveAuthProgress();
+    renderAuthScreen();
+  } catch {
+    authState = { ...authState, loading: false, error: tr('authConnError') };
+    renderAuthScreen();
+  }
+}
+
+async function submitCodeStep() {
+  const input = document.getElementById('auth-code-input');
+  const code = (input?.value || '').trim();
+  if (code.length !== OTP_LENGTH) {
+    authState.error = tr('authInvalidCode');
+    renderAuthScreen();
+    return;
+  }
+  authState = { ...authState, error: null, info: null, loading: true };
+  renderAuthScreen();
+  try {
+    const res = await fetch(`${API}?action=verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, email: authState.email, code }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 429 && data.restart_required) {
+      showAuthScreen('email', tr('authRateRestart'));
+      return;
+    }
+    if (!res.ok || data.error) {
+      if (data.error === 'expired_otp') {
+        authState = { ...authState, loading: false, error: null, info: null, codeExpired: true };
+      } else {
+        authState = { ...authState, loading: false, error: tr('authInvalidCode'), codeExpired: false };
+      }
+      renderAuthScreen();
+      return;
+    }
+    saveSession({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: data.expires_at,
+      email: authState.email,
+    });
+    clearAuthProgress();
+    authState.loading = false;
+    loadOverview().then(() => { startOverviewPolling(); });
+  } catch (e) {
+    authState.error = tr('authConnError');
+    authState.loading = false;
+    renderAuthScreen();
+  }
+}
+
+async function logout() {
+  const s = getSession();
+  if (s?.access_token) {
+    try {
+      await fetch(`${API}?action=logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${s.access_token}`,
+        },
+        body: JSON.stringify({ token }),
+      });
+    } catch (e) {
+      console.warn('[portal] logout call failed:', e);
+    }
+  }
+  clearSession();
+  clearAuthProgress();
+  showAuthScreen('email', tr('authLoggedOut'), true);
+}
+
+function updateFooterLogout() {
+  const footer = document.querySelector('.footer');
+  if (!footer) return;
+  const existing = document.getElementById('footer-logout-btn');
+  const s = getSession();
+  if (s) {
+    if (!existing) {
+      const btn = document.createElement('button');
+      btn.id = 'footer-logout-btn';
+      btn.className = 'footer-logout';
+      btn.textContent = tr('authLogout');
+      btn.addEventListener('click', logout);
+      footer.appendChild(btn);
+    } else {
+      existing.textContent = tr('authLogout');
+    }
+  } else if (existing) {
+    existing.remove();
+  }
+}
+
 async function loadOverview() {
   if (!token) {
     showError(tr('missingLink'), tr('missingLinkDesc'));
     return;
   }
   try {
-    const res = await fetch(`${API}?action=overview&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=overview&token=${encodeURIComponent(token)}`);
     const data = await res.json();
+    if (res.status === 401 && data.error === 'auth_required') {
+      showAuthScreen('email');
+      return;
+    }
+    if (res.status === 403 && data.error === 'wrong_email') {
+      clearSession();
+      showAuthScreen('email', tr('authNotAuthorized'));
+      return;
+    }
+    if (res.status === 503) {
+      console.warn('[portal] Supabase 503 on overview, skipping render');
+      return;
+    }
     if (!res.ok || data.error) {
       if (data.error === 'expired') return showError(tr('expired'), tr('expiredDesc'));
       return showError(tr('invalidLink'), data.message || tr('missingLinkDesc'));
@@ -1039,7 +1589,7 @@ function render(data) {
 async function openIntake() {
   if (!token) return;
   try {
-    const res = await fetch(`${API}?action=open-intake`, {
+    const res = await authedFetch(`${API}?action=open-intake`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -1056,7 +1606,7 @@ async function openIntake() {
 async function openContract(documentId) {
   if (!token || !documentId) return;
   try {
-    const res = await fetch(`${API}?action=open-contract`, {
+    const res = await authedFetch(`${API}?action=open-contract`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, document_id: documentId }),
@@ -1168,7 +1718,7 @@ async function fetchMessages(initial) {
   try {
     const params = new URLSearchParams({ action: 'messages', token });
     if (!initial && chatLastFetchedAt) params.set('since', chatLastFetchedAt);
-    const res = await fetch(`${API}?${params.toString()}`);
+    const res = await authedFetch(`${API}?${params.toString()}`);
     const data = await res.json();
     if (!res.ok || data.error) return;
     const incoming = data.messages || [];
@@ -1188,7 +1738,7 @@ async function fetchMessages(initial) {
 async function markRead() {
   if (!token) return;
   try {
-    await fetch(`${API}?action=mark-read`, {
+    await authedFetch(`${API}?action=mark-read`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token }),
@@ -1279,7 +1829,7 @@ async function sendChat() {
   errEl.classList.add('hidden');
 
   try {
-    const res = await fetch(`${API}?action=send-message`, {
+    const res = await authedFetch(`${API}?action=send-message`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, body }),
@@ -1336,7 +1886,7 @@ async function fetchMoodboard() {
   if (!token) return;
   const scroll = document.getElementById('moodboard-scroll');
   try {
-    const res = await fetch(`${API}?action=moodboard&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=moodboard&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="moodboard-empty">${escapeHtml(tr('moodboardErrorGeneric'))}</div>`;
@@ -1409,7 +1959,7 @@ async function handleMoodboardFiles(event) {
       const form = new FormData();
       form.append('token', token);
       form.append('file', blob, 'inspiration.jpg');
-      const res = await fetch(`${API}?action=moodboard-upload`, { method: 'POST', body: form });
+      const res = await authedFetch(`${API}?action=moodboard-upload`, { method: 'POST', body: form });
       const data = await res.json();
       // Replace placeholder
       moodboardImages = moodboardImages.filter(m => m.id !== tempId);
@@ -1435,7 +1985,7 @@ async function deleteMoodboardImage(id) {
   moodboardImages = moodboardImages.filter(m => m.id !== id);
   renderMoodboard();
   try {
-    const res = await fetch(`${API}?action=moodboard-delete`, {
+    const res = await authedFetch(`${API}?action=moodboard-delete`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ token, image_id: id }),
@@ -1531,7 +2081,7 @@ async function fetchDeliveries() {
   if (!token) return;
   const scroll = document.getElementById('deliveries-scroll');
   try {
-    const res = await fetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=deliverables&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
@@ -1601,7 +2151,7 @@ async function fetchMeetings() {
   if (!token) return;
   const scroll = document.getElementById('meetings-scroll');
   try {
-    const res = await fetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=meetings&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="meetings-loading">${escapeHtml(tr('intakeError'))}</div>`;
@@ -1725,7 +2275,7 @@ async function fetchIntake() {
   if (!token) return;
   const scroll = document.getElementById('intake-scroll');
   try {
-    const res = await fetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
+    const res = await authedFetch(`${API}?action=intake&token=${encodeURIComponent(token)}`);
     const data = await res.json();
     if (!res.ok || data.error) {
       if (scroll) scroll.innerHTML = `<div class="intake-loading">${escapeHtml(tr('intakeError'))}</div>`;
@@ -1778,15 +2328,42 @@ async function restoreChatState() {
   }
   if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
     await expandChat();
-  } else {
+  } else if (lastData) {
+    // Only start polling if loadOverview() actually rendered the portal.
+    // If we're on the auth screen (auth_required), polling would fire 401s
+    // every 30s and reset the user's code-input step.
     startOverviewPolling();
   }
 }
 
 setLang(lang);
-loadOverview()
-  .then(restoreChatState)
-  .catch(err => console.error('[portal-session] loadOverview/restoreChatState failed:', err));
+
+// On init: if there's a saved auth-progress (user got OTP, switched to Mail,
+// browser killed the tab), restore the code-input step so they don't have to
+// start over. Only kicks in when there's no valid session yet.
+(function initPortal() {
+  const inProgress = loadAuthProgress();
+  const hasSession = !!getSession();
+  if (!hasSession && inProgress?.email) {
+    authState = {
+      ...authState,
+      step: 'code',
+      email: inProgress.email,
+      codeRequestedAt: inProgress.codeRequestedAt || 0,
+      resendCooldownUntil: inProgress.resendCooldownUntil || 0,
+      error: null,
+      info: tr('authResumed'),
+      loading: false,
+      codeExpired: false,
+    };
+    renderAuthScreen();
+    updateFooterLogout();
+    return;
+  }
+  loadOverview()
+    .then(restoreChatState)
+    .catch(err => console.error('[portal-session] loadOverview/restoreChatState failed:', err));
+})();
 </script>
 </body>
 </html>
