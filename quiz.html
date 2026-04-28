@@ -73,6 +73,11 @@
     .footer{text-align:center;padding:20px 0;font-size:11px;color:#B0A090}
     .hidden{display:none}
     @media(max-width:480px){.row{flex-direction:column;gap:0}}
+    /* Embed mode: hide brand header + footer so quiz fills the parent modal */
+    html.embed .brand{display:none}
+    html.embed .footer{display:none}
+    html.embed body{background:transparent}
+    html.embed .container{max-width:none;padding:14px 16px 24px}
   </style>
 </head>
 <body>
@@ -96,7 +101,16 @@ const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/client-portal
 const app = document.getElementById('app');
 
 // i18n
-let lang = localStorage.getItem('vf_lang') || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
+let lang = (function() {
+  // Respect explicit ?lang= override first (used by portal modal embed)
+  try {
+    const qs = new URLSearchParams(location.search);
+    const q = qs.get('lang');
+    if (q === 'no' || q === 'en') return q;
+  } catch (_) {}
+  return localStorage.getItem('vf_lang')
+    || (navigator.language.startsWith('nb') || navigator.language.startsWith('no') || navigator.language.startsWith('nn') ? 'no' : 'en');
+})();
 const t = {
   en: {
     loading: 'Loading questionnaire...',
@@ -204,6 +218,17 @@ let token = null;
 
 // Set initial toggle state
 if (lang === 'no') { setLang('no'); }
+
+// Embed mode: when loaded inside the portal modal as an iframe, hide brand
+// header so the quiz fills the bottom-sheet without duplicating chrome.
+(function applyEmbed() {
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get('embed') === '1') {
+      document.documentElement.classList.add('embed');
+    }
+  } catch (_) {}
+})();
 
 // Token resolution: support /i/{token} path, ?token= query, and sessionStorage
 (function resolveToken() {
@@ -489,6 +514,12 @@ async function submit() {
     const data = await res.json();
     if (data.error) { btn.disabled = false; btn.textContent = 'Submit'; alert(data.message || 'Error saving.'); return; }
     showSuccess();
+    // Notify parent (portal modal) if we're embedded in an iframe
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'intake-submitted' }, window.location.origin);
+      }
+    } catch (_) {}
   } catch(e) { btn.disabled = false; btn.textContent = 'Submit'; alert('Network error.'); }
 }
 

@@ -326,6 +326,16 @@
     .footer-logout{display:inline-block;margin-left:14px;color:#9B7E5E;font-size:11px;cursor:pointer;background:none;border:none;font-family:inherit;text-decoration:underline;padding:0}
     .footer-logout:hover{color:#7A6048}
 
+    /* Intake form modal (iframes quiz.html in embed mode) */
+    .intake-modal{position:fixed;inset:0;background:rgba(28,24,20,0.65);z-index:9000;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+    .intake-modal.open{display:flex}
+    .intake-sheet{background:#FAF6EF;width:100%;max-width:560px;height:96vh;border-radius:24px 24px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -10px 40px rgba(0,0,0,0.18);animation:gpSlideUp 0.32s cubic-bezier(0.32,0.72,0.34,1.0)}
+    .intake-header{padding:14px 20px;border-bottom:1px solid rgba(155,126,94,0.12);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#FAF6EF}
+    .intake-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;color:#3F2E1E;font-weight:500}
+    .intake-close{background:none;border:none;font-size:24px;color:#9B8A75;cursor:pointer;padding:4px 8px;line-height:1;border-radius:8px}
+    .intake-close:hover{background:rgba(155,126,94,0.08)}
+    .intake-iframe{flex:1;border:none;width:100%;background:#FAF6EF;-webkit-overflow-scrolling:touch}
+
     /* Group photos quiz modal */
     .gp-modal{position:fixed;inset:0;background:rgba(28,24,20,0.65);z-index:9000;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
     .gp-modal.open{display:flex}
@@ -422,6 +432,16 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
   <span class="chat-fab-badge hidden" id="chat-fab-badge">0</span>
 </button>
+
+<div class="intake-modal" id="intake-modal" onclick="intakeModalBgClick(event)">
+  <div class="intake-sheet" onclick="event.stopPropagation()">
+    <div class="intake-header">
+      <div class="intake-title" id="intake-modal-title">Kundeskjema</div>
+      <button class="intake-close" onclick="closeIntake()" aria-label="Close">×</button>
+    </div>
+    <iframe class="intake-iframe" id="intake-iframe" src="about:blank" title="Kundeskjema"></iframe>
+  </div>
+</div>
 
 <div class="gp-modal" id="gp-modal" onclick="gpModalBgClick(event)">
   <div class="gp-sheet" onclick="event.stopPropagation()">
@@ -2142,6 +2162,22 @@ function openChatFromFab() {
 
 async function openIntake() {
   if (!token) return;
+  const modal = document.getElementById('intake-modal');
+  const iframe = document.getElementById('intake-iframe');
+  const titleEl = document.getElementById('intake-modal-title');
+  if (titleEl) titleEl.textContent = tr('quizTitle') || 'Kundeskjema';
+  if (!modal || !iframe) {
+    // Fallback: full-page redirect if modal not present
+    try {
+      const res = await authedFetch(`${API}?action=open-intake`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
+      });
+      const d = await res.json();
+      if (d.url) window.location.href = d.url;
+    } catch (_) { alert(tr('connError')); }
+    return;
+  }
   try {
     const res = await authedFetch(`${API}?action=open-intake`, {
       method: 'POST',
@@ -2149,13 +2185,39 @@ async function openIntake() {
       body: JSON.stringify({ token }),
     });
     const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    }
+    if (!data.url) throw new Error('no url');
+    // Embed mode hides quiz brand and footer so it fills the bottom-sheet cleanly.
+    iframe.src = data.url + (data.url.includes('?') ? '&' : '?') + 'embed=1&lang=' + encodeURIComponent(lang);
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
   } catch (e) {
     alert(tr('connError'));
   }
 }
+
+function closeIntake() {
+  const modal = document.getElementById('intake-modal');
+  const iframe = document.getElementById('intake-iframe');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+  if (iframe) iframe.src = 'about:blank';
+  // Refresh portal so the intake-tile flips to "submitted" state if it just was.
+  loadOverview().catch(() => {});
+}
+
+function intakeModalBgClick(e) {
+  if (e.target.id === 'intake-modal') closeIntake();
+}
+
+// Listen for postMessage from intake quiz iframe (submit success → close + refresh)
+window.addEventListener('message', (event) => {
+  if (event.origin !== window.location.origin) return;
+  const data = event.data || {};
+  if (data && data.type === 'intake-submitted') {
+    setTimeout(closeIntake, 1500); // brief pause so user sees the thank-you
+  }
+});
 
 async function openSignedContract(documentId) {
   if (!token || !documentId) return;
