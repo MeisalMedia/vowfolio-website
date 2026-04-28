@@ -48,6 +48,10 @@
     .tile-body{flex:1;min-width:0}
     .tile-title{font-size:15px;font-weight:600;color:#3D3229;margin-bottom:2px}
     .tile-status{font-size:12px;color:#8A7D6E}
+    .tile-status.nudge{color:#B88E4D;font-weight:600}
+    .tile.tile-nudge{box-shadow:0 0 0 2px rgba(184,142,77,0.4),0 2px 12px rgba(61,50,41,0.06);background:linear-gradient(180deg,#FFFCF5 0%,#FFFFFF 100%)}
+    .tile-list .tile.tile-nudge{box-shadow:0 0 0 2px rgba(184,142,77,0.4) inset;background:linear-gradient(180deg,#FFFCF5 0%,#FFFFFF 100%)}
+    .tile-nudge-pill{display:inline-block;font-size:11px;font-weight:600;color:#fff;background:#B88E4D;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px;letter-spacing:0.2px}
     .tile-status.ok{color:#6B8F71;font-weight:500}
     .tile-status.warn{color:#B07A3E;font-weight:500}
     .tile-arrow{color:#C4B8A8;font-size:18px;flex-shrink:0}
@@ -641,6 +645,7 @@ const t = {
     gpSubmittedClose: 'Close',
     gpItemPlaceholder: 'Photo name',
     gpAddNotesLabel: 'Add note',
+    gpDeadlinePrefix: 'Send by',
 
     faqTitle: 'Questions couples often ask',
     faq1q: 'When will I receive my photos?',
@@ -909,6 +914,7 @@ const t = {
     gpSubmittedClose: 'Lukk',
     gpItemPlaceholder: 'Bildenavn',
     gpAddNotesLabel: 'Legg til notat',
+    gpDeadlinePrefix: 'Send senest',
 
     faqTitle: 'Spørsmål par ofte stiller',
     faq1q: 'Når får vi bildene?',
@@ -1914,15 +1920,35 @@ function render(data) {
     `;
 
   const gp = s.group_photos || { submitted: false, count: 0 };
-  const gpStatusText = gp.submitted
-    ? `${gp.count} ${tr('gpTileSubmitted')}`
-    : tr('gpTileNotStarted');
+  // Soft nudge: when ≤30 days to wedding and not yet submitted, replace the
+  // generic status with "Send senest [deadline]". Deadline = wedding - 7 days
+  // (matches the "frozen 7 days before"-rule for client edits).
+  const gpDaysToWedding = daysUntil(w.weddingDate);
+  const gpDeadlineMs = w.weddingDate
+    ? new Date(w.weddingDate).getTime() - 7 * 24 * 3600 * 1000
+    : null;
+  const gpDeadlineDate = gpDeadlineMs ? new Date(gpDeadlineMs) : null;
+  const gpDaysToDeadline = gpDeadlineMs
+    ? Math.ceil((gpDeadlineMs - Date.now()) / (24 * 3600 * 1000))
+    : null;
+  const gpNudge = !gp.submitted
+    && gpDaysToWedding !== null
+    && gpDaysToWedding > 0
+    && gpDaysToWedding <= 30;
+  let gpStatusText;
+  if (gp.submitted) {
+    gpStatusText = `${gp.count} ${tr('gpTileSubmitted')}`;
+  } else if (gpNudge && gpDeadlineDate) {
+    gpStatusText = `${tr('gpDeadlinePrefix')} ${formatDate(gpDeadlineDate.toISOString())}`;
+  } else {
+    gpStatusText = tr('gpTileNotStarted');
+  }
   const groupPhotosTileHtml = `
-    <button class="tile" id="group-photos-tile" onclick="openGroupPhotos()">
+    <button class="tile${gpNudge ? ' tile-nudge' : ''}" id="group-photos-tile" onclick="openGroupPhotos()">
       <div class="tile-icon sage">👨‍👩‍👧‍👦</div>
       <div class="tile-body">
-        <div class="tile-title">${tr('gpTileTitle')}</div>
-        <div class="tile-status" id="group-photos-status">${gpStatusText}</div>
+        <div class="tile-title">${tr('gpTileTitle')}${gpNudge ? ` <span class="tile-nudge-pill">${gpDaysToDeadline > 0 ? gpDaysToDeadline + ' ' + tr('countDays') : tr('today')}</span>` : ''}</div>
+        <div class="tile-status${gpNudge ? ' nudge' : ''}" id="group-photos-status">${gpStatusText}</div>
       </div>
       <div class="tile-arrow">↗</div>
     </button>
