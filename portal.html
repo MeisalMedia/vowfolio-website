@@ -1896,12 +1896,16 @@ function render(data) {
     </div>
     `;
 
+  const gp = s.group_photos || { submitted: false, count: 0 };
+  const gpStatusText = gp.submitted
+    ? `${gp.count} ${tr('gpTileSubmitted')}`
+    : tr('gpTileNotStarted');
   const groupPhotosTileHtml = `
     <button class="tile" id="group-photos-tile" onclick="openGroupPhotos()">
       <div class="tile-icon sage">👨‍👩‍👧‍👦</div>
       <div class="tile-body">
         <div class="tile-title">${tr('gpTileTitle')}</div>
-        <div class="tile-status" id="group-photos-status">${tr('gpTileNotStarted')}</div>
+        <div class="tile-status" id="group-photos-status">${gpStatusText}</div>
       </div>
       <div class="tile-arrow">↗</div>
     </button>
@@ -1909,7 +1913,7 @@ function render(data) {
 
   const sortableTiles = [
     { done: !!intake.submitted, html: intakeTileHtml },
-    { done: false, html: groupPhotosTileHtml },
+    { done: !!gp.submitted, html: groupPhotosTileHtml },
     { done: contract.status === 'signed', html: contractTileHtml },
   ];
   sortableTiles.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
