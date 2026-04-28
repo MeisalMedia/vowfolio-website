@@ -1896,8 +1896,20 @@ function render(data) {
     </div>
     `;
 
+  const groupPhotosTileHtml = `
+    <button class="tile" id="group-photos-tile" onclick="openGroupPhotos()">
+      <div class="tile-icon sage">👨‍👩‍👧‍👦</div>
+      <div class="tile-body">
+        <div class="tile-title">${tr('gpTileTitle')}</div>
+        <div class="tile-status" id="group-photos-status">${tr('gpTileNotStarted')}</div>
+      </div>
+      <div class="tile-arrow">↗</div>
+    </button>
+    `;
+
   const sortableTiles = [
     { done: !!intake.submitted, html: intakeTileHtml },
+    { done: false, html: groupPhotosTileHtml },
     { done: contract.status === 'signed', html: contractTileHtml },
     { done: !!deposit.paid, html: depositTileHtml },
   ];
@@ -2032,17 +2044,6 @@ function render(data) {
     </div>
     </div>
     ` : ''}
-
-    <div class="tile-row">
-    <button class="tile" id="group-photos-tile" onclick="openGroupPhotos()">
-      <div class="tile-icon sage">👨‍👩‍👧‍👦</div>
-      <div class="tile-body">
-        <div class="tile-title">${tr('gpTileTitle')}</div>
-        <div class="tile-status" id="group-photos-status">${tr('gpTileNotStarted')}</div>
-      </div>
-      <div class="tile-arrow">↗</div>
-    </button>
-    </div>
     </div>
 
     <div class="photog-card">
