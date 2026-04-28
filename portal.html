@@ -177,12 +177,17 @@
 
     /* Day plan — signature section, always visible */
     .dayplan-card{background:#fff;border-radius:16px;padding:18px 20px 14px;margin-bottom:14px;box-shadow:0 2px 12px rgba(61,50,41,0.06)}
-    .dayplan-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .dayplan-card.collapsed{padding-bottom:18px}
+    .dayplan-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;cursor:pointer;user-select:none;background:none;border:none;padding:0;width:100%;font-family:inherit;text-align:left}
+    .dayplan-card.collapsed .dayplan-header{margin-bottom:0}
     .dayplan-icon{width:36px;height:36px;border-radius:10px;background:#E8F0E6;color:#6B8F71;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
     .dayplan-header-text{flex:1;min-width:0}
     .dayplan-title{font-family:'Playfair Display',serif;font-size:18px;color:#3D3229;line-height:1.2;font-weight:600}
     .dayplan-sub{font-size:11.5px;color:#9B8D7E;margin-top:3px;letter-spacing:0.3px}
-    .dayplan-list{display:flex;flex-direction:column;margin-top:2px}
+    .dayplan-chev{color:#9B8D7E;font-size:14px;flex-shrink:0;transition:transform 0.2s}
+    .dayplan-card.collapsed .dayplan-chev{transform:rotate(-90deg)}
+    .dayplan-list{display:flex;flex-direction:column;margin-top:2px;overflow:hidden;transition:max-height 0.25s ease,opacity 0.2s ease;max-height:2000px;opacity:1}
+    .dayplan-card.collapsed .dayplan-list{max-height:0;opacity:0;margin-top:0}
     .dayplan-item{display:flex;align-items:stretch;position:relative;min-height:52px}
     .dayplan-time{flex-shrink:0;width:52px;padding-top:18px;font-family:'SF Mono','Menlo','Courier New',monospace;font-size:13px;font-weight:700;color:#C2847A;letter-spacing:0.3px}
     .dayplan-rail{flex-shrink:0;width:20px;position:relative}
@@ -1630,17 +1635,27 @@ function renderDayPlan(items) {
   }).join('');
   const unit = items.length === 1 ? tr('dayPlanEvent') : tr('dayPlanEvents');
   return `
-    <div class="dayplan-card">
-      <div class="dayplan-header">
+    <div class="dayplan-card collapsed" id="dayplan-card">
+      <button type="button" class="dayplan-header" onclick="toggleDayPlan()" aria-expanded="false">
         <div class="dayplan-icon">⏱️</div>
         <div class="dayplan-header-text">
           <div class="dayplan-title">${escapeHtml(tr('dayPlanTitle'))}</div>
           <div class="dayplan-sub">${items.length} ${escapeHtml(unit)}</div>
         </div>
-      </div>
+        <div class="dayplan-chev">▾</div>
+      </button>
       <div class="dayplan-list">${rows}</div>
     </div>
   `;
+}
+
+function toggleDayPlan() {
+  const card = document.getElementById('dayplan-card');
+  if (!card) return;
+  const wasCollapsed = card.classList.contains('collapsed');
+  card.classList.toggle('collapsed');
+  const btn = card.querySelector('.dayplan-header');
+  if (btn) btn.setAttribute('aria-expanded', wasCollapsed ? 'true' : 'false');
 }
 
 function renderCountdown(isoDate, status) {
