@@ -1911,7 +1911,6 @@ function render(data) {
     { done: !!intake.submitted, html: intakeTileHtml },
     { done: false, html: groupPhotosTileHtml },
     { done: contract.status === 'signed', html: contractTileHtml },
-    { done: !!deposit.paid, html: depositTileHtml },
   ];
   sortableTiles.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const sortedTilesHtml = sortableTiles.map(t =>
@@ -2000,6 +1999,8 @@ function render(data) {
       </div>
     </div>
     </div>
+
+    <div class="tile-row tile-group${deposit.paid ? ' done' : ''}">${depositTileHtml}</div>
 
     ${delivTotal > 0 ? `
     <div class="tile-row">
