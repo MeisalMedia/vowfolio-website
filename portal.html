@@ -982,6 +982,8 @@ function setLang(newLang) {
     return;
   }
   if (lastData) {
+    // Capture currently-expanded tiles so language toggle preserves in-session state
+    const openTileIds = Array.from(document.querySelectorAll('.tile.expanded')).map(el => el.id).filter(Boolean);
     render(lastData);
     if (chatOpen) {
       const tile = document.getElementById('chat-tile');
@@ -989,34 +991,16 @@ function setLang(newLang) {
       bindChatInput();
       renderChatMessages();
     }
-    if (localStorage.getItem(INTAKE_STATE_KEY) === '1') {
-      const itile = document.getElementById('intake-tile');
-      if (itile) {
-        itile.classList.add('expanded');
-        if (intakeData) renderIntake(intakeData);
-      }
-    }
-    if (localStorage.getItem(MEETINGS_STATE_KEY) === '1') {
-      const mtile = document.getElementById('meetings-tile');
-      if (mtile) {
-        mtile.classList.add('expanded');
-        if (meetingsData) renderMeetings();
-      }
-    }
-    if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1') {
-      const dtile = document.getElementById('deliveries-tile');
-      if (dtile) {
-        dtile.classList.add('expanded');
-        if (deliveriesData) renderDeliveries();
-      }
-    }
-    if (localStorage.getItem(MOODBOARD_STATE_KEY) === '1') {
-      const mbtile = document.getElementById('moodboard-tile');
-      if (mbtile) {
-        mbtile.classList.add('expanded');
-        if (moodboardLoaded) renderMoodboard();
-      }
-    }
+    openTileIds.forEach(id => {
+      if (id === 'chat-tile') return;
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('expanded');
+      if (id === 'intake-tile' && intakeData) renderIntake(intakeData);
+      else if (id === 'meetings-tile' && meetingsData) renderMeetings();
+      else if (id === 'deliveries-tile' && deliveriesData) renderDeliveries();
+      else if (id === 'moodboard-tile' && moodboardLoaded) renderMoodboard();
+    });
   }
 }
 
@@ -2879,21 +2863,16 @@ function toggleIntake(tile) {
 }
 
 async function restoreChatState() {
-  if (localStorage.getItem(INTAKE_STATE_KEY) === '1' && document.getElementById('intake-tile')) {
-    expandIntake();
-  }
-  if (localStorage.getItem(MEETINGS_STATE_KEY) === '1' && document.getElementById('meetings-tile')) {
-    expandMeetings();
-  }
-  if (localStorage.getItem(DELIVERIES_STATE_KEY) === '1' && document.getElementById('deliveries-tile')) {
-    expandDeliveries();
-  }
-  if (localStorage.getItem(MOODBOARD_STATE_KEY) === '1' && document.getElementById('moodboard-tile')) {
-    expandMoodboard();
-  }
-  if (localStorage.getItem(CHAT_STATE_KEY) === '1') {
-    await expandChat();
-  } else if (lastData) {
+  // All tiles default to closed on page load. In-session toggle still works,
+  // but state is not persisted across page reloads. Clear any legacy keys.
+  try {
+    localStorage.removeItem(INTAKE_STATE_KEY);
+    localStorage.removeItem(MEETINGS_STATE_KEY);
+    localStorage.removeItem(DELIVERIES_STATE_KEY);
+    localStorage.removeItem(MOODBOARD_STATE_KEY);
+    localStorage.removeItem(CHAT_STATE_KEY);
+  } catch (_) {}
+  if (lastData) {
     // Only start polling if loadOverview() actually rendered the portal.
     // If we're on the auth screen (auth_required), polling would fire 401s
     // every 30s and reset the user's code-input step (e.g. when they switch
