@@ -3095,19 +3095,10 @@ function gpRender() {
     stepLabel.textContent = '';
     progress.innerHTML = '';
     body.innerHTML = `
-      <div style="text-align:center;padding:30px 8px 20px">
-        <div style="font-size:48px;margin-bottom:12px">✓</div>
-        <div class="gp-title" style="margin-bottom:6px">${gpEscape(tr('gpSubmittedTitle'))}</div>
-        <div class="gp-desc" style="margin-bottom:18px">${gpEscape(tr('gpSubmittedDesc'))}</div>
-        <div class="gp-summary-section">
-          <div class="gp-summary-heading">${gpState.items.length} ${gpEscape(tr('gpStep5OtherHeading')).toLowerCase()}</div>
-          ${gpState.items.map(i => `
-            <div class="gp-item ${i.must_have ? 'must-have' : ''}" style="cursor:default">
-              ${i.must_have ? '<span style="color:#B88E4D;font-size:16px">★</span>' : '<span style="width:16px"></span>'}
-              <div class="gp-item-text">${gpEscape(i.title)}${i.notes ? `<div class="gp-item-notes">${gpEscape(i.notes)}</div>` : ''}</div>
-            </div>
-          `).join('')}
-        </div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 24px;min-height:320px">
+        <div style="width:72px;height:72px;border-radius:50%;background:#E8F0E6;color:#6B8F71;display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:18px;font-weight:600">✓</div>
+        <div class="gp-title" style="margin-bottom:8px">${gpEscape(tr('gpSubmittedTitle'))}</div>
+        <div class="gp-desc" style="margin-bottom:0;max-width:320px">${gpEscape(tr('gpSubmittedDesc'))}</div>
       </div>
     `;
     footer.innerHTML = `
