@@ -1934,16 +1934,23 @@ function render(data) {
     <div class="tile-list">
     ${sortedTilesHtml}
 
-    ${w.galleryUrl ? `
+    ${meetingsCount > 0 ? `
     <div class="tile-row">
-    <a class="tile" href="${escapeHtml(w.galleryUrl)}" target="_blank" rel="noopener" style="text-decoration:none">
-      <div class="tile-icon gold">📷</div>
+    <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
+      <div class="tile-icon gold">🗓️</div>
       <div class="tile-body">
-        <div class="tile-title">${tr('galleryTitle')}</div>
-        <div class="tile-status">${tr('galleryStatus')}</div>
+        <div class="tile-title">${tr('meetingsTitle')}</div>
+        <div class="tile-status">${meetingsCount === 1 ? tr('meetingsStatus1') : `${meetingsCount} ${tr('meetingsStatusN')}`}</div>
       </div>
-      <div class="tile-arrow">↗</div>
-    </a>
+      <div class="tile-chev">▾</div>
+    </button>
+    <div class="tile-expand meetings-expand">
+      <div class="meetings-body">
+        <div class="meetings-scroll" id="meetings-scroll">
+          <div class="meetings-loading">${escapeHtml(tr('meetingsLoading'))}</div>
+        </div>
+      </div>
+    </div>
     </div>
     ` : ''}
 
@@ -2026,23 +2033,16 @@ function render(data) {
     </div>
     ` : ''}
 
-    ${meetingsCount > 0 ? `
+    ${w.galleryUrl ? `
     <div class="tile-row">
-    <button class="tile" id="meetings-tile" onclick="toggleMeetings(this)">
-      <div class="tile-icon gold">🗓️</div>
+    <a class="tile" href="${escapeHtml(w.galleryUrl)}" target="_blank" rel="noopener" style="text-decoration:none">
+      <div class="tile-icon gold">📷</div>
       <div class="tile-body">
-        <div class="tile-title">${tr('meetingsTitle')}</div>
-        <div class="tile-status">${meetingsCount === 1 ? tr('meetingsStatus1') : `${meetingsCount} ${tr('meetingsStatusN')}`}</div>
+        <div class="tile-title">${tr('galleryTitle')}</div>
+        <div class="tile-status">${tr('galleryStatus')}</div>
       </div>
-      <div class="tile-chev">▾</div>
-    </button>
-    <div class="tile-expand meetings-expand">
-      <div class="meetings-body">
-        <div class="meetings-scroll" id="meetings-scroll">
-          <div class="meetings-loading">${escapeHtml(tr('meetingsLoading'))}</div>
-        </div>
-      </div>
-    </div>
+      <div class="tile-arrow">↗</div>
+    </a>
     </div>
     ` : ''}
     </div>
