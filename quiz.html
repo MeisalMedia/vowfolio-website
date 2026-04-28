@@ -197,7 +197,7 @@ function setLang(l) {
 }
 
 let step = 0;
-const totalSteps = 13;
+const totalSteps = 12;
 let formData = {};
 let weddingInfo = {};
 let token = null;
@@ -290,11 +290,12 @@ function renderStep() {
     case 5: h += stepFirstLook(); break;
     case 6: h += stepPhotoStyle(); break;
     case 7: h += stepMustHaves(); break;
-    case 8: h += stepVIP(); break;
-    case 9: h += stepExtras(); break;
-    case 10: h += stepLogistics(); break;
-    case 11: h += stepPractical(); break;
-    case 12: h += stepFinal(); break;
+    // Step 8 (VIP/group photos) retired — handled by dedicated group photos
+    // quiz in client portal.
+    case 8: h += stepExtras(); break;
+    case 9: h += stepLogistics(); break;
+    case 10: h += stepPractical(); break;
+    case 11: h += stepFinal(); break;
   }
 
   h += '</div>';
@@ -417,16 +418,7 @@ function stepMustHaves() {
   h += '</div>';
   return h;
 }
-function stepVIP() {
-  let h = '<div class="step-title">' + L('s9title') + '</div><div class="step-desc">' + L('s9desc') + '</div>';
-  h += textareaField('vipList', '', L('s9p'));
-  h += '<div class="suggestion-chips">';
-  [L('grandparents'),L('bridesmaids'),L('groomsmen'),L('immFamily'),L('collegeFriends')].forEach(s => {
-    h += '<div class="suggestion" onclick="addSuggestion(\'vipList\',\'' + s.replace(/'/g,"\\'") + '\')">' + s + '</div>';
-  });
-  h += '</div>';
-  return h;
-}
+// stepVIP retired — dedicated group photos quiz lives in client portal.
 function stepExtras() {
   return '<div class="step-title">' + L('s10title') + '</div><div class="step-desc">' + L('s10desc') + '</div>'
     + toggleField('hasSpeeches', L('hasSpeeches'))
