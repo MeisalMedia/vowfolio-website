@@ -253,7 +253,15 @@
     function renderForm(config, studio) {
       // Apply theme
       var theme = config.theme || 'classic';
-      if (theme === 'light') {
+      if (theme === 'none') {
+        document.body.style.background = 'transparent';
+        document.body.style.padding = '0';
+        document.querySelectorAll('.card').forEach(function(c) {
+          c.style.background = 'transparent';
+          c.style.boxShadow = 'none';
+          c.style.borderRadius = '0';
+        });
+      } else if (theme === 'light') {
         document.body.style.background = '#FFFFFF';
         document.querySelector('.card').style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
       } else if (theme === 'dark') {
@@ -308,13 +316,17 @@
       var fields = '';
 
       // Project type selector
-      fields += '<div class="field"><label>Hva gjelder det?</label>' +
-        '<div class="checkbox-group">' +
-        '<label class="radio-label"><input type="radio" name="project_type" value="wedding" checked><span>Bryllup</span></label>' +
-        '<label class="radio-label"><input type="radio" name="project_type" value="couple"><span>Par / forlovelse</span></label>' +
-        '<label class="radio-label"><input type="radio" name="project_type" value="family"><span>Familie</span></label>' +
-        '<label class="radio-label"><input type="radio" name="project_type" value="other"><span>Annet</span></label>' +
-        '</div></div>';
+      if (config.wedding_only) {
+        fields += '<input type="hidden" name="project_type" value="wedding">';
+      } else {
+        fields += '<div class="field"><label>Hva gjelder det?</label>' +
+          '<div class="checkbox-group">' +
+          '<label class="radio-label"><input type="radio" name="project_type" value="wedding" checked><span>Bryllup</span></label>' +
+          '<label class="radio-label"><input type="radio" name="project_type" value="couple"><span>Par / forlovelse</span></label>' +
+          '<label class="radio-label"><input type="radio" name="project_type" value="family"><span>Familie</span></label>' +
+          '<label class="radio-label"><input type="radio" name="project_type" value="other"><span>Annet</span></label>' +
+          '</div></div>';
+      }
 
       fields += '<div class="field"><label for="name">Navn <span class="req">*</span></label>' +
         '<input type="text" id="name" name="name" required placeholder="Ditt navn" autocomplete="name"></div>';
