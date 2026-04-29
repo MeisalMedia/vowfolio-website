@@ -2206,8 +2206,10 @@ function closeIntake() {
   loadOverview().catch(() => {});
 }
 
-function intakeModalBgClick(e) {
-  if (e.target.id === 'intake-modal') closeIntake();
+function intakeModalBgClick(_e) {
+  // Intentionally NOT closing on backdrop click. Intake is a 13-step form
+  // and accidentally tapping outside the sheet would feel destructive.
+  // The X button + autosave-on-step provides a safer dismiss path.
 }
 
 // Listen for postMessage from intake quiz iframe (submit success → close + refresh)

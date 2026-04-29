@@ -214,7 +214,25 @@ let step = 0;
 const totalSteps = 12;
 let formData = {};
 let weddingInfo = {};
+let weddingId = null;
 let token = null;
+
+// ── Draft autosave (per wedding) ─────────────────────────────────────
+// Keyed by wedding_id (stable across token rotation), so closing the modal
+// or browser mid-flow doesn't lose progress. Cleared on successful submit.
+function _draftKey() { return weddingId ? 'vf_intake_draft_' + weddingId : null; }
+function saveDraft() {
+  const k = _draftKey(); if (!k) return;
+  try { localStorage.setItem(k, JSON.stringify({ formData, step, savedAt: Date.now() })); } catch (_) {}
+}
+function loadDraft() {
+  const k = _draftKey(); if (!k) return null;
+  try { const raw = localStorage.getItem(k); return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
+}
+function clearDraft() {
+  const k = _draftKey(); if (!k) return;
+  try { localStorage.removeItem(k); } catch (_) {}
+}
 
 // Set initial toggle state
 if (lang === 'no') { setLang('no'); }
@@ -270,7 +288,15 @@ async function loadQuiz() {
     const data = await res.json();
     if (!res.ok || data.error) { showError(L('invalidLink'), data.message || L('connErrorDesc')); return; }
     weddingInfo = data.wedding || {};
+    weddingId = data.weddingId || null;
     if (data.form) prefill(data.form);
+    // Merge any local draft on top of DB data — draft represents the most
+    // recent in-progress edits the client made before closing the modal.
+    const draft = loadDraft();
+    if (draft && draft.formData) {
+      formData = Object.assign({}, formData, draft.formData);
+      if (typeof draft.step === 'number') step = Math.max(0, Math.min(draft.step, totalSteps - 1));
+    }
     renderStep();
   } catch(e) { showError(L('connError'), L('connErrorDesc')); }
 }
@@ -331,10 +357,33 @@ function renderStep() {
   h += '</div>';
 
   app.innerHTML = h;
+  attachAutoSave();
 }
 
-function next() { saveCurrentStep(); if (step < totalSteps-1) { step++; renderStep(); window.scrollTo(0,0); } }
-function prev() { saveCurrentStep(); if (step > 0) { step--; renderStep(); window.scrollTo(0,0); } }
+// Debounced autosave on every input/change so closing the modal mid-step
+// doesn't drop the typing the user did since their last next/prev.
+let _autoSaveTimer = null;
+function attachAutoSave() {
+  app.querySelectorAll('[data-field], input, textarea, select').forEach(el => {
+    el.addEventListener('input', _scheduleAutoSave);
+    el.addEventListener('change', _scheduleAutoSave);
+  });
+}
+function _scheduleAutoSave() {
+  if (_autoSaveTimer) clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(() => { saveCurrentStep(); saveDraft(); }, 600);
+}
+
+// Flush pending save when the iframe is being torn down (modal close)
+// or the tab/page is hidden — covers users closing the modal faster than
+// the 600ms debounce.
+window.addEventListener('pagehide', () => { saveCurrentStep(); saveDraft(); });
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') { saveCurrentStep(); saveDraft(); }
+});
+
+function next() { saveCurrentStep(); saveDraft(); if (step < totalSteps-1) { step++; renderStep(); window.scrollTo(0,0); } }
+function prev() { saveCurrentStep(); saveDraft(); if (step > 0) { step--; renderStep(); window.scrollTo(0,0); } }
 
 function saveCurrentStep() {
   document.querySelectorAll('[data-field]').forEach(el => {
@@ -513,6 +562,7 @@ async function submit() {
     });
     const data = await res.json();
     if (data.error) { btn.disabled = false; btn.textContent = 'Submit'; alert(data.message || 'Error saving.'); return; }
+    clearDraft(); // Successful submit — drop the autosaved draft.
     showSuccess();
     // Notify parent (portal modal) if we're embedded in an iframe
     try {
