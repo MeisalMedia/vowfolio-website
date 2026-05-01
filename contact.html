@@ -251,6 +251,8 @@
     }
 
     function renderForm(config, studio) {
+      var isEmbedded = window.self !== window.top;
+
       // Apply theme
       var theme = config.theme || 'classic';
       if (theme === 'none') {
@@ -262,10 +264,10 @@
           c.style.borderRadius = '0';
         });
       } else if (theme === 'light') {
-        document.body.style.background = '#FFFFFF';
+        if (!isEmbedded) document.body.style.background = '#FFFFFF';
         document.querySelector('.card').style.boxShadow = '0 2px 12px rgba(0,0,0,0.06)';
       } else if (theme === 'dark') {
-        document.body.style.background = '#1A1A1A';
+        document.body.style.background = isEmbedded ? 'transparent' : '#1A1A1A';
         document.body.style.color = '#F5F5F5';
         document.querySelectorAll('.card').forEach(function(c) {
           c.style.background = '#2A2A2A';
