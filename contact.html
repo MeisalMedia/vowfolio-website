@@ -299,6 +299,14 @@
         }
       }
 
+      // Intro text (custom or hidden)
+      var subtitleEl = document.getElementById('subtitleText');
+      if (config.intro_text === '' || config.intro_text === null) {
+        subtitleEl.style.display = 'none';
+      } else if (config.intro_text) {
+        subtitleEl.textContent = config.intro_text;
+      }
+
       // Hero image (hidden if show_branding is explicitly false)
       if (studio && studio.portal_hero_url && config.show_branding !== false) {
         try {
