@@ -330,6 +330,8 @@
 
     function detectLanguage(config) {
       var supported = ['nb', 'en'];
+      var urlLang = new URLSearchParams(window.location.search).get('lang');
+      if (urlLang && supported.indexOf(urlLang) !== -1) return urlLang;
       if (config.form_language && config.form_language !== 'auto') {
         return supported.indexOf(config.form_language) !== -1 ? config.form_language : 'nb';
       }
