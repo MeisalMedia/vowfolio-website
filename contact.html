@@ -228,13 +228,126 @@
   </div>
 
   <script>
+    // ─── i18n ────────────────────────────────────────────────────────────────
+    var TRANSLATIONS = {
+      nb: {
+        loading: 'Laster...',
+        formNotFound: 'Skjema ikke funnet.',
+        defaultTitle: 'Ta kontakt',
+        defaultSubtitle: 'Vi gleder oss til å høre fra dere',
+        submitBtn: 'Send forespørsel',
+        sending: 'Sender...',
+        errorGeneric: 'Noe gikk galt',
+        errorRetry: 'Noe gikk galt. Prøv igjen.',
+        poweredBy: 'Drevet av',
+        pageTitle: 'Kontakt',
+        pageTitleSuffix: '— Kontakt',
+        successTitle: 'Takk for henvendelsen!',
+        successMsg: 'Vi har mottatt forespørselen deres\nog tar kontakt så snart vi kan.',
+        typeWedding: 'Bryllup',
+        typeCouple: 'Par / forlovelse',
+        typeFamily: 'Familie',
+        typePortrait: 'Portrett',
+        typeCommercial: 'Kommersielt',
+        labelProjectType: 'Hva gjelder det?',
+        labelName: 'Navn',
+        placeholderName: 'Ditt navn',
+        labelPartner: 'Partnerens navn',
+        placeholderPartner: 'Partnerens navn',
+        labelEmail: 'E-post',
+        placeholderEmail: 'navn@epost.no',
+        labelPhone: 'Telefon',
+        placeholderPhone: '+47 412 34 567',
+        labelPreferredContact: 'Foretrukket kontaktmåte',
+        optionEmail: 'E-post',
+        optionPhone: 'Telefon',
+        labelDate: 'Dato',
+        labelFlexibleDate: 'Datoen er fleksibel',
+        labelVenue: 'Sted / Lokale',
+        placeholderVenue: 'Kirke, lokale eller område',
+        labelPhotoStyle: 'Hva er viktigst for dere?',
+        styleNatural: 'Naturlige øyeblikk',
+        stylePortraits: 'Portretter',
+        styleFullDay: 'Hele dagen dokumentert',
+        labelMessage: 'Fortell litt om planene deres',
+        placeholderMessage: 'Hva ser dere for dere?',
+      },
+      en: {
+        loading: 'Loading...',
+        formNotFound: 'Form not found.',
+        defaultTitle: 'Get in touch',
+        defaultSubtitle: 'We look forward to hearing from you',
+        submitBtn: 'Send inquiry',
+        sending: 'Sending...',
+        errorGeneric: 'Something went wrong',
+        errorRetry: 'Something went wrong. Please try again.',
+        poweredBy: 'Powered by',
+        pageTitle: 'Contact',
+        pageTitleSuffix: '— Contact',
+        successTitle: 'Thank you!',
+        successMsg: 'We have received your inquiry\nand will be in touch as soon as possible.',
+        typeWedding: 'Wedding',
+        typeCouple: 'Couple / Engagement',
+        typeFamily: 'Family',
+        typePortrait: 'Portrait',
+        typeCommercial: 'Commercial',
+        labelProjectType: 'What is this about?',
+        labelName: 'Name',
+        placeholderName: 'Your name',
+        labelPartner: "Partner's name",
+        placeholderPartner: "Partner's name",
+        labelEmail: 'Email',
+        placeholderEmail: 'name@email.com',
+        labelPhone: 'Phone',
+        placeholderPhone: '+1 555 123 4567',
+        labelPreferredContact: 'Preferred contact method',
+        optionEmail: 'Email',
+        optionPhone: 'Phone',
+        labelDate: 'Date',
+        labelFlexibleDate: 'The date is flexible',
+        labelVenue: 'Location / Venue',
+        placeholderVenue: 'Church, venue, or area',
+        labelPhotoStyle: 'What matters most to you?',
+        styleNatural: 'Natural moments',
+        stylePortraits: 'Portraits',
+        styleFullDay: 'Full day coverage',
+        labelMessage: 'Tell us a bit about your plans',
+        placeholderMessage: 'What do you envision?',
+      },
+    };
+
+    function detectBrowserLang() {
+      var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'nb';
+      var code = nav.toLowerCase().slice(0, 2);
+      if (code === 'en') return 'en';
+      return 'nb';
+    }
+
+    var LANG = detectBrowserLang();
+    function t(key) { return (TRANSLATIONS[LANG] || TRANSLATIONS['nb'])[key] || key; }
+    // Set loading text immediately from browser language
+    document.querySelector('#loadingCard .loading').textContent = t('loading');
+
+    function detectLanguage(config) {
+      var supported = ['nb', 'en'];
+      if (config.form_language && config.form_language !== 'auto') {
+        return supported.indexOf(config.form_language) !== -1 ? config.form_language : 'nb';
+      }
+      var nav = (navigator.languages && navigator.languages[0]) || navigator.language || 'nb';
+      var code = nav.toLowerCase().slice(0, 2);
+      if (code === 'nb' || code === 'no' || code === 'nn') return 'nb';
+      if (code === 'en') return 'en';
+      return 'nb';
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const API = 'https://ubdqueuknaqegipnbsxc.supabase.co/functions/v1/contact-form';
     const path = window.location.pathname;
     const match = path.match(/\/contact\/([a-z0-9]+)/);
     const formId = match ? match[1] : null;
 
     if (!formId) {
-      document.getElementById('loadingCard').innerHTML = '<div class="loading">Skjema ikke funnet.</div>';
+      document.getElementById('loadingCard').innerHTML = '<div class="loading">' + t('formNotFound') + '</div>';
     } else {
       loadForm();
     }
@@ -246,11 +359,26 @@
         const data = await res.json();
         renderForm(data.config, data.studio);
       } catch (e) {
-        document.getElementById('loadingCard').innerHTML = '<div class="loading">Skjema ikke funnet.</div>';
+        document.getElementById('loadingCard').innerHTML = '<div class="loading">' + t('formNotFound') + '</div>';
       }
     }
 
     function renderForm(config, studio) {
+      LANG = detectLanguage(config);
+      document.documentElement.lang = LANG;
+
+      // Update static text nodes now that language is known
+      document.getElementById('studioName').textContent = t('defaultTitle');
+      document.getElementById('subtitleText').textContent = t('defaultSubtitle');
+      document.getElementById('submitBtn').textContent = t('submitBtn');
+      document.querySelectorAll('.powered').forEach(function(el) {
+        el.innerHTML = t('poweredBy') + ' <a href="https://vowfolio.com" target="_blank" rel="noopener">VowFolio</a>';
+      });
+      var successH2 = document.querySelector('#successCard .success h2');
+      var successP  = document.querySelector('#successCard .success p');
+      if (successH2) successH2.textContent = t('successTitle');
+      if (successP)  successP.innerHTML = t('successMsg').replace('\n', '<br>');
+
       var isEmbedded = window.self !== window.top;
 
       // Apply theme
@@ -294,10 +422,10 @@
       if (studio && studio.studio_name) {
         if (config.show_studio_name === false) {
           document.getElementById('studioName').style.display = 'none';
-          document.title = 'Ta kontakt';
+          document.title = t('pageTitle');
         } else {
           document.getElementById('studioName').textContent = studio.studio_name;
-          document.title = studio.studio_name + ' — Kontakt';
+          document.title = studio.studio_name + ' ' + t('pageTitleSuffix');
         }
       }
 
@@ -326,70 +454,80 @@
       var fields = '';
 
       // Project type selector
+      var allSessionTypes = [
+        { value: 'wedding',  label: t('typeWedding') },
+        { value: 'couple',   label: t('typeCouple') },
+        { value: 'family',   label: t('typeFamily') },
+        { value: 'portrait', label: t('typePortrait') },
+        { value: 'other',    label: t('typeCommercial') },
+      ];
+      var visibleTypes = (Array.isArray(config.visible_session_types) && config.visible_session_types.length > 0)
+        ? allSessionTypes.filter(function(st) { return config.visible_session_types.indexOf(st.value) !== -1; })
+        : allSessionTypes;
       if (config.wedding_only) {
         fields += '<input type="hidden" name="project_type" value="wedding">';
+      } else if (visibleTypes.length === 1) {
+        fields += '<input type="hidden" name="project_type" value="' + visibleTypes[0].value + '">';
       } else {
-        fields += '<div class="field"><label>Hva gjelder det?</label>' +
+        fields += '<div class="field"><label>' + t('labelProjectType') + '</label>' +
           '<div class="checkbox-group">' +
-          '<label class="radio-label"><input type="radio" name="project_type" value="wedding" checked><span>Bryllup</span></label>' +
-          '<label class="radio-label"><input type="radio" name="project_type" value="couple"><span>Par / forlovelse</span></label>' +
-          '<label class="radio-label"><input type="radio" name="project_type" value="family"><span>Familie</span></label>' +
-          '<label class="radio-label"><input type="radio" name="project_type" value="portrait"><span>Portrett</span></label>' +
-          '<label class="radio-label"><input type="radio" name="project_type" value="other"><span>Kommersielt</span></label>' +
+          visibleTypes.map(function(st, i) {
+            return '<label class="radio-label"><input type="radio" name="project_type" value="' + st.value + '"' + (i === 0 ? ' checked' : '') + '><span>' + st.label + '</span></label>';
+          }).join('') +
           '</div></div>';
       }
 
-      fields += '<div class="field"><label for="name">Navn <span class="req">*</span></label>' +
-        '<input type="text" id="name" name="name" required placeholder="Ditt navn" autocomplete="name"></div>';
+      fields += '<div class="field"><label for="name">' + t('labelName') + ' <span class="req">*</span></label>' +
+        '<input type="text" id="name" name="name" required placeholder="' + t('placeholderName') + '" autocomplete="name"></div>';
 
       if (config.show_partner_name) {
-        fields += '<div class="field"><label for="partner_name">Partnerens navn</label>' +
-          '<input type="text" id="partner_name" name="partner_name" placeholder="Partnerens navn" autocomplete="off"></div>';
+        fields += '<div class="field"><label for="partner_name">' + t('labelPartner') + '</label>' +
+          '<input type="text" id="partner_name" name="partner_name" placeholder="' + t('placeholderPartner') + '" autocomplete="off"></div>';
       }
 
-      fields += '<div class="field"><label for="email">E-post <span class="req">*</span></label>' +
-        '<input type="email" id="email" name="email" required placeholder="navn@epost.no" autocomplete="email"></div>';
+      fields += '<div class="field"><label for="email">' + t('labelEmail') + ' <span class="req">*</span></label>' +
+        '<input type="email" id="email" name="email" required placeholder="' + t('placeholderEmail') + '" autocomplete="email"></div>';
 
       if (config.show_phone) {
-        fields += '<div class="field"><label for="phone">Telefon</label>' +
-          '<input type="tel" id="phone" name="phone" placeholder="+47 412 34 567" autocomplete="tel"></div>';
+        fields += '<div class="field"><label for="phone">' + t('labelPhone') + '</label>' +
+          '<input type="tel" id="phone" name="phone" placeholder="' + t('placeholderPhone') + '" autocomplete="tel"></div>';
       }
 
       if (config.show_preferred_contact) {
-        fields += '<div class="field"><label>Foretrukket kontaktmåte</label>' +
+        fields += '<div class="field"><label>' + t('labelPreferredContact') + '</label>' +
           '<div class="radio-group">' +
-          '<label class="radio-label"><input type="radio" name="preferred_contact" value="email" checked><span>E-post</span></label>' +
-          '<label class="radio-label"><input type="radio" name="preferred_contact" value="phone"><span>Telefon</span></label>' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="email" checked><span>' + t('optionEmail') + '</span></label>' +
+          '<label class="radio-label"><input type="radio" name="preferred_contact" value="phone"><span>' + t('optionPhone') + '</span></label>' +
           '</div></div>';
       }
 
       if (config.show_wedding_date) {
-        fields += '<div class="field"><label for="wedding_date">Dato</label>' +
+        fields += '<div class="field"><label for="wedding_date">' + t('labelDate') + '</label>' +
           '<input type="date" id="wedding_date" name="wedding_date"></div>';
       }
 
       if (config.show_flexible_date && config.show_wedding_date) {
         fields += '<div class="field"><label class="checkbox-label">' +
-          '<input type="checkbox" name="flexible_date" value="yes"><span>Datoen er fleksibel</span></label></div>';
+          '<input type="checkbox" name="flexible_date" value="yes"><span>' + t('labelFlexibleDate') + '</span></label></div>';
       }
 
       if (config.show_venue) {
-        fields += '<div class="field"><label for="venue">Sted / Lokale</label>' +
-          '<input type="text" id="venue" name="venue" placeholder="Kirke, lokale eller område" autocomplete="off"></div>';
+        fields += '<div class="field"><label for="venue">' + t('labelVenue') + '</label>' +
+          '<input type="text" id="venue" name="venue" placeholder="' + t('placeholderVenue') + '" autocomplete="off"></div>';
       }
 
       if (config.show_photo_style) {
-        fields += '<div class="field"><label>Hva er viktigst for dere?</label>' +
+        fields += '<div class="field"><label>' + t('labelPhotoStyle') + '</label>' +
           '<div class="checkbox-group">' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="natural"><span>Naturlige øyeblikk</span></label>' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="portraits"><span>Portretter</span></label>' +
-          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="full_day"><span>Hele dagen dokumentert</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="natural"><span>' + t('styleNatural') + '</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="portraits"><span>' + t('stylePortraits') + '</span></label>' +
+          '<label class="checkbox-label"><input type="checkbox" name="photo_style" value="full_day"><span>' + t('styleFullDay') + '</span></label>' +
           '</div></div>';
       }
 
       if (config.show_message) {
-        fields += '<div class="field"><label for="message">Fortell litt om planene deres</label>' +
-          '<textarea id="message" name="message" rows="4" placeholder="Hva ser dere for dere?"></textarea></div>';
+        fields += '<div class="field"><label for="message">' + t('labelMessage') + '</label>' +
+          '<textarea id="message" name="message" rows="4" placeholder="' + t('placeholderMessage') + '"></textarea></div>';
       }
 
       document.getElementById('formFields').innerHTML = fields;
@@ -407,7 +545,7 @@
       var btn = document.getElementById('submitBtn');
       errorEl.style.display = 'none';
       btn.disabled = true;
-      btn.innerHTML = '<span class="sending-spinner"></span>Sender...';
+      btn.innerHTML = '<span class="sending-spinner"></span>' + t('sending');
 
       var data = {};
       var fd = new FormData(e.target);
@@ -427,16 +565,16 @@
           body: JSON.stringify(data)
         });
         var json = await res.json();
-        if (!res.ok || json.error) throw new Error(json.error || 'Noe gikk galt');
+        if (!res.ok || json.error) throw new Error(json.error || t('errorGeneric'));
 
         document.getElementById('formCard').style.display = 'none';
         document.getElementById('successCard').style.display = 'block';
         notifyHeight();
       } catch (err) {
-        errorEl.textContent = err.message || 'Noe gikk galt. Prøv igjen.';
+        errorEl.textContent = err.message || t('errorRetry');
         errorEl.style.display = 'block';
         btn.disabled = false;
-        btn.textContent = 'Send forespørsel';
+        btn.textContent = t('submitBtn');
         notifyHeight();
       }
     }
