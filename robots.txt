@@ -1,0 +1,26 @@
+# vowfolio.com — robots policy
+# Public pages crawl freely. Token-gated app paths are blocked from indexing
+# (each URL contains a private hash and serves dynamic per-customer data).
+
+User-agent: *
+Allow: /
+Disallow: /p/
+Disallow: /ps/
+Disallow: /i/
+Disallow: /q/
+Disallow: /s/
+Disallow: /f/
+Disallow: /contact/
+Disallow: /editor
+Disallow: /editor/
+Disallow: /styleguide
+Disallow: /portal.html
+Disallow: /portal-session.html
+Disallow: /quiz.html
+Disallow: /session-quiz.html
+Disallow: /signing.html
+Disallow: /feedback.html
+Disallow: /editor.html
+Disallow: /styleguide.html
+
+Sitemap: https://vowfolio.com/sitemap.xml
