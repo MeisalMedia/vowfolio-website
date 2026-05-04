@@ -693,7 +693,9 @@
     }
 
     // ── Oppdrag (wedding list) ──
-    let oppdragView = 'kort'; // 'kort' | 'liste'
+    // Default til listevisning. Husker brukerens valg i localStorage så
+    // det stikker mellom økter.
+    let oppdragView = (localStorage.getItem('vf_oppdrag_view') === 'kort') ? 'kort' : 'liste';
     let oppdragFilter = 'alle';
 
     // ── Oppdrag detail state ──
@@ -758,8 +760,8 @@
       html += `</div>`;
       html += `<button class="btn-primary btn-sm" onclick="navigate('createDoc')" style="margin-left:8px">+ Ny kontrakt</button>`;
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
-      html += `<button onclick="oppdragView='kort';renderOppdrag(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${oppdragView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
-      html += `<button onclick="oppdragView='liste';renderOppdrag(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
+      html += `<button onclick="oppdragView='kort';localStorage.setItem('vf_oppdrag_view','kort');renderOppdrag(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${oppdragView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
+      html += `<button onclick="oppdragView='liste';localStorage.setItem('vf_oppdrag_view','liste');renderOppdrag(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
       html += `</div></div>`;
 
       if (filtered.length === 0) {
