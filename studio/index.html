@@ -249,6 +249,59 @@
       .tab { flex-shrink: 0; }
       .login-card { padding: 32px 24px; }
     }
+
+    /* ── Command palette (Cmd+K) ── */
+    .cmd-overlay { display:none; position:fixed; inset:0; background:rgba(61,50,41,0.5); z-index:300; align-items:flex-start; justify-content:center; padding-top:80px; }
+    .cmd-overlay.open { display:flex; }
+    .cmd-box { background:var(--white); border-radius:16px; width:100%; max-width:540px; box-shadow:0 16px 64px rgba(61,50,41,0.2); overflow:hidden; }
+    .cmd-input { width:100%; padding:18px 20px; font-size:16px; font-family:inherit; border:none; outline:none; background:transparent; color:var(--espresso); border-bottom:1px solid var(--sand); }
+    .cmd-results { max-height:400px; overflow-y:auto; }
+    .cmd-result { display:flex; align-items:center; gap:12px; padding:12px 20px; cursor:pointer; transition:background 0.1s; }
+    .cmd-result:hover, .cmd-result.focused { background:var(--cream); }
+    .cmd-result .cmd-icon { width:32px; height:32px; border-radius:8px; background:var(--sand); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:15px; }
+    .cmd-result .cmd-body { flex:1; min-width:0; }
+    .cmd-result .cmd-title { font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cmd-result .cmd-sub { font-size:11px; color:#8A7D72; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .cmd-result .cmd-type { font-size:10px; font-weight:600; color:#B0A090; text-transform:uppercase; letter-spacing:0.4px; flex-shrink:0; }
+    .cmd-empty { padding:32px; text-align:center; color:#A09080; font-size:13px; }
+    .cmd-hint { padding:10px 20px 12px; font-size:11px; color:#B0A090; border-top:1px solid var(--sand); display:flex; gap:16px; }
+    .cmd-hint kbd { background:var(--sand); border-radius:4px; padding:2px 6px; font-family:inherit; font-size:10px; }
+
+    /* ── Kanban pipeline ── */
+    .kanban-board { display:flex; gap:16px; min-height:400px; overflow-x:auto; padding-bottom:8px; align-items:flex-start; }
+    .kanban-col { flex:1; min-width:200px; max-width:280px; background:rgba(232,224,214,0.5); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; transition:background 0.15s; }
+    .kanban-col.drag-over { background:rgba(107,143,113,0.12); }
+    .kanban-col-header { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; padding:2px 2px 8px; display:flex; align-items:center; justify-content:space-between; border-bottom:2px solid; margin-bottom:2px; }
+    .kanban-col-count { font-weight:500; opacity:0.6; letter-spacing:0; text-transform:none; font-size:12px; }
+    .kanban-card { background:var(--white); border-radius:10px; padding:12px 14px; cursor:grab; transition:transform 0.12s, box-shadow 0.12s; box-shadow:0 1px 4px rgba(61,50,41,0.05); border:1.5px solid transparent; }
+    .kanban-card:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(61,50,41,0.1); border-color:var(--sand); }
+    .kanban-card.dragging { opacity:0.45; cursor:grabbing; }
+    .kanban-card .kc-couple { font-size:13px; font-weight:600; margin-bottom:5px; }
+    .kanban-card .kc-meta { display:flex; gap:6px; flex-wrap:wrap; }
+    .kanban-card .kc-date { font-size:11px; color:var(--taupe); margin-top:6px; font-weight:500; }
+
+    /* ── Hover inline row actions ── */
+    .row-actions-inline { display:none; gap:5px; }
+    tr:hover .row-actions-inline { display:inline-flex; }
+
+    /* ── Inquiry age badges ── */
+    .age-fresh { background:#F0EBE4; color:#9B7E5E; }
+    .age-aging { background:#FFF3CD; color:#8A6A1A; }
+    .age-old   { background:#FDECEA; color:#C0392B; }
+
+    /* ── Activity feed ── */
+    .activity-row { display:flex; align-items:flex-start; gap:10px; padding:10px 16px; border-bottom:1px solid var(--sand); }
+    .activity-row:last-child { border-bottom:none; }
+    .activity-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+
+    /* ── Sidebar premium feel ── */
+    .sidebar { background:var(--white); }
+    .sidebar-logo { padding:28px 22px 22px; }
+    .sidebar-logo span { font-size:19px; }
+    .nav-item { padding:11px 14px; gap:11px; }
+
+    /* ── Stat card sparkline ── */
+    .sparkline-svg { display:block; margin-top:10px; opacity:0.75; }
   </style>
 </head>
 <body>
@@ -293,6 +346,9 @@
         <div class="nav-item" id="navKontakter" onclick="navigate('kontakter')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg> Kontakter
         </div>
+        <div class="nav-item" id="navShotliste" onclick="navigate('shotliste')">
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Shotlister
+        </div>
         <div class="nav-divider"></div>
         <div class="nav-item" id="navDokumenter" onclick="toggleDokumenter()">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10z"/><polyline points="13 3 13 10 20 10"/></svg>
@@ -320,6 +376,15 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <!-- Cmd+K search palette -->
+  <div id="cmdOverlay" class="cmd-overlay" onclick="if(event.target===this)closeCmdPalette()">
+    <div class="cmd-box">
+      <input type="text" class="cmd-input" id="cmdInput" placeholder="Søk i oppdrag, kontakter, dokumenter…" oninput="runCmdSearch(this.value)" onkeydown="handleCmdKey(event)" autocomplete="off">
+      <div class="cmd-results" id="cmdResults"><div class="cmd-empty">Begynn å skrive for å søke…</div></div>
+      <div class="cmd-hint"><span><kbd>↑↓</kbd> naviger</span><span><kbd>↵</kbd> åpne</span><span><kbd>Esc</kbd> lukk</span></div>
+    </div>
+  </div>
 
   <!-- Contact modal -->
   <div id="kontaktModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
@@ -358,6 +423,8 @@
     const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
+    let _dragWeddingId = null;
+    let _cmdFocusIdx = -1;
     let templates = [], documents = [], weddings = [], contacts = [];
     let shotTemplates = [], taskTemplates = [];
     let messageThreads = [];
@@ -516,6 +583,7 @@
         hjem: 'navHjem', oppdrag: 'navOppdrag', oppdragDetail: 'navOppdrag',
         meldinger: 'navMeldinger', conversation: 'navMeldinger',
         kontakter: 'navKontakter', kontaktDetail: 'navKontakter',
+        shotliste: 'navShotliste',
         kontrakter: 'navKontrakter', createDoc: 'navKontrakter', viewDoc: 'navKontrakter',
         maler: 'navMaler', newTemplate: 'navMaler', editTemplate: 'navMaler',
         editShotTemplate: 'navMaler', newShotTemplate: 'navMaler',
@@ -533,6 +601,7 @@
         case 'conversation': renderConversation(main, params); break;
         case 'kontakter': renderKontakter(main); break;
         case 'kontaktDetail': renderKontaktDetail(main, params); break;
+        case 'shotliste': renderMaler(main, 'shot'); break;
         case 'settings': renderSettings(main); break;
         case 'kontrakter': renderKontrakter(main); break;
         case 'maler': renderMaler(main, params?.tab); break;
@@ -558,19 +627,20 @@
       const coupleName = w => w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
       const weddingCoupleById = id => { const w = weddings.find(x => x.id === id); return w ? coupleName(w) : ''; };
 
-      // Trenger deg nå — KUN handlinger (ikke shoots; de bor i Neste oppdrag / Denne uken)
+      // Trenger deg nå
       const todos = [];
       for (const p of payments.filter(p => p.status !== 'paid' && p.due_date && new Date(p.due_date) < today)) {
         const days = Math.floor((today - new Date(p.due_date)) / 86400000);
         const name = weddingCoupleById(p.wedding_id) || p.title || 'Betaling';
-        const ctx = `${fmt(parseFloat(p.amount||0))} ${curr} forfalt · ${days} ${days === 1 ? 'dag' : 'dager'}`;
+        const amount = `${fmt(parseFloat(p.amount||0))} ${curr}`;
+        const ctx = `forfalt · ${days} ${days === 1 ? 'dag' : 'dager'} siden`;
         const w = weddings.find(x => x.id === p.wedding_id);
-        todos.push({ dot: '#C0392B', name, ctx, label: 'Åpne', onclick: w ? `navigate('oppdragDetail','${w.id}')` : `navigate('oppdrag')`, priority: 1 });
+        todos.push({ type:'payment', dot:'#C0392B', name, amount, ctx, label:'Merk betalt', onclick: w ? `navigate('oppdragDetail','${w.id}')` : `navigate('oppdrag')`, priority:1 });
       }
       for (const d of documents.filter(d => ['sent','viewed','signed_by_client'].includes(d.status))) {
         const days = Math.floor((now - new Date(d.created_at).getTime()) / 86400000);
         const name = weddingCoupleById(d.wedding_id) || d.title;
-        todos.push({ dot: '#9B7E5E', name, ctx: `kontrakt ikke signert · ${days} ${days === 1 ? 'dag' : 'dager'}`, label: 'Åpne', onclick: `navigate('viewDoc','${d.id}')`, priority: 2 });
+        todos.push({ type:'contract', dot:'#9B7E5E', name, amount:null, ctx:`kontrakt ikke signert · ${days} ${days===1?'dag':'dager'}`, label:'Åpne', onclick:`navigate('viewDoc','${d.id}')`, priority:2 });
       }
       todos.sort((a,b) => a.priority - b.priority);
 
@@ -592,17 +662,54 @@
         .sort((a,b) => new Date(b.updated_at) - new Date(a.updated_at))
         .slice(0, 4);
 
-      // Inntekter
+      // Inntekter + sparkline
       const year = today.getFullYear();
       const month = today.getMonth();
-      const paidThisYear = payments.filter(p => p.status === 'paid' && p.paid_date && new Date(p.paid_date).getFullYear() === year)
+      const paidThisYear = payments.filter(p => p.status==='paid' && p.paid_date && new Date(p.paid_date).getFullYear()===year)
         .reduce((s,p) => s + parseFloat(p.amount||0), 0);
-      const paidThisMonth = payments.filter(p => p.status === 'paid' && p.paid_date && new Date(p.paid_date).getFullYear() === year && new Date(p.paid_date).getMonth() === month)
+      const paidThisMonth = payments.filter(p => p.status==='paid' && p.paid_date && new Date(p.paid_date).getFullYear()===year && new Date(p.paid_date).getMonth()===month)
         .reduce((s,p) => s + parseFloat(p.amount||0), 0);
+      const paidLastYear = payments.filter(p => p.status==='paid' && p.paid_date && new Date(p.paid_date).getFullYear()===(year-1))
+        .reduce((s,p) => s + parseFloat(p.amount||0), 0);
+      const projected = month > 0 ? Math.round(paidThisYear / (month+1) * 12) : null;
+
+      // Sparkline: siste 12 måneder
+      const sparkVals = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(year, month - i, 1);
+        const y = d.getFullYear(), m = d.getMonth();
+        sparkVals.push(payments.filter(p => p.status==='paid' && p.paid_date && new Date(p.paid_date).getFullYear()===y && new Date(p.paid_date).getMonth()===m)
+          .reduce((s,p) => s + parseFloat(p.amount||0), 0));
+      }
+      const sparkMax = Math.max(...sparkVals, 1);
+      const SW = 200, SH = 44;
+      const pts = sparkVals.map((v,i) => `${Math.round((i/11)*(SW-6))+3},${Math.round(SH-4-(v/sparkMax)*(SH-10))+3}`).join(' ');
+      const lastPt = pts.split(' ').pop();
+      const sparkSvg = `<svg width="${SW}" height="${SH}" viewBox="0 0 ${SW} ${SH}" class="sparkline-svg"><polyline points="${pts}" fill="none" stroke="#6B8F71" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${lastPt.split(',')[0]}" cy="${lastPt.split(',')[1]}" r="3.5" fill="#6B8F71"/></svg>`;
+
+      // Aktivitetsfeed: siste 7 dager
+      const sevenDayMs = 7 * 86400000;
+      const acts = [];
+      for (const c of contacts) {
+        if (!c.updated_at || (now - new Date(c.updated_at).getTime()) >= sevenDayMs) continue;
+        const verb = { inquiry:'sendte en henvendelse', booked:'ble booket', active:'ble aktiv', completed:'fullført' }[c.status] || 'oppdatert';
+        acts.push({ t: new Date(c.updated_at), text: `${c.primary_name} ${verb}`, dot:'#4A7FB5' });
+      }
+      for (const d of documents) {
+        if (!d.updated_at || (now - new Date(d.updated_at).getTime()) >= sevenDayMs) continue;
+        if (d.status === 'fully_signed') acts.push({ t: new Date(d.updated_at), text:`Kontrakt signert: ${d.title}`, dot:'#4A8A55' });
+        else if (d.status === 'sent') acts.push({ t: new Date(d.updated_at), text:`Kontrakt sendt: ${d.title}`, dot:'#9B7E5E' });
+      }
+      for (const th of messageThreads) {
+        if (!th.last_message_at || (now - new Date(th.last_message_at).getTime()) >= sevenDayMs) continue;
+        acts.push({ t: new Date(th.last_message_at), text:`Ny melding fra ${threadDisplayName(th)}`, dot:'#8A7D72' });
+      }
+      acts.sort((a,b) => b.t - a.t);
+      const recentActs = acts.slice(0, 6);
 
       let html = `<div class="main-content" style="padding-top:24px">`;
 
-      // 1. Trenger deg nå (maks 3 synlige; "Vis alle" hvis flere)
+      // 1. Trenger deg nå
       html += `<div class="hjem-section-title">Trenger deg nå${todos.length > 0 ? ` <span class="count">· ${todos.length}</span>` : ''}</div>`;
       if (todos.length === 0) {
         html += `<div style="padding:12px 14px;font-size:13px;color:#8A7D72">Alt er under kontroll ✨</div>`;
@@ -610,13 +717,16 @@
         const visible = window.__hjemShowAllTodos ? todos : todos.slice(0, 3);
         html += `<div style="display:flex;flex-direction:column;gap:6px">`;
         for (const t of visible) {
-          html += `<div class="todo-row" onclick="${t.onclick}">
+          const isCrit = t.type === 'payment';
+          const rowExtra = isCrit ? 'background:linear-gradient(135deg,#FEF0EE 0%,#FFF9F8 100%);border:1px solid #F5C6C0;' : '';
+          html += `<div class="todo-row" style="${rowExtra}" onclick="${t.onclick}">
             <div class="dot" style="background:${t.dot}"></div>
             <div class="todo-body">
-              <div class="todo-name">${esc(t.name)}</div>
+              <div class="todo-name" style="${isCrit?'color:#C0392B;font-weight:700;':''}">${esc(t.name)}</div>
               <div class="todo-ctx">${esc(t.ctx)}</div>
             </div>
-            <button class="btn-primary btn-sm" onclick="event.stopPropagation();${t.onclick}">${t.label}</button>
+            ${t.amount ? `<div style="font-size:16px;font-weight:700;color:#C0392B;margin-left:auto;padding-right:14px;flex-shrink:0">${esc(t.amount)}</div>` : ''}
+            <button class="btn-primary btn-sm" style="${isCrit?'background:#C0392B;':''}font-size:12px" onclick="event.stopPropagation();${t.onclick}">${t.label}</button>
           </div>`;
         }
         html += `</div>`;
@@ -625,36 +735,28 @@
         }
       }
 
-      // 2. Neste oppdrag (med én ekstra info-linje: betalingsstatus / kontraktstatus)
+      // 2. Neste oppdrag
       if (nextWedding) {
         const wd = new Date(nextWedding.wedding_date); wd.setHours(0,0,0,0);
         const days = Math.round((wd - today) / 86400000);
         const dayLabel = days === 0 ? 'i dag' : days === 1 ? 'i morgen' : `om ${days} dager`;
-
-        // Statuslinje: kontrakt + betaling
         const wPayments = payments.filter(p => p.wedding_id === nextWedding.id);
-        const paidSum = wPayments.filter(p => p.status === 'paid').reduce((s,p) => s + parseFloat(p.amount||0), 0);
+        const paidSum = wPayments.filter(p => p.status==='paid').reduce((s,p) => s + parseFloat(p.amount||0), 0);
         const contractVal = parseFloat(nextWedding.contract_value || 0);
         const wDocs = documents.filter(d => d.wedding_id === nextWedding.id);
-        const hasSigned = wDocs.some(d => d.status === 'fully_signed');
+        const hasSigned = wDocs.some(d => d.status==='fully_signed');
         const hasSent = wDocs.some(d => ['sent','viewed','signed_by_client'].includes(d.status));
-        let statusLine = '';
         const parts = [];
         if (hasSigned) parts.push('✓ Kontrakt signert');
         else if (hasSent) parts.push('⏳ Kontrakt venter på signatur');
-        else if (wDocs.length === 0) parts.push('⚠ Ingen kontrakt');
-        if (contractVal > 0) {
-          const pct = Math.round((paidSum / contractVal) * 100);
-          parts.push(`${fmt(paidSum)} / ${fmt(contractVal)} ${curr} (${pct}%)`);
-        }
-        if (parts.length > 0) statusLine = parts.join(' · ');
-
+        else if (wDocs.length===0) parts.push('⚠ Ingen kontrakt');
+        if (contractVal > 0) { const pct = Math.round((paidSum/contractVal)*100); parts.push(`${fmt(paidSum)} / ${fmt(contractVal)} ${curr} (${pct}%)`); }
         html += `<div class="hjem-section-title">Neste oppdrag</div>`;
         html += `<div class="card" style="border-left:3px solid var(--rose);border-radius:0 12px 12px 0;cursor:pointer" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
         html += `<div style="font-size:11px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${dayLabel} · ${dfWeek(nextWedding.wedding_date)}</div>`;
         html += `<div style="font-size:18px;font-weight:600;font-family:'Playfair Display',serif">${esc(coupleName(nextWedding))}</div>`;
         if (nextWedding.venue) html += `<div style="font-size:13px;color:#8A7D72;margin-top:4px">📍 ${esc(nextWedding.venue)}</div>`;
-        if (statusLine) html += `<div style="font-size:12px;color:#8A7D72;margin-top:8px;padding-top:8px;border-top:1px solid var(--sand)">${statusLine}</div>`;
+        if (parts.length) html += `<div style="font-size:12px;color:#8A7D72;margin-top:8px;padding-top:8px;border-top:1px solid var(--sand)">${parts.join(' · ')}</div>`;
         html += `</div>`;
       }
 
@@ -672,33 +774,49 @@
         html += `</div>`;
       }
 
-      // 4. Nye henvendelser (med Ny-badge på rader <7 dager gamle)
+      // 4. Nye henvendelser med alders-farge
       if (newInquiries.length > 0) {
         html += `<div class="hjem-section-title">Nye henvendelser <span class="count">· ${newInquiries.length}</span></div>`;
         html += `<div style="display:flex;flex-direction:column;gap:2px">`;
         for (const c of newInquiries) {
-          const when = c.updated_at ? dfShort(c.updated_at) : '';
-          const wDate = c.wedding_date ? ' · ' + dfShort(c.wedding_date) : '';
           const partner = c.partner_name ? ' & ' + c.partner_name : '';
           const target = c.linked_wedding_id ? `navigate('oppdragDetail','${c.linked_wedding_id}')` : `navigate('kontaktDetail','${c.id}')`;
           const ageMs = c.updated_at ? (now - new Date(c.updated_at).getTime()) : Infinity;
-          const isNew = ageMs < 7 * 86400000;
-          const subParts = [c.source, wDate.replace(' · ', '')].filter(Boolean).join(' · ');
+          const ageDays = Math.floor(ageMs / 86400000);
+          const ageClass = ageDays <= 2 ? 'age-fresh' : ageDays <= 5 ? 'age-aging' : 'age-old';
+          const ageLabel = ageDays === 0 ? 'i dag' : ageDays === 1 ? 'i går' : `${ageDays}d`;
+          const subParts = [c.source, c.wedding_date ? dfShort(c.wedding_date) : ''].filter(Boolean).join(' · ');
           html += `<div class="overview-row" onclick="${target}">
-            <div class="ov-date">${when}</div>
-            <div class="ov-title">${esc(c.primary_name + partner)}${isNew ? ' <span class="ov-badge-new">Ny</span>' : ''}</div>
+            <div class="ov-date"><span class="badge ${ageClass}" style="font-size:10px;padding:2px 7px">${ageLabel}</span></div>
+            <div class="ov-title">${esc(c.primary_name + partner)}${ageDays === 0 ? ' <span class="ov-badge-new">Ny</span>' : ''}</div>
             <div class="ov-sub">${esc(subParts)}</div>
           </div>`;
         }
         html += `</div>`;
       }
 
-      // 5. Inntekter (tydelig kontrast: stort tall, rolig label)
-      if (paidThisYear > 0 || paidThisMonth > 0) {
-        html += `<div class="hjem-section-title">Inntekter</div>`;
-        html += `<div style="display:flex;gap:40px;padding:4px 14px;flex-wrap:wrap">`;
-        html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Denne måneden</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:600;color:var(--espresso)">${fmt(paidThisMonth)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div></div>`;
-        html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">I år</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:600;color:var(--espresso)">${fmt(paidThisYear)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div></div>`;
+      // 5. Inntekter med sparkline + vs. i fjor + prognose
+      html += `<div class="hjem-section-title">Inntekter</div>`;
+      html += `<div class="card" style="padding:20px 24px">`;
+      html += `<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">`;
+      html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Denne måneden</div><div style="font-size:26px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisMonth)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div></div>`;
+      html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">I år</div><div style="font-size:26px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisYear)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div>${paidLastYear > 0 ? `<div style="font-size:11px;margin-top:3px;color:${paidThisYear>=paidLastYear?'#4A8A55':'#C0392B'}">${paidThisYear>=paidLastYear?'↑':'↓'} vs ${year-1}: ${fmt(paidLastYear)} ${curr}</div>` : ''}</div>`;
+      if (projected && projected > paidThisYear) html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Prognose ${year}</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:600;color:#8A7D72">${fmt(projected)} <span style="font-size:13px;font-weight:400">${curr}</span></div></div>`;
+      html += `</div>`;
+      if (sparkVals.some(v => v > 0)) html += sparkSvg;
+      html += `</div>`;
+
+      // 6. Aktivitetsfeed
+      if (recentActs.length > 0) {
+        html += `<div class="hjem-section-title">Siste 7 dager</div>`;
+        html += `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.05);overflow:hidden">`;
+        for (const a of recentActs) {
+          html += `<div class="activity-row">
+            <div class="activity-dot" style="background:${a.dot}"></div>
+            <div style="flex:1;font-size:13px;color:var(--espresso)">${esc(a.text)}</div>
+            <div style="font-size:11px;color:#A09080;flex-shrink:0">${relativeTime(a.t.toISOString())}</div>
+          </div>`;
+        }
         html += `</div>`;
       }
 
@@ -707,9 +825,7 @@
     }
 
     // ── Oppdrag (wedding list) ──
-    // Default til listevisning. Husker brukerens valg i localStorage så
-    // det stikker mellom økter.
-    let oppdragView = (localStorage.getItem('vf_oppdrag_view') === 'kort') ? 'kort' : 'liste';
+    let oppdragView = (() => { const v = localStorage.getItem('vf_oppdrag_view'); return v === 'kort' ? 'kort' : v === 'pipeline' ? 'pipeline' : 'liste'; })();
     let oppdragFilter = 'alle';
 
     // ── Oppdrag detail state ──
@@ -745,7 +861,7 @@
       const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' });
 
       const counts = { alle: weddings.length };
-      for (const s of ['inquiry','booked','completed','archived']) {
+      for (const s of ['inquiry','booked','active','completed','archived']) {
         counts[s] = weddings.filter(w => {
           const c = contacts.find(x => x.linked_wedding_id === w.id);
           return (c?.status || 'inquiry') === s;
@@ -776,10 +892,42 @@
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
       html += `<button onclick="oppdragView='kort';localStorage.setItem('vf_oppdrag_view','kort');renderOppdrag(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${oppdragView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
       html += `<button onclick="oppdragView='liste';localStorage.setItem('vf_oppdrag_view','liste');renderOppdrag(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
+      html += `<button onclick="oppdragView='pipeline';localStorage.setItem('vf_oppdrag_view','pipeline');renderOppdrag(document.getElementById('mainContent'))" title="Pipeline" style="padding:7px 10px;border:none;border-left:1.5px solid var(--sand);background:${oppdragView==='pipeline'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:10px;font-weight:700;font-family:inherit;line-height:1;letter-spacing:0.3px">▦</button>`;
       html += `</div></div>`;
 
       if (filtered.length === 0) {
         html += `<div class="empty-state"><div class="icon" style="font-size:48px;opacity:0.35;margin-bottom:16px">◈</div><h3>Ingen oppdrag</h3><p>Oppdrag hentes fra bryllupsregisteret i appen.</p></div>`;
+      } else if (oppdragView === 'pipeline') {
+        // ── Kanban pipeline ──
+        const cols = [
+          { key:'inquiry',   label:'Lead',      color:'#4A7FB5' },
+          { key:'booked',    label:'Booket',    color:'#4A8A55' },
+          { key:'active',    label:'Redigerer', color:'#9B7E5E' },
+          { key:'completed', label:'Levert',    color:'#6B8F71' },
+        ];
+        html += `<div class="kanban-board">`;
+        for (const col of cols) {
+          const colItems = weddings.filter(w => {
+            const c = contacts.find(x => x.linked_wedding_id === w.id);
+            return (c?.status || 'inquiry') === col.key;
+          });
+          html += `<div class="kanban-col" id="kcol-${col.key}" ondragover="event.preventDefault();document.getElementById('kcol-${col.key}').classList.add('drag-over')" ondragleave="document.getElementById('kcol-${col.key}').classList.remove('drag-over')" ondrop="dropToKanban(event,'${col.key}')">`;
+          html += `<div class="kanban-col-header" style="color:${col.color};border-color:${col.color}">`;
+          html += `<span>${col.label}</span><span class="kanban-col-count">${colItems.length}</span>`;
+          html += `</div>`;
+          for (const w of colItems) {
+            const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+            const pt = projectTypeInfo(w.project_type);
+            const wDate = w.wedding_date ? df(w.wedding_date) : '';
+            html += `<div class="kanban-card" draggable="true" ondragstart="dragKanban(event,'${w.id}')" onclick="navigate('oppdragDetail','${w.id}')">`;
+            html += `<div class="kc-couple">${esc(couple)}</div>`;
+            html += `<div class="kc-meta"><span style="font-size:10px;font-weight:600;padding:2px 6px;border-radius:6px;background:${pt.bg};color:${pt.color}">${pt.label}</span></div>`;
+            if (wDate) html += `<div class="kc-date">📅 ${wDate}</div>`;
+            html += `</div>`;
+          }
+          html += `</div>`;
+        }
+        html += `</div>`;
       } else if (oppdragView === 'kort') {
         html += `<div class="card-grid card-grid-auto">`;
         for (const w of filtered) {
@@ -788,6 +936,7 @@
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
           const pt = projectTypeInfo(w.project_type);
+          const thread = messageThreads.find(t => t.wedding_id === w.id);
           html += `<div class="oppdrag-card" onclick="navigate('oppdragDetail','${w.id}')">`;
           html += `<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">`;
           html += `<div class="couple">${esc(couple)}</div>`;
@@ -796,19 +945,29 @@
           html += `<span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color};white-space:nowrap">${st.label}</span>`;
           html += `</div></div>`;
           html += `<div class="meta"><span>📅 ${wDate}</span>${w.venue ? `<span>📍 ${esc(w.venue)}</span>` : ''}</div>`;
-          html += `<div class="footer"><span style="font-size:12px;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</span></div>`;
+          html += `<div class="footer">`;
+          html += `<span style="font-size:12px;color:#8A7D72">${wDocs.length} dok.</span>`;
+          html += `<div style="display:flex;gap:5px" onclick="event.stopPropagation()">`;
+          if (thread) html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:4px 9px" onclick="navigate('conversation','${thread.id}')">Meldinger</button>`;
+          html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:4px 9px" onclick="copyPortalLink('${w.id}')">Del</button>`;
+          html += `</div></div>`;
           html += `</div>`;
         }
         html += `</div>`;
       } else {
+        // ── Listevisning med hover-actions ──
         html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Dato</th><th>Lokale</th><th>Type</th><th>Status</th></tr></thead><tbody>`;
         for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
           const pt = projectTypeInfo(w.project_type);
-          html += `<tr onclick="navigate('oppdragDetail','${w.id}')">`;
-          html += `<td><strong>${esc(couple)}</strong></td>`;
+          const thread = messageThreads.find(t => t.wedding_id === w.id);
+          html += `<tr onclick="navigate('oppdragDetail','${w.id}')" onmouseenter="showRowActs(this)" onmouseleave="hideRowActs(this)">`;
+          html += `<td><strong>${esc(couple)}</strong><span class="row-actions-inline" style="margin-left:8px;gap:5px">`;
+          if (thread) html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();navigate('conversation','${thread.id}')">Meldinger</button>`;
+          html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();copyPortalLink('${w.id}')">Del portal</button>`;
+          html += `</span></td>`;
           html += `<td style="color:#8A7D72">${wDate}</td>`;
           html += `<td style="color:#8A7D72">${esc(w.venue||'—')}</td>`;
           html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color}">${pt.label}</span></td>`;
@@ -819,6 +978,32 @@
       }
       html += `</div>`;
       el.innerHTML = html;
+    }
+
+    function showRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.display='inline-flex'); }
+    function hideRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.display='none'); }
+
+    function dragKanban(event, weddingId) {
+      _dragWeddingId = weddingId;
+      event.dataTransfer.effectAllowed = 'move';
+    }
+    async function dropToKanban(event, newStatus) {
+      event.preventDefault();
+      document.querySelectorAll('.kanban-col').forEach(el => el.classList.remove('drag-over'));
+      if (!_dragWeddingId) return;
+      const wId = _dragWeddingId; _dragWeddingId = null;
+      const c = contacts.find(x => x.linked_wedding_id === wId);
+      if (!c) { showToast('Ingen kontakt funnet for dette oppdraget'); return; }
+      const { error } = await sb.from('crm_contacts').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', c.id);
+      if (error) { showToast('Feil: ' + error.message); return; }
+      c.status = newStatus;
+      renderOppdrag(document.getElementById('mainContent'));
+      showToast('Status oppdatert → ' + { inquiry:'Lead', booked:'Booket', active:'Redigerer', completed:'Levert' }[newStatus]);
+    }
+
+    function copyPortalLink(weddingId) {
+      const url = `https://vowfolio.com/portal?w=${weddingId}`;
+      navigator.clipboard.writeText(url).then(() => showToast('Portallenke kopiert til utklippstavlen')).catch(() => showToast('Kunne ikke kopiere lenken'));
     }
 
     // ── Oppdrag detail ──
@@ -1311,25 +1496,25 @@
 
     function renderKontakter(el, filterOverride) {
       const search = kontaktSearch.toLowerCase();
+      const now = Date.now();
       let filtered = contacts.filter(c => {
         if (!search) return true;
         return (c.primary_name||'').toLowerCase().includes(search) ||
           (c.partner_name||'').toLowerCase().includes(search) ||
-          (c.email||'').toLowerCase().includes(search);
+          (c.email||'').toLowerCase().includes(search) ||
+          (c.phone||'').toLowerCase().includes(search);
       });
 
       let html = `<div class="main-content">`;
 
       // Search + view toggle bar
       html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">`;
-      html += `<input type="text" placeholder="Søk navn eller e-post..." value="${esc(kontaktSearch)}" oninput="kontaktSearch=this.value;renderKontakter(document.getElementById('mainContent'))" style="padding:9px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);min-width:220px;flex:1;max-width:320px">`;
+      html += `<input type="text" placeholder="Søk navn, e-post eller telefon…" value="${esc(kontaktSearch)}" oninput="kontaktSearch=this.value;renderKontakter(document.getElementById('mainContent'))" style="padding:9px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);min-width:220px;flex:1;max-width:320px">`;
       html += `<button class="btn-primary btn-sm" onclick="showKontaktModal()">+ Legg til</button>`;
-      // View toggle
       html += `<div style="margin-left:auto;display:flex;border:1.5px solid var(--sand);border-radius:8px;overflow:hidden">`;
       html += `<button onclick="kontaktView='kort';renderKontakter(document.getElementById('mainContent'))" title="Kortvisning" style="padding:7px 11px;border:none;background:${kontaktView==='kort'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">⊞</button>`;
       html += `<button onclick="kontaktView='liste';renderKontakter(document.getElementById('mainContent'))" title="Listevisning" style="padding:7px 11px;border:none;border-left:1.5px solid var(--sand);background:${kontaktView==='liste'?'var(--sand)':'var(--white)'};cursor:pointer;font-size:14px;line-height:1">☰</button>`;
-      html += `</div>`;
-      html += `</div>`;
+      html += `</div></div>`;
 
       if (filtered.length === 0) {
         html += `<div class="empty-state"><div class="icon">◉</div><h3>${contacts.length === 0 ? 'Ingen kontakter enda' : 'Ingen treff'}</h3><p>${contacts.length === 0 ? 'Kontakter synkroniseres fra appen.' : 'Prøv et annet søk eller filter.'}</p></div>`;
@@ -1338,25 +1523,43 @@
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
           const w = weddings.find(x => x.id === c.linked_wedding_id);
-          html += `<div onclick="navigate('kontaktDetail','${c.id}')" style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--white);border-radius:10px;box-shadow:0 1px 4px rgba(61,50,41,0.04);cursor:pointer;transition:transform 0.12s, box-shadow 0.12s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 10px rgba(61,50,41,0.08)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(61,50,41,0.04)'">`;
+          const st = contactStatusInfo(c.status);
+          const ageMs = c.updated_at ? (now - new Date(c.updated_at).getTime()) : Infinity;
+          const ageDays = Math.floor(ageMs / 86400000);
+          const lastContact = ageDays === 0 ? 'i dag' : ageDays === 1 ? 'i går' : `${ageDays}d siden`;
+          const wDate = w?.wedding_date ? new Date(w.wedding_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : null;
+          html += `<div onclick="navigate('kontaktDetail','${c.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:var(--white);border-radius:10px;box-shadow:0 1px 4px rgba(61,50,41,0.04);cursor:pointer;transition:transform 0.12s,box-shadow 0.12s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 10px rgba(61,50,41,0.08)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(61,50,41,0.04)'">`;
+          html += `<div class="contact-avatar" style="width:40px;height:40px;font-size:14px;flex-shrink:0">${avatarInitials(displayName)}</div>`;
           html += `<div style="flex:1;min-width:0">`;
-          html += `<div style="font-size:14px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
-          if (c.venue_name) html += `<div style="font-size:12px;color:#8A7D72;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.venue_name)}</div>`;
+          html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">`;
+          html += `<div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
+          html += `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:${st.bg};color:${st.color};flex-shrink:0;white-space:nowrap">${st.label}</span>`;
           html += `</div>`;
-          html += `<div style="display:flex;gap:6px;flex-shrink:0">`;
-          if (c.source) html += `<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500;white-space:nowrap">${esc(c.source)}</span>`;
-          if (w) html += `<span style="font-size:11px;padding:3px 8px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500;white-space:nowrap">Tilknyttet</span>`;
+          const infoLine = [];
+          if (c.email) infoLine.push(`<span style="color:#8A7D72">✉ ${esc(c.email)}</span>`);
+          else if (c.phone) infoLine.push(`<span style="color:#8A7D72">📞 ${esc(c.phone)}</span>`);
+          if (infoLine.length) html += `<div style="font-size:12px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${infoLine.join('')}</div>`;
+          html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">`;
+          if (wDate) html += `<span style="font-size:11px;padding:2px 7px;border-radius:6px;background:#EAF0F8;color:#4A7FB5;font-weight:500">📅 ${wDate}</span>`;
+          if (c.source) html += `<span style="font-size:11px;padding:2px 7px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500">${esc(c.source)}</span>`;
+          html += `<span style="font-size:11px;color:#C0B0A0;margin-left:auto">Sist: ${lastContact}</span>`;
+          html += `</div>`;
           html += `</div></div>`;
         }
         html += `</div>`;
       } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Lokale</th><th>Kilde</th></tr></thead><tbody>`;
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>E-post</th><th>Bryllupsdato</th><th>Kilde</th><th>Status</th></tr></thead><tbody>`;
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
+          const w = weddings.find(x => x.id === c.linked_wedding_id);
+          const st = contactStatusInfo(c.status);
+          const wDate = w?.wedding_date ? new Date(w.wedding_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : c.wedding_date ? new Date(c.wedding_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : '—';
           html += `<tr onclick="navigate('kontaktDetail','${c.id}')">`;
           html += `<td><div style="display:flex;align-items:center;gap:10px"><div class="contact-avatar" style="width:30px;height:30px;font-size:11px">${avatarInitials(displayName)}</div><span style="font-weight:500">${esc(displayName)}</span></div></td>`;
-          html += `<td style="color:#8A7D72">${esc(c.venue_name||'—')}</td>`;
+          html += `<td style="color:#8A7D72">${esc(c.email||'—')}</td>`;
+          html += `<td style="color:#8A7D72">${wDate}</td>`;
           html += `<td style="color:#8A7D72">${esc(c.source||'—')}</td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
           html += `</tr>`;
         }
         html += `</tbody></table></div>`;
@@ -2197,6 +2400,92 @@
 
     function esc(s) { return s ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;') : ''; }
     function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+    // ── Cmd+K global search ──
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openCmdPalette(); }
+      if (e.key === 'Escape') closeCmdPalette();
+    });
+
+    function openCmdPalette() {
+      if (!currentUser) return;
+      const overlay = document.getElementById('cmdOverlay');
+      if (!overlay) return;
+      overlay.classList.add('open');
+      const input = document.getElementById('cmdInput');
+      if (input) { input.value = ''; input.focus(); }
+      runCmdSearch('');
+    }
+
+    function closeCmdPalette() {
+      document.getElementById('cmdOverlay')?.classList.remove('open');
+    }
+
+    function runCmdSearch(q) {
+      q = (q || '').trim().toLowerCase();
+      const results = [];
+
+      for (const w of weddings) {
+        const name = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+        if (!q || name.toLowerCase().includes(q) || (w.venue||'').toLowerCase().includes(q)) {
+          const date = w.wedding_date ? new Date(w.wedding_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : '';
+          results.push({ icon:'💍', title:name, sub:[date, w.venue].filter(Boolean).join(' · '), type:'Oppdrag', action:`navigate('oppdragDetail','${w.id}')` });
+        }
+      }
+      for (const c of contacts) {
+        const name = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : c.primary_name;
+        if (!q || (name||'').toLowerCase().includes(q) || (c.email||'').toLowerCase().includes(q) || (c.phone||'').toLowerCase().includes(q)) {
+          const st = contactStatusInfo(c.status);
+          results.push({ icon:'👤', title:name||c.email||'—', sub:[c.email, st.label].filter(Boolean).join(' · '), type:'Kontakt', action:`navigate('kontaktDetail','${c.id}')` });
+        }
+      }
+      for (const d of documents) {
+        if (!q || d.title.toLowerCase().includes(q)) {
+          results.push({ icon:'📄', title:d.title, sub:d.status, type:'Dokument', action:`navigate('viewDoc','${d.id}')` });
+        }
+      }
+      for (const t of messageThreads) {
+        const name = threadDisplayName(t);
+        if (!q || name.toLowerCase().includes(q)) {
+          results.push({ icon:'💬', title:name, sub:threadSubtitle(t), type:'Melding', action:`navigate('conversation','${t.id}')` });
+        }
+      }
+
+      _cmdFocusIdx = -1;
+      const container = document.getElementById('cmdResults');
+      if (!container) return;
+      const limited = results.slice(0, 8);
+      if (limited.length === 0) {
+        container.innerHTML = `<div class="cmd-empty">${q ? `Ingen treff for «${esc(q)}»` : 'Begynn å skrive for å søke…'}</div>`;
+        return;
+      }
+      container.innerHTML = limited.map((r, i) =>
+        `<div class="cmd-result" id="cmd-r-${i}" onclick="closeCmdPalette();${r.action}">
+          <div class="cmd-icon">${r.icon}</div>
+          <div class="cmd-body">
+            <div class="cmd-title">${esc(r.title)}</div>
+            ${r.sub ? `<div class="cmd-sub">${esc(r.sub)}</div>` : ''}
+          </div>
+          <div class="cmd-type">${r.type}</div>
+        </div>`
+      ).join('');
+    }
+
+    function handleCmdKey(event) {
+      const results = document.querySelectorAll('.cmd-result');
+      if (!results.length) return;
+      if (event.key === 'ArrowDown') { event.preventDefault(); _cmdFocusIdx = Math.min(_cmdFocusIdx + 1, results.length - 1); }
+      else if (event.key === 'ArrowUp') { event.preventDefault(); _cmdFocusIdx = Math.max(_cmdFocusIdx - 1, 0); }
+      else if (event.key === 'Enter') {
+        event.preventDefault();
+        const focused = document.querySelector('.cmd-result.focused');
+        if (focused) { focused.click(); return; }
+        if (results[0]) results[0].click();
+        return;
+      } else { return; }
+      results.forEach((r, i) => r.classList.toggle('focused', i === _cmdFocusIdx));
+      if (results[_cmdFocusIdx]) results[_cmdFocusIdx].scrollIntoView({ block:'nearest' });
+    }
   </script>
 </body>
 </html>
