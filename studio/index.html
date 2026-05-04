@@ -95,9 +95,22 @@
     .overview-row .ov-sub { font-size: 11px; color: #B0A090; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 35%; }
     .ov-badge-new { font-size: 10px; font-weight: 700; color: var(--sage); background: #E8F4EA; padding: 2px 7px; border-radius: 10px; letter-spacing: 0.4px; text-transform: uppercase; }
 
-    .hjem-section-title { font-size: 13px; font-weight: 700; color: var(--espresso); text-transform: uppercase; letter-spacing: 0.6px; margin: 28px 0 10px; }
-    .hjem-section-title:first-child { margin-top: 0; }
-    .hjem-section-title .count { font-weight: 500; color: #A09080; margin-left: 6px; letter-spacing: 0; text-transform: none; }
+    .hjem-section-title { font-size: 11px; font-weight: 700; color: #A09080; text-transform: uppercase; letter-spacing: 0.7px; margin: 0 0 8px; }
+    .hjem-section-title .count { font-weight: 500; margin-left: 5px; letter-spacing: 0; text-transform: none; }
+
+    /* ── Dashboard grid ── */
+    .hjem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: start; }
+    .hjem-col { display: flex; flex-direction: column; gap: 0; }
+    .hjem-panel { background: var(--white); border-radius: 12px; box-shadow: 0 2px 12px rgba(61,50,41,0.05); padding: 18px 18px 12px; }
+    .hjem-panel + .hjem-panel { margin-top: 16px; }
+    @media (max-width: 700px) { .hjem-grid { grid-template-columns: 1fr; } }
+
+    /* ── Sidebar search trigger ── */
+    .sidebar-search { margin: 10px 10px 4px; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1.5px solid var(--sand); border-radius: 8px; cursor: pointer; transition: border-color 0.15s, background 0.15s; color: #A09080; font-size: 13px; width: calc(100% - 20px); box-sizing: border-box; background: none; font-family: inherit; }
+    .sidebar-search:hover { border-color: var(--sage); background: var(--cream); color: var(--espresso); }
+    .sidebar-search svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .sidebar-search-text { flex: 1; text-align: left; }
+    .sidebar-search-kbd { font-size: 10px; background: var(--sand); border-radius: 4px; padding: 2px 5px; font-family: inherit; white-space: nowrap; }
 
     /* ── Section headers ── */
     .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
@@ -331,6 +344,11 @@
         <span>VowFolio</span>
         <sub>Studio</sub>
       </div>
+      <button class="sidebar-search" onclick="openCmdPalette()">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span class="sidebar-search-text">Søk…</span>
+        <span class="sidebar-search-kbd" id="searchKbd">⌘K</span>
+      </button>
       <div class="sidebar-nav">
         <div class="nav-item" id="navHjem" onclick="navigate('hjem')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg> Hjem
@@ -709,13 +727,11 @@
 
       let html = `<div class="main-content" style="padding-top:24px">`;
 
-      // 1. Trenger deg nå
-      html += `<div class="hjem-section-title">Trenger deg nå${todos.length > 0 ? ` <span class="count">· ${todos.length}</span>` : ''}</div>`;
-      if (todos.length === 0) {
-        html += `<div style="padding:12px 14px;font-size:13px;color:#8A7D72">Alt er under kontroll ✨</div>`;
-      } else {
+      // ── 1. Trenger deg nå (full bredde, alltid øverst) ──
+      if (todos.length > 0) {
+        html += `<div class="hjem-section-title" style="margin-bottom:8px">Trenger deg nå <span class="count">· ${todos.length}</span></div>`;
         const visible = window.__hjemShowAllTodos ? todos : todos.slice(0, 3);
-        html += `<div style="display:flex;flex-direction:column;gap:6px">`;
+        html += `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:20px">`;
         for (const t of visible) {
           const isCrit = t.type === 'payment';
           const rowExtra = isCrit ? 'background:linear-gradient(135deg,#FEF0EE 0%,#FFF9F8 100%);border:1px solid #F5C6C0;' : '';
@@ -731,93 +747,125 @@
         }
         html += `</div>`;
         if (todos.length > 3 && !window.__hjemShowAllTodos) {
-          html += `<div class="todo-show-more" onclick="window.__hjemShowAllTodos=true;navigate('hjem')">Vis alle ${todos.length}</div>`;
+          html += `<div class="todo-show-more" style="margin-bottom:12px" onclick="window.__hjemShowAllTodos=true;navigate('hjem')">Vis alle ${todos.length}</div>`;
         }
       }
 
-      // 2. Neste oppdrag
-      if (nextWedding) {
-        const wd = new Date(nextWedding.wedding_date); wd.setHours(0,0,0,0);
-        const days = Math.round((wd - today) / 86400000);
-        const dayLabel = days === 0 ? 'i dag' : days === 1 ? 'i morgen' : `om ${days} dager`;
-        const wPayments = payments.filter(p => p.wedding_id === nextWedding.id);
-        const paidSum = wPayments.filter(p => p.status==='paid').reduce((s,p) => s + parseFloat(p.amount||0), 0);
-        const contractVal = parseFloat(nextWedding.contract_value || 0);
-        const wDocs = documents.filter(d => d.wedding_id === nextWedding.id);
-        const hasSigned = wDocs.some(d => d.status==='fully_signed');
-        const hasSent = wDocs.some(d => ['sent','viewed','signed_by_client'].includes(d.status));
-        const parts = [];
-        if (hasSigned) parts.push('✓ Kontrakt signert');
-        else if (hasSent) parts.push('⏳ Kontrakt venter på signatur');
-        else if (wDocs.length===0) parts.push('⚠ Ingen kontrakt');
-        if (contractVal > 0) { const pct = Math.round((paidSum/contractVal)*100); parts.push(`${fmt(paidSum)} / ${fmt(contractVal)} ${curr} (${pct}%)`); }
-        html += `<div class="hjem-section-title">Neste oppdrag</div>`;
-        html += `<div class="card" style="border-left:3px solid var(--rose);border-radius:0 12px 12px 0;cursor:pointer" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
-        html += `<div style="font-size:11px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${dayLabel} · ${dfWeek(nextWedding.wedding_date)}</div>`;
-        html += `<div style="font-size:18px;font-weight:600;font-family:'Playfair Display',serif">${esc(coupleName(nextWedding))}</div>`;
-        if (nextWedding.venue) html += `<div style="font-size:13px;color:#8A7D72;margin-top:4px">📍 ${esc(nextWedding.venue)}</div>`;
-        if (parts.length) html += `<div style="font-size:12px;color:#8A7D72;margin-top:8px;padding-top:8px;border-top:1px solid var(--sand)">${parts.join(' · ')}</div>`;
+      // ── 2. Inntekter (full bredde) ──
+      html += `<div class="hjem-section-title" style="margin-bottom:8px">Inntekter</div>`;
+      html += `<div class="card" style="padding:18px 24px;margin-bottom:16px">`;
+      html += `<div style="display:flex;gap:0;align-items:stretch">`;
+      html += `<div style="flex:1;padding-right:24px"><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Denne måneden</div><div style="font-size:28px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisMonth)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div></div>`;
+      html += `<div style="flex:1;padding:0 24px;border-left:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">I år</div><div style="font-size:28px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisYear)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div>${paidLastYear > 0 ? `<div style="font-size:11px;margin-top:3px;color:${paidThisYear>=paidLastYear?'#4A8A55':'#C0392B'}">${paidThisYear>=paidLastYear?'↑':'↓'} vs ${year-1}: ${fmt(paidLastYear)} ${curr}</div>` : ''}</div>`;
+      if (projected && projected > paidThisYear) {
+        html += `<div style="flex:1;padding-left:24px;border-left:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Prognose ${year}</div><div style="font-size:28px;font-family:'Playfair Display',serif;font-weight:600;color:#8A7D72">${fmt(projected)} <span style="font-size:13px;font-weight:400">${curr}</span></div></div>`;
+      }
+      if (sparkVals.some(v => v > 0)) {
+        html += `<div style="flex:0 0 auto;padding-left:24px;border-left:1px solid var(--sand);display:flex;align-items:center">${sparkSvg}</div>`;
+      }
+      html += `</div></div>`;
+
+      // ── 3. 2-kolonne: Neste oppdrag | Denne uken ──
+      const hasNextWedding = !!nextWedding;
+      const hasThisWeek = thisWeek.length > 0;
+      if (hasNextWedding || hasThisWeek) {
+        html += `<div class="hjem-grid">`;
+
+        html += `<div class="hjem-col">`;
+        if (hasNextWedding) {
+          const wd = new Date(nextWedding.wedding_date); wd.setHours(0,0,0,0);
+          const days = Math.round((wd - today) / 86400000);
+          const dayLabel = days === 0 ? 'i dag' : days === 1 ? 'i morgen' : `om ${days} dager`;
+          const wPayments = payments.filter(p => p.wedding_id === nextWedding.id);
+          const paidSum = wPayments.filter(p => p.status==='paid').reduce((s,p) => s + parseFloat(p.amount||0), 0);
+          const contractVal = parseFloat(nextWedding.contract_value || 0);
+          const wDocs = documents.filter(d => d.wedding_id === nextWedding.id);
+          const hasSigned = wDocs.some(d => d.status==='fully_signed');
+          const hasSent = wDocs.some(d => ['sent','viewed','signed_by_client'].includes(d.status));
+          const parts = [];
+          if (hasSigned) parts.push('✓ Kontrakt signert');
+          else if (hasSent) parts.push('⏳ Venter på signatur');
+          else if (wDocs.length===0) parts.push('⚠ Ingen kontrakt');
+          if (contractVal > 0) { const pct = Math.round((paidSum/contractVal)*100); parts.push(`${fmt(paidSum)} / ${fmt(contractVal)} ${curr} (${pct}%)`); }
+          html += `<div class="hjem-section-title">Neste oppdrag</div>`;
+          html += `<div class="hjem-panel" style="border-left:3px solid var(--rose);border-radius:0 12px 12px 0;cursor:pointer;padding-bottom:14px" onclick="navigate('oppdragDetail','${nextWedding.id}')">`;
+          html += `<div style="font-size:11px;font-weight:600;color:var(--taupe);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">${dayLabel} · ${dfWeek(nextWedding.wedding_date)}</div>`;
+          html += `<div style="font-size:18px;font-weight:600;font-family:'Playfair Display',serif">${esc(coupleName(nextWedding))}</div>`;
+          if (nextWedding.venue) html += `<div style="font-size:13px;color:#8A7D72;margin-top:4px">📍 ${esc(nextWedding.venue)}</div>`;
+          if (parts.length) html += `<div style="font-size:12px;color:#8A7D72;margin-top:10px;padding-top:10px;border-top:1px solid var(--sand)">${parts.join(' · ')}</div>`;
+          html += `</div>`;
+        }
+        html += `</div>`;
+
+        html += `<div class="hjem-col">`;
+        if (hasThisWeek) {
+          html += `<div class="hjem-section-title">Denne uken <span class="count">· ${thisWeek.length}</span></div>`;
+          html += `<div class="hjem-panel" style="padding:8px 4px">`;
+          for (const w of thisWeek) {
+            html += `<div class="overview-row" onclick="navigate('oppdragDetail','${w.id}')">
+              <div class="ov-date">${dfWeek(w.wedding_date)}</div>
+              <div class="ov-title">${esc(coupleName(w))}</div>
+              <div class="ov-sub">${esc(w.venue || '')}</div>
+            </div>`;
+          }
+          html += `</div>`;
+        } else if (hasNextWedding) {
+          html += `<div class="hjem-section-title">Denne uken</div>`;
+          html += `<div class="hjem-panel" style="padding:20px;text-align:center;color:#B0A090;font-size:13px">Ingen flere oppdrag denne uken</div>`;
+        }
+        html += `</div>`;
+
         html += `</div>`;
       }
 
-      // 3. Denne uken
-      if (thisWeek.length > 0) {
-        html += `<div class="hjem-section-title">Denne uken <span class="count">· ${thisWeek.length}</span></div>`;
-        html += `<div style="display:flex;flex-direction:column;gap:2px">`;
-        for (const w of thisWeek) {
-          html += `<div class="overview-row" onclick="navigate('oppdragDetail','${w.id}')">
-            <div class="ov-date">${dfWeek(w.wedding_date)}</div>
-            <div class="ov-title">${esc(coupleName(w))}</div>
-            <div class="ov-sub">${esc(w.venue || '')}</div>
-          </div>`;
+      // ── 4. 2-kolonne: Nye henvendelser | Siste 7 dager ──
+      const hasInquiries = newInquiries.length > 0;
+      const hasActivity = recentActs.length > 0;
+      if (hasInquiries || hasActivity) {
+        html += `<div class="hjem-grid">`;
+
+        html += `<div class="hjem-col">`;
+        if (hasInquiries) {
+          html += `<div class="hjem-section-title">Nye henvendelser <span class="count">· ${newInquiries.length}</span></div>`;
+          html += `<div class="hjem-panel" style="padding:8px 4px">`;
+          for (const c of newInquiries) {
+            const partner = c.partner_name ? ' & ' + c.partner_name : '';
+            const target = c.linked_wedding_id ? `navigate('oppdragDetail','${c.linked_wedding_id}')` : `navigate('kontaktDetail','${c.id}')`;
+            const ageMs = c.updated_at ? (now - new Date(c.updated_at).getTime()) : Infinity;
+            const ageDays = Math.floor(ageMs / 86400000);
+            const ageClass = ageDays <= 2 ? 'age-fresh' : ageDays <= 5 ? 'age-aging' : 'age-old';
+            const ageLabel = ageDays === 0 ? 'i dag' : ageDays === 1 ? 'i går' : `${ageDays}d`;
+            const subParts = [c.source, c.wedding_date ? dfShort(c.wedding_date) : ''].filter(Boolean).join(' · ');
+            html += `<div class="overview-row" onclick="${target}">
+              <div class="ov-date"><span class="badge ${ageClass}" style="font-size:10px;padding:2px 7px">${ageLabel}</span></div>
+              <div class="ov-title">${esc(c.primary_name + partner)}${ageDays === 0 ? ' <span class="ov-badge-new">Ny</span>' : ''}</div>
+              <div class="ov-sub">${esc(subParts)}</div>
+            </div>`;
+          }
+          html += `</div>`;
         }
+        html += `</div>`;
+
+        html += `<div class="hjem-col">`;
+        if (hasActivity) {
+          html += `<div class="hjem-section-title">Siste 7 dager</div>`;
+          html += `<div class="hjem-panel" style="padding:4px 8px">`;
+          for (const a of recentActs) {
+            html += `<div class="activity-row">
+              <div class="activity-dot" style="background:${a.dot}"></div>
+              <div style="flex:1;font-size:13px;color:var(--espresso)">${esc(a.text)}</div>
+              <div style="font-size:11px;color:#A09080;flex-shrink:0">${relativeTime(a.t.toISOString())}</div>
+            </div>`;
+          }
+          html += `</div>`;
+        }
+        html += `</div>`;
+
         html += `</div>`;
       }
 
-      // 4. Nye henvendelser med alders-farge
-      if (newInquiries.length > 0) {
-        html += `<div class="hjem-section-title">Nye henvendelser <span class="count">· ${newInquiries.length}</span></div>`;
-        html += `<div style="display:flex;flex-direction:column;gap:2px">`;
-        for (const c of newInquiries) {
-          const partner = c.partner_name ? ' & ' + c.partner_name : '';
-          const target = c.linked_wedding_id ? `navigate('oppdragDetail','${c.linked_wedding_id}')` : `navigate('kontaktDetail','${c.id}')`;
-          const ageMs = c.updated_at ? (now - new Date(c.updated_at).getTime()) : Infinity;
-          const ageDays = Math.floor(ageMs / 86400000);
-          const ageClass = ageDays <= 2 ? 'age-fresh' : ageDays <= 5 ? 'age-aging' : 'age-old';
-          const ageLabel = ageDays === 0 ? 'i dag' : ageDays === 1 ? 'i går' : `${ageDays}d`;
-          const subParts = [c.source, c.wedding_date ? dfShort(c.wedding_date) : ''].filter(Boolean).join(' · ');
-          html += `<div class="overview-row" onclick="${target}">
-            <div class="ov-date"><span class="badge ${ageClass}" style="font-size:10px;padding:2px 7px">${ageLabel}</span></div>
-            <div class="ov-title">${esc(c.primary_name + partner)}${ageDays === 0 ? ' <span class="ov-badge-new">Ny</span>' : ''}</div>
-            <div class="ov-sub">${esc(subParts)}</div>
-          </div>`;
-        }
-        html += `</div>`;
-      }
-
-      // 5. Inntekter med sparkline + vs. i fjor + prognose
-      html += `<div class="hjem-section-title">Inntekter</div>`;
-      html += `<div class="card" style="padding:20px 24px">`;
-      html += `<div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">`;
-      html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Denne måneden</div><div style="font-size:26px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisMonth)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div></div>`;
-      html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">I år</div><div style="font-size:26px;font-family:'Playfair Display',serif;font-weight:600">${fmt(paidThisYear)} <span style="font-size:14px;color:#8A7D72;font-weight:400">${curr}</span></div>${paidLastYear > 0 ? `<div style="font-size:11px;margin-top:3px;color:${paidThisYear>=paidLastYear?'#4A8A55':'#C0392B'}">${paidThisYear>=paidLastYear?'↑':'↓'} vs ${year-1}: ${fmt(paidLastYear)} ${curr}</div>` : ''}</div>`;
-      if (projected && projected > paidThisYear) html += `<div><div style="font-size:11px;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Prognose ${year}</div><div style="font-size:22px;font-family:'Playfair Display',serif;font-weight:600;color:#8A7D72">${fmt(projected)} <span style="font-size:13px;font-weight:400">${curr}</span></div></div>`;
-      html += `</div>`;
-      if (sparkVals.some(v => v > 0)) html += sparkSvg;
-      html += `</div>`;
-
-      // 6. Aktivitetsfeed
-      if (recentActs.length > 0) {
-        html += `<div class="hjem-section-title">Siste 7 dager</div>`;
-        html += `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.05);overflow:hidden">`;
-        for (const a of recentActs) {
-          html += `<div class="activity-row">
-            <div class="activity-dot" style="background:${a.dot}"></div>
-            <div style="flex:1;font-size:13px;color:var(--espresso)">${esc(a.text)}</div>
-            <div style="font-size:11px;color:#A09080;flex-shrink:0">${relativeTime(a.t.toISOString())}</div>
-          </div>`;
-        }
-        html += `</div>`;
+      if (todos.length === 0 && !nextWedding && newInquiries.length === 0 && recentActs.length === 0) {
+        html += `<div style="padding:48px 0;text-align:center;color:#A09080;font-size:14px">Alt er under kontroll ✨</div>`;
       }
 
       html += `</div>`;
@@ -2416,6 +2464,12 @@
       if (input) { input.value = ''; input.focus(); }
       runCmdSearch('');
     }
+
+    (function() {
+      const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+      const kbd = document.getElementById('searchKbd');
+      if (kbd) kbd.textContent = isMac ? '⌘K' : 'Ctrl+K';
+    })();
 
     function closeCmdPalette() {
       document.getElementById('cmdOverlay')?.classList.remove('open');
