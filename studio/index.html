@@ -1150,6 +1150,12 @@
       currentThreadId = threadId;
       const thread = messageThreads.find(t => t.id === threadId);
       if (!thread) { el.innerHTML = '<div class="main-content"><p>Tråd ikke funnet.</p></div>'; return; }
+      // Marker tråden som lest UMIDDELBART (synkront, før network round-trips).
+      // Tidligere kjørte dette etter await på message-fetch, så badgen hang
+      // i 200-500ms ekstra. Nå: viewedThreadIds + badge-rerender før alt annet.
+      viewedThreadIds.add(threadId);
+      thread.unread_count = 0;
+      updateMeldingerBadge();
       const name = threadDisplayName(thread);
       const sub = threadSubtitle(thread);
 
@@ -1170,15 +1176,15 @@
       currentMessages = data || [];
       renderMessageBubbles();
 
-      // Mark read — alltid, uavhengig av unread_count. Også markér tråden
-      // som "viewed" lokalt så waitingForYou-heuristikken skrur av
-      // indikatoren umiddelbart (uten å vente på re-fetch).
-      viewedThreadIds.add(threadId);
-      if (currentUser && (thread.unread_count || 0) > 0) {
-        await sb.from('message_threads').update({ unread_count: 0, updated_at: new Date().toISOString() }).eq('id', threadId);
-        thread.unread_count = 0;
+      // Persister mark-read til DB (kjører i bakgrunnen — UI er allerede
+      // oppdatert øverst i funksjonen, så brukeren ser badgen forsvinne
+      // umiddelbart).
+      if (currentUser) {
+        sb.from('message_threads')
+          .update({ unread_count: 0, updated_at: new Date().toISOString() })
+          .eq('id', threadId)
+          .then(() => {});
       }
-      updateMeldingerBadge();
     }
 
     function renderMessageBubbles() {
