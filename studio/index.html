@@ -1143,7 +1143,11 @@
           <div style="font-family:'Playfair Display',serif;font-size:17px">${esc(couple)}</div>
           <span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
         </div>
-        <button class="btn-primary btn-sm" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-outline btn-sm" onclick="openPortalLink(this,'${weddingId}','${w.project_type||'wedding'}')">🔗 Send portal</button>
+          <button class="btn-outline btn-sm" onclick="goToWeddingMessages('${weddingId}')">💬 Melding</button>
+          <button class="btn-primary btn-sm" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
+        </div>
       </div>`;
 
       html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
@@ -1170,7 +1174,7 @@
       else if (tab === 'betalinger') renderOppdragBetalingerTab();
     }
 
-    function renderOppdragInfoTab() {
+    async function renderOppdragInfoTab() {
       const el = document.getElementById('oppdragTabContent');
       if (!el) return;
       const w = weddings.find(x => x.id === detailWeddingId);
@@ -1179,33 +1183,105 @@
       const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
       const curr = studioSettings?.currency_symbol || 'kr';
 
+      el.innerHTML = `<div style="color:#A09080;text-align:center;padding:60px;font-size:14px">Laster…</div>`;
+
+      const [meetingsRes, timelineRes, deliverablesRes, wContactsRes, intakeRes] = await Promise.all([
+        sb.from('wedding_meetings').select('*').eq('wedding_id', detailWeddingId).order('meeting_date', { ascending: false }),
+        sb.from('day_timeline_items').select('*').eq('wedding_id', detailWeddingId).order('sort_order', { ascending: true }),
+        sb.from('deliverables').select('*').eq('wedding_id', detailWeddingId).order('sort_order', { ascending: true }),
+        sb.from('contacts').select('*').eq('wedding_id', detailWeddingId).order('created_at', { ascending: true }),
+        sb.from('wedding_intake_forms').select('*').eq('wedding_id', detailWeddingId).limit(1),
+      ]);
+      const meetings = meetingsRes.data || [];
+      const timeline = timelineRes.data || [];
+      const deliverables = deliverablesRes.data || [];
+      const wContacts = wContactsRes.data || [];
+      const intake = intakeRes.data?.[0] || null;
+
+      const sectionTitle = t => `<div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">${t}</div>`;
+      const fieldRow = (label, val) => val ? `<div style="margin-bottom:10px"><span style="font-size:11px;color:#A09080">${label}: </span><span style="font-size:13px;color:var(--espresso)">${val}</span></div>` : '';
+
       let daysInfo = '';
       if (w.wedding_date) {
         const days = Math.ceil((new Date(w.wedding_date) - new Date()) / 86400000);
         daysInfo = days > 0 ? `${days} dager til bryllupet` : days === 0 ? 'I dag!' : `${Math.abs(days)} dager siden`;
       }
 
-      const fieldRow = (label, content) => `<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--sand)">
-        <div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">${label}</div>
-        ${content}</div>`;
-
       let html = `<div class="detail-info-grid">`;
 
-      // Left column
-      html += `<div>`;
-      html += `<div class="card" style="margin-bottom:16px">`;
-      if (w.wedding_date) html += fieldRow('Dato', `<div style="font-size:16px;font-weight:600">${df(w.wedding_date)}</div>${daysInfo ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${daysInfo}</div>` : ''}`);
-      if (w.venue) html += fieldRow('Lokale', `<div style="font-size:15px">${esc(w.venue)}</div>${w.venue_address ? `<div style="font-size:13px;color:#8A7D72;margin-top:2px">${esc(w.venue_address)}</div>` : ''}`);
-      if (w.contract_value) html += fieldRow('Kontraktsverdi', `<div style="font-size:15px;font-weight:600">${w.contract_value.toLocaleString('nb-NO')} ${curr}</div>`);
-      if (c.notes) html += `<div><div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Notater</div><div style="font-size:14px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</div></div>`;
-      html += `</div>`;
+      // ── LEFT COLUMN ──────────────────────────────────────────────
+      html += `<div style="display:flex;flex-direction:column;gap:16px">`;
+
+      // Basis-info card
+      html += `<div class="card">`;
+      html += sectionTitle('Oppdrag');
+      if (w.wedding_date) html += `<div style="margin-bottom:10px"><div style="font-size:16px;font-weight:600;color:var(--espresso)">${df(w.wedding_date)}</div>${daysInfo ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${daysInfo}</div>` : ''}</div>`;
+      if (w.venue) html += fieldRow('Lokale', esc(w.venue) + (w.venue_address ? ` <span style="color:#A09080">· ${esc(w.venue_address)}</span>` : ''));
+      if (w.contract_value) html += fieldRow('Kontraktsverdi', `<strong>${w.contract_value.toLocaleString('nb-NO')} ${curr}</strong>`);
+      if (w.photo_style) html += fieldRow('Stil', esc(w.photo_style));
+      if (c.notes) html += `<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;margin-bottom:4px">Notater</div><div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</div></div>`;
       html += `</div>`;
 
-      // Right column: contact card
-      html += `<div>`;
+      // Logistikk card (from intake form)
+      if (intake) {
+        html += `<div class="card">`;
+        html += sectionTitle('Logistikk');
+        if (intake.photographer_arrival_time) html += fieldRow('Fotograf ankommer', esc(intake.photographer_arrival_time));
+        if (intake.getting_ready_time) html += fieldRow('Getting ready', esc(intake.getting_ready_time));
+        if (intake.getting_ready_location) html += fieldRow('Getting ready-sted', esc(intake.getting_ready_location));
+        if (intake.ceremony_time) html += fieldRow('Seremoni', esc(intake.ceremony_time));
+        if (intake.ceremony_address) html += fieldRow('Seremonisted', esc(intake.ceremony_address));
+        if (intake.reception_time) html += fieldRow('Mottakelse', esc(intake.reception_time));
+        if (intake.reception_address) html += fieldRow('Mottakelsessted', esc(intake.reception_address));
+        if (intake.first_look) html += fieldRow('First look', intake.first_look_time ? esc(intake.first_look_time) : 'Ja');
+        if (intake.guest_count) html += fieldRow('Antall gjester', String(intake.guest_count));
+        if (intake.coordinator) html += fieldRow('Koordinator', esc(intake.coordinator));
+        if (intake.ceremony_type) html += fieldRow('Seremoniform', esc(intake.ceremony_type));
+        if (intake.booked_package) html += fieldRow('Pakke', esc(intake.booked_package));
+        if (intake.must_have_shots) html += `<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;margin-bottom:4px">Must-have bilder</div><div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(intake.must_have_shots)}</div></div>`;
+        html += `</div>`;
+      }
+
+      // Dagplan card
+      if (timeline.length > 0) {
+        html += `<div class="card">`;
+        html += sectionTitle('Dagplan');
+        timeline.forEach((item, i) => {
+          const border = i < timeline.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+          html += `<div style="display:flex;gap:14px;padding:10px 0;${border}">`;
+          html += `<div style="min-width:52px;font-size:13px;font-weight:600;color:var(--taupe);flex-shrink:0">${esc(item.event_time || '')}</div>`;
+          html += `<div><div style="font-size:13px;color:var(--espresso);font-weight:500">${esc(item.title || '')}</div>${item.notes ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${esc(item.notes)}</div>` : ''}</div>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Møtenotater
+      if (meetings.length > 0) {
+        html += `<div class="card">`;
+        html += sectionTitle('Møtenotater');
+        meetings.forEach((m, i) => {
+          const border = i < meetings.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:14px;margin-bottom:14px;' : '';
+          html += `<div style="${border}">`;
+          html += `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">`;
+          html += `<div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(m.title || 'Møte')}</div>`;
+          html += `<div style="font-size:11px;color:#A09080">${m.meeting_date ? df(m.meeting_date) : ''}</div>`;
+          html += `</div>`;
+          if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(m.notes)}</div>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`; // end left column
+
+      // ── RIGHT COLUMN ─────────────────────────────────────────────
+      html += `<div style="display:flex;flex-direction:column;gap:16px">`;
+
+      // Kontakt (CRM)
       if (c.primary_name || c.email || c.phone) {
         html += `<div class="card">`;
-        html += `<div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">Kontakt</div>`;
+        html += sectionTitle('Kontakt');
         if (c.primary_name) {
           html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">`;
           html += `<div class="contact-avatar">${avatarInitials(c.primary_name + (c.partner_name ? ' & ' + c.partner_name : ''))}</div>`;
@@ -1213,14 +1289,82 @@
           html += `</div>`;
         }
         html += `<div style="display:flex;flex-direction:column;gap:10px">`;
-        if (c.email) html += `<a href="mailto:${esc(c.email)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>${esc(c.email)}</a>`;
-        if (c.phone) html += `<a href="tel:${esc(c.phone)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>${esc(c.phone)}</a>`;
+        if (c.email) html += `<a href="mailto:${esc(c.email)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none">✉ ${esc(c.email)}</a>`;
+        if (c.phone) html += `<a href="tel:${esc(c.phone)}" style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--espresso);text-decoration:none">📞 ${esc(c.phone)}</a>`;
         html += `</div></div>`;
       }
-      html += `</div>`;
 
-      html += `</div>`; // grid
+      // Kontakter i bryllupet
+      if (wContacts.length > 0) {
+        html += `<div class="card">`;
+        html += sectionTitle('Kontakter i bryllupet');
+        wContacts.forEach((p, i) => {
+          const border = i < wContacts.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:10px;margin-bottom:10px;' : '';
+          html += `<div style="${border}">`;
+          html += `<div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(p.name)}</div>`;
+          if (p.role) html += `<div style="font-size:11px;color:#A09080;margin-top:1px">${esc(p.role)}</div>`;
+          html += `<div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">`;
+          if (p.phone) html += `<a href="tel:${esc(p.phone)}" style="font-size:12px;color:var(--taupe);text-decoration:none">📞 ${esc(p.phone)}</a>`;
+          if (p.email) html += `<a href="mailto:${esc(p.email)}" style="font-size:12px;color:var(--taupe);text-decoration:none">✉ ${esc(p.email)}</a>`;
+          html += `</div></div>`;
+        });
+        html += `</div>`;
+      }
+
+      // Leveranser
+      if (deliverables.length > 0) {
+        html += `<div class="card">`;
+        html += sectionTitle('Leveranser');
+        deliverables.forEach(d => {
+          const done = d.is_complete || d.status === 'delivered';
+          html += `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sand);cursor:pointer" onclick="toggleDeliverable('${d.id}',${done})">`;
+          html += `<div style="width:18px;height:18px;border-radius:50%;border:2px solid ${done ? 'var(--sage)' : 'var(--sand)'};background:${done ? 'var(--sage)' : 'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer">${done ? '<svg width="10" height="10" viewBox="0 0 10 10" stroke="white" fill="none" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>' : ''}</div>`;
+          html += `<div style="flex:1;font-size:13px;color:${done ? '#A09080' : 'var(--espresso)'};text-decoration:${done ? 'line-through' : 'none'}">${esc(d.title)}</div>`;
+          if (d.due_date) html += `<div style="font-size:11px;color:#A09080">${df(d.due_date)}</div>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      html += `</div>`; // end right column
+      html += `</div>`; // end grid
       el.innerHTML = html;
+    }
+
+    async function toggleDeliverable(id, currentDone) {
+      const newDone = !currentDone;
+      await sb.from('deliverables').update({ is_complete: newDone, status: newDone ? 'delivered' : 'pending' }).eq('id', id);
+      renderOppdragInfoTab();
+    }
+
+    async function openPortalLink(btn, weddingId, projectType) {
+      btn.textContent = '…';
+      btn.disabled = true;
+      try {
+        const bytes = crypto.getRandomValues(new Uint8Array(6));
+        const rawToken = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        const msgBuf = new TextEncoder().encode(rawToken);
+        const hashBuf = await crypto.subtle.digest('SHA-256', msgBuf);
+        const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
+        const { error } = await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
+        if (error) throw error;
+        const prefix = (projectType === 'wedding' || !projectType) ? 'p' : 'ps';
+        const url = `https://vowfolio.com/${prefix}/${rawToken}`;
+        await navigator.clipboard.writeText(url);
+        showToast('Portallenke kopiert! Del med kunden.');
+      } catch (e) {
+        showToast('Kunne ikke generere lenke: ' + (e.message || e));
+      } finally {
+        btn.textContent = '🔗 Send portal';
+        btn.disabled = false;
+      }
+    }
+
+    function goToWeddingMessages(weddingId) {
+      const thread = messageThreads.find(t => t.wedding_id === weddingId);
+      if (thread) { navigate('conversation', thread.id); }
+      else { navigate('meldinger'); showToast('Ingen meldingstråd funnet for dette oppdraget'); }
     }
 
     function renderOppdragDokumenterTab() {
