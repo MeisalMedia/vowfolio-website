@@ -787,7 +787,7 @@
         }
         html += `</div>`;
       } else {
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Type</th><th>Status</th><th>Dato</th><th>Lokale</th></tr></thead><tbody>`;
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Dato</th><th>Lokale</th><th>Type</th><th>Status</th></tr></thead><tbody>`;
         for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
@@ -795,10 +795,10 @@
           const pt = projectTypeInfo(w.project_type);
           html += `<tr onclick="navigate('oppdragDetail','${w.id}')">`;
           html += `<td><strong>${esc(couple)}</strong></td>`;
-          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color}">${pt.label}</span></td>`;
-          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
           html += `<td style="color:#8A7D72">${wDate}</td>`;
           html += `<td style="color:#8A7D72">${esc(w.venue||'—')}</td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color}">${pt.label}</span></td>`;
+          html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
           html += `</tr>`;
         }
         html += `</tbody></table></div>`;
