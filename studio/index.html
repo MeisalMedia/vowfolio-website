@@ -365,6 +365,10 @@
     let lastMessageByThread = {};
     let otherPartyByThread = {};
     let crewProfilesById = {};
+    // Tråder bruker har åpnet i denne økten — overstyrer waitingForYou-
+    // heuristikken så indikatorene forsvinner umiddelbart etter at man har
+    // lest meldingen, uten å vente på neste sync.
+    const viewedThreadIds = new Set();
     let studioName = '';
     let studioSettings = null;
     let quillEditor = null;
@@ -460,6 +464,7 @@
     }
 
     function threadWaitingForYou(thread) {
+      if (viewedThreadIds.has(thread.id)) return false;
       if ((thread.unread_count || 0) > 0) return true;
       const last = lastMessageByThread[thread.id];
       if (!last) return false;
@@ -1165,12 +1170,15 @@
       currentMessages = data || [];
       renderMessageBubbles();
 
-      // Mark read
-      if (currentUser && thread.unread_count > 0) {
+      // Mark read — alltid, uavhengig av unread_count. Også markér tråden
+      // som "viewed" lokalt så waitingForYou-heuristikken skrur av
+      // indikatoren umiddelbart (uten å vente på re-fetch).
+      viewedThreadIds.add(threadId);
+      if (currentUser && (thread.unread_count || 0) > 0) {
         await sb.from('message_threads').update({ unread_count: 0, updated_at: new Date().toISOString() }).eq('id', threadId);
         thread.unread_count = 0;
-        updateMeldingerBadge();
       }
+      updateMeldingerBadge();
     }
 
     function renderMessageBubbles() {
