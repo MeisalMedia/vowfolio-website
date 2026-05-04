@@ -365,10 +365,20 @@
     let lastMessageByThread = {};
     let otherPartyByThread = {};
     let crewProfilesById = {};
-    // Tråder bruker har åpnet i denne økten — overstyrer waitingForYou-
-    // heuristikken så indikatorene forsvinner umiddelbart etter at man har
-    // lest meldingen, uten å vente på neste sync.
-    const viewedThreadIds = new Set();
+    // Persistent "viewed-state" per tråd: { threadId: ISO-timestamp da brukeren
+    // åpnet tråden }. Lagres i localStorage så det overlever reload, og
+    // sammenlignes med thread.last_message_at — så NYE meldinger etter
+    // visning fortsatt markerer tråden som ulest.
+    const VIEWED_KEY = 'vf_viewed_threads';
+    function loadViewedTimestamps() {
+      try { const raw = localStorage.getItem(VIEWED_KEY); return raw ? JSON.parse(raw) : {}; }
+      catch (_) { return {}; }
+    }
+    let viewedAtByThread = loadViewedTimestamps();
+    function markThreadViewed(threadId, lastMessageAt) {
+      viewedAtByThread[threadId] = lastMessageAt || new Date().toISOString();
+      try { localStorage.setItem(VIEWED_KEY, JSON.stringify(viewedAtByThread)); } catch (_) {}
+    }
     let studioName = '';
     let studioSettings = null;
     let quillEditor = null;
@@ -464,7 +474,11 @@
     }
 
     function threadWaitingForYou(thread) {
-      if (viewedThreadIds.has(thread.id)) return false;
+      // Hvis vi har åpnet tråden ETTER siste melding, er den lest.
+      const viewedAt = viewedAtByThread[thread.id];
+      if (viewedAt && thread.last_message_at && viewedAt >= thread.last_message_at) {
+        return false;
+      }
       if ((thread.unread_count || 0) > 0) return true;
       const last = lastMessageByThread[thread.id];
       if (!last) return false;
@@ -1153,9 +1167,10 @@
       const thread = messageThreads.find(t => t.id === threadId);
       if (!thread) { el.innerHTML = '<div class="main-content"><p>Tråd ikke funnet.</p></div>'; return; }
       // Marker tråden som lest UMIDDELBART (synkront, før network round-trips).
-      // Tidligere kjørte dette etter await på message-fetch, så badgen hang
-      // i 200-500ms ekstra. Nå: viewedThreadIds + badge-rerender før alt annet.
-      viewedThreadIds.add(threadId);
+      // Persistent via localStorage — overlever reload. Sammenlignes mot
+      // thread.last_message_at i threadWaitingForYou så NYE meldinger etter
+      // visning fortsatt blir markert som ulest.
+      markThreadViewed(threadId, thread.last_message_at);
       thread.unread_count = 0;
       updateMeldingerBadge();
       const name = threadDisplayName(thread);
