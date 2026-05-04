@@ -1487,7 +1487,20 @@
       });
       if (error) { showToast('Kunne ikke sende: ' + error.message); return; }
       const preview = body.length > 80 ? body.slice(0, 79) + '…' : body;
-      await sb.from('message_threads').update({ last_message_preview: preview, last_message_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', currentThreadId);
+      const sentAt = new Date().toISOString();
+      await sb.from('message_threads').update({ last_message_preview: preview, last_message_at: sentAt, updated_at: sentAt }).eq('id', currentThreadId);
+
+      // Keep in-memory state consistent so viewed-check and badge stay correct
+      // without waiting for the next loadData(). If we skip this, viewedAt < new
+      // last_message_at after a reload, causing the thread to look unread even
+      // though the last message is ours.
+      if (thread) {
+        thread.last_message_at = sentAt;
+        thread.last_message_preview = preview;
+      }
+      lastMessageByThread[currentThreadId] = { thread_id: currentThreadId, sender_role: role, sender_id: currentUser.id, sender_name: currentUser.email, body, created_at: sentAt };
+      markThreadViewed(currentThreadId, sentAt);
+
       const { data: fresh } = await sb.from('messages').select('*').eq('thread_id', currentThreadId).order('created_at', { ascending: true });
       currentMessages = fresh || [];
       renderMessageBubbles();
