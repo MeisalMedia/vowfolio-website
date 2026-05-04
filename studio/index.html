@@ -138,7 +138,7 @@
     .detail-side { display: flex; flex-direction: column; gap: 16px; }
 
     /* ── Kontakter ── */
-    .contact-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--taupe); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+    .contact-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--sand); color: var(--taupe); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; letter-spacing: 0.5px; }
 
     /* ── Messages placeholder ── */
     .empty-state { text-align: center; padding: 80px 20px; color: #A09080; }
@@ -880,7 +880,7 @@
         html += `<div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px">Kontakt</div>`;
         if (c.primary_name) {
           html += `<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">`;
-          html += `<div class="contact-avatar">${c.primary_name[0]}</div>`;
+          html += `<div class="contact-avatar">${avatarInitials(c.primary_name + (c.partner_name ? ' & ' + c.partner_name : ''))}</div>`;
           html += `<div><div style="font-weight:600;font-size:15px">${esc(c.primary_name)}</div>${c.partner_name ? `<div style="font-size:13px;color:#8A7D72">& ${esc(c.partner_name)}</div>` : ''}</div>`;
           html += `</div>`;
         }
@@ -1046,6 +1046,21 @@
     }
 
     // ── Meldinger ──
+    function avatarInitials(name) {
+      if (!name || typeof name !== 'string') return '?';
+      const trimmed = name.trim();
+      if (!trimmed) return '?';
+      // "Marte & Kristoffer Bakken" → "MK"
+      const amp = trimmed.split(/\s*&\s*/).filter(Boolean);
+      if (amp.length === 2 && amp[0][0] && amp[1][0]) {
+        return (amp[0][0] + amp[1][0]).toUpperCase();
+      }
+      // "Helge Øgård Meisal" → "HM" (første + siste ord)
+      const parts = trimmed.split(/\s+/).filter(Boolean);
+      if (parts.length === 1) return parts[0][0].toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
     function threadDisplayName(t) {
       if (t.wedding_id) {
         const w = weddings.find(x => x.id === t.wedding_id);
@@ -1104,9 +1119,9 @@
           // (den kan være null før vi har eksplisitt unread-tracking på web).
           const waiting = (typeof threadWaitingForYou === 'function') && threadWaitingForYou(t);
           const isUnread = unreadCount > 0 || waiting;
-          const initial = (name[0]||'?').toUpperCase();
+          const initial = avatarInitials(name);
           html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s;${isUnread?'background:rgba(107,143,113,0.04);':''}" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='${isUnread?'rgba(107,143,113,0.04)':'var(--white)'}'">`;
-          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0;position:relative">${initial}${isUnread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--sage);border:2px solid var(--white)"></span>':''}</div>`;
+          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:14px;flex-shrink:0;position:relative">${initial}${isUnread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--sage);border:2px solid var(--white)"></span>':''}</div>`;
           html += `<div style="flex:1;min-width:0">`;
           html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${isUnread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${isUnread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${isUnread?600:400}">${time}</div></div>`;
           if (sub) html += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
@@ -1135,7 +1150,7 @@
 
       let html = `<div style="padding:10px 20px;background:var(--white);border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:12px;flex-shrink:0">
         <button class="btn-outline btn-sm" onclick="navigate('meldinger')">←</button>
-        <div class="contact-avatar" style="width:32px;height:32px;font-size:12px;flex-shrink:0">${(name[0]||'?').toUpperCase()}</div>
+        <div class="contact-avatar" style="width:32px;height:32px;font-size:11px;flex-shrink:0">${avatarInitials(name)}</div>
         <div style="min-width:0"><div style="font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>${sub ? `<div style="font-size:11px;color:#8A7D72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>` : ''}</div>
       </div>`;
       html += `<div id="msgScroll" style="flex:1;overflow-y:auto;padding:20px 24px;background:var(--cream)"><div id="msgList" style="display:flex;flex-direction:column;gap:4px;max-width:720px;margin:0 auto">Laster...</div></div>`;
@@ -1308,7 +1323,7 @@
         for (const c of filtered) {
           const displayName = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : (c.primary_name || '—');
           html += `<tr onclick="navigate('kontaktDetail','${c.id}')">`;
-          html += `<td><div style="display:flex;align-items:center;gap:10px"><div class="contact-avatar" style="width:30px;height:30px;font-size:12px">${(c.primary_name||'?')[0].toUpperCase()}</div><span style="font-weight:500">${esc(displayName)}</span></div></td>`;
+          html += `<td><div style="display:flex;align-items:center;gap:10px"><div class="contact-avatar" style="width:30px;height:30px;font-size:11px">${avatarInitials(displayName)}</div><span style="font-weight:500">${esc(displayName)}</span></div></td>`;
           html += `<td style="color:#8A7D72">${esc(c.venue_name||'—')}</td>`;
           html += `<td style="color:#8A7D72">${esc(c.source||'—')}</td>`;
           html += `</tr>`;
