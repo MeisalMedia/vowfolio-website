@@ -1316,14 +1316,16 @@
     }
 
     function threadDisplayName(t) {
+      if (t.contact_id) {
+        const c = contacts.find(x => x.id === t.contact_id);
+        if (c) return c.partner_name ? `${c.primary_name} & ${c.partner_name}` : c.primary_name;
+        return 'Henvendelse';
+      }
       if (t.wedding_id) {
         const w = weddings.find(x => x.id === t.wedding_id);
         if (w) return w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
         return 'Kunde';
       }
-      // Crew-tråd: bruk navnet på den andre fotografen (fra siste melding
-      // de sendte), ikke generisk 'Crew'. Faller tilbake til crew_profiles
-      // hvis ingen meldinger ennå, og 'Crew' som siste utvei.
       const fromMessages = otherPartyByThread[t.id];
       if (fromMessages) return fromMessages;
       const profile = crewProfilesById[t.photographer_id];
@@ -1331,6 +1333,16 @@
       return 'Crew';
     }
     function threadSubtitle(t) {
+      if (t.contact_id) {
+        const c = contacts.find(x => x.id === t.contact_id);
+        if (c) {
+          const parts = ['Henvendelse'];
+          if (c.wedding_date) parts.push(new Date(c.wedding_date).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' }));
+          if (c.venue_name) parts.push(c.venue_name);
+          return parts.join(' · ');
+        }
+        return 'Henvendelse';
+      }
       if (t.wedding_id) {
         const w = weddings.find(x => x.id === t.wedding_id);
         if (w) {
@@ -1368,18 +1380,19 @@
           const preview = t.last_message_preview || 'Ingen meldinger enda';
           const time = relativeTime(t.last_message_at);
           const unreadCount = t.unread_count || 0;
-          // Konsistent med nav-badge: marker tråden som "venter på deg" hvis
-          // siste melding ikke er fra fotografen, selv om unread_count er 0
-          // (den kan være null før vi har eksplisitt unread-tracking på web).
-          const waiting = (typeof threadWaitingForYou === 'function') && threadWaitingForYou(t);
+          const isInquiryThread = !!t.contact_id;
+          const waiting = !isInquiryThread && (typeof threadWaitingForYou === 'function') && threadWaitingForYou(t);
           const isUnread = unreadCount > 0 || waiting;
           const initial = avatarInitials(name);
-          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s;${isUnread?'background:rgba(107,143,113,0.04);':''}" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='${isUnread?'rgba(107,143,113,0.04)':'var(--white)'}'">`;
-          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:14px;flex-shrink:0;position:relative">${initial}${isUnread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--sage);border:2px solid var(--white)"></span>':''}</div>`;
+          const bgColor = isInquiryThread ? 'rgba(107,143,113,0.06)' : (isUnread ? 'rgba(107,143,113,0.04)' : 'var(--white)');
+          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s;background:${bgColor}" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='${bgColor}'">`;
+          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:14px;flex-shrink:0;position:relative">${initial}${(isUnread||isInquiryThread)?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--sage);border:2px solid var(--white)"></span>':''}</div>`;
           html += `<div style="flex:1;min-width:0">`;
-          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${isUnread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${isUnread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${isUnread?600:400}">${time}</div></div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px">`;
+          html += `<div style="display:flex;align-items:center;gap:6px;min-width:0"><div style="font-weight:${isUnread||isInquiryThread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div>${isInquiryThread?'<span style="font-size:10px;font-weight:600;color:var(--sage);background:rgba(107,143,113,0.12);padding:1px 6px;border-radius:8px;white-space:nowrap;flex-shrink:0">Henvendelse</span>':''}</div>`;
+          html += `<div style="font-size:11px;color:${isUnread||isInquiryThread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${isUnread||isInquiryThread?600:400}">${time}</div></div>`;
           if (sub) html += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
-          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${isUnread?'var(--espresso)':'#8A7D72'};font-weight:${isUnread?500:400};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${isUnread||isInquiryThread?'var(--espresso)':'#8A7D72'};font-weight:${isUnread||isInquiryThread?500:400};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
           if (unreadCount > 0) {
             html += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unreadCount}</div>`;
           }
@@ -1448,13 +1461,22 @@
       let html = '';
       let lastSender = null, lastTime = 0;
       for (const m of currentMessages) {
-        const mine = m.sender_id === myId || m.sender_role === 'photographer';
+        const isInquiryMsg = m.sender_role === 'inquiry';
+        const mine = !isInquiryMsg && (m.sender_id === myId || m.sender_role === 'photographer');
         const t = new Date(m.created_at).getTime();
         const newGroup = m.sender_id !== lastSender || (t - lastTime) > 5 * 60000;
         if (newGroup && html) html += `<div style="height:8px"></div>`;
-        html += `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'}">`;
-        html += `<div style="max-width:70%;padding:9px 14px;border-radius:16px;background:${mine?'var(--sage)':'var(--white)'};color:${mine?'var(--white)':'var(--espresso)'};font-size:14px;line-height:1.4;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(61,50,41,0.04)">${esc(m.body)}</div>`;
-        html += `</div>`;
+        if (isInquiryMsg) {
+          // Inquiry form submission — show as a distinct card, not a chat bubble
+          html += `<div style="background:rgba(107,143,113,0.07);border:1px solid rgba(107,143,113,0.2);border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.6;color:var(--espresso);white-space:pre-wrap;word-wrap:break-word">`;
+          html += `<div style="font-size:11px;font-weight:600;color:var(--sage);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em">Kontaktskjema</div>`;
+          html += esc(m.body);
+          html += `</div>`;
+        } else {
+          html += `<div style="display:flex;justify-content:${mine?'flex-end':'flex-start'}">`;
+          html += `<div style="max-width:70%;padding:9px 14px;border-radius:16px;background:${mine?'var(--sage)':'var(--white)'};color:${mine?'var(--white)':'var(--espresso)'};font-size:14px;line-height:1.4;word-wrap:break-word;white-space:pre-wrap;box-shadow:0 1px 2px rgba(61,50,41,0.04)">${esc(m.body)}</div>`;
+          html += `</div>`;
+        }
         lastSender = m.sender_id; lastTime = t;
       }
       list.innerHTML = html;
@@ -1473,7 +1495,7 @@
       if (!body || !currentThreadId) return;
       if (!currentUser) { showToast('Du må være logget inn'); return; }
       const thread = messageThreads.find(t => t.id === currentThreadId);
-      const role = thread?.wedding_id ? 'photographer' : 'crew';
+      const role = (thread?.wedding_id || thread?.contact_id) ? 'photographer' : 'crew';
       input.value = ''; autoGrow(input);
 
       // Optimistic append
