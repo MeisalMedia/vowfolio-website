@@ -2589,8 +2589,11 @@
       document.getElementById('nyttOppdragModal').style.display = 'none';
     }
     async function saveNyttOppdrag() {
+      const btn = document.querySelector('#nyttOppdragModal .btn-primary');
+      if (btn.disabled) return;
+      btn.disabled = true; btn.textContent = 'Oppretter…';
       const p1 = document.getElementById('noP1').value.trim();
-      if (!p1) { showToast('Partner 1 er påkrevd'); return; }
+      if (!p1) { btn.disabled = false; btn.textContent = 'Opprett oppdrag'; showToast('Partner 1 er påkrevd'); return; }
       const p2 = document.getElementById('noP2').value.trim();
       const email = document.getElementById('noEmail').value.trim();
       const phone = document.getElementById('noPhone').value.trim();
