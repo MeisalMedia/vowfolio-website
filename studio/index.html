@@ -363,6 +363,8 @@
     let messageThreads = [];
     let payments = [];
     let lastMessageByThread = {};
+    let otherPartyByThread = {};
+    let crewProfilesById = {};
     let studioName = '';
     let studioSettings = null;
     let quillEditor = null;
@@ -414,14 +416,33 @@
       payments = pay.data || [];
 
       lastMessageByThread = {};
+      otherPartyByThread = {};
+      // Last crew-profiler så vi kan vise faktiske fotografnavn på crew-tråder
+      // selv før meldinger har kommet inn.
+      try {
+        const { data: profs } = await sb
+          .from('crew_profiles')
+          .select('user_id, display_name');
+        crewProfilesById = {};
+        for (const p of (profs || [])) {
+          if (p.user_id) crewProfilesById[p.user_id] = p;
+        }
+      } catch (_) { crewProfilesById = {}; }
       if (messageThreads.length > 0) {
         const threadIds = messageThreads.map(x => x.id);
         const { data: msgs } = await sb.from('messages')
-          .select('thread_id, sender_role, sender_id, created_at, body')
+          .select('thread_id, sender_role, sender_id, sender_name, created_at, body')
           .in('thread_id', threadIds)
           .order('created_at', { ascending: false });
         for (const m of (msgs || [])) {
           if (!lastMessageByThread[m.thread_id]) lastMessageByThread[m.thread_id] = m;
+          // Cache navnet til den ANDRE parten (ikke meg selv) per tråd —
+          // brukes til crew-tråder uten wedding_id, der vi ellers viste 'Crew'.
+          if (!otherPartyByThread[m.thread_id]
+              && m.sender_id !== currentUser?.id
+              && (m.sender_name || '').trim().length > 0) {
+            otherPartyByThread[m.thread_id] = m.sender_name.trim();
+          }
         }
       }
     }
@@ -1031,6 +1052,13 @@
         if (w) return w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
         return 'Kunde';
       }
+      // Crew-tråd: bruk navnet på den andre fotografen (fra siste melding
+      // de sendte), ikke generisk 'Crew'. Faller tilbake til crew_profiles
+      // hvis ingen meldinger ennå, og 'Crew' som siste utvei.
+      const fromMessages = otherPartyByThread[t.id];
+      if (fromMessages) return fromMessages;
+      const profile = crewProfilesById[t.photographer_id];
+      if (profile?.display_name) return profile.display_name;
       return 'Crew';
     }
     function threadSubtitle(t) {
@@ -1070,15 +1098,22 @@
           const sub = threadSubtitle(t);
           const preview = t.last_message_preview || 'Ingen meldinger enda';
           const time = relativeTime(t.last_message_at);
-          const unread = t.unread_count || 0;
+          const unreadCount = t.unread_count || 0;
+          // Konsistent med nav-badge: marker tråden som "venter på deg" hvis
+          // siste melding ikke er fra fotografen, selv om unread_count er 0
+          // (den kan være null før vi har eksplisitt unread-tracking på web).
+          const waiting = (typeof threadWaitingForYou === 'function') && threadWaitingForYou(t);
+          const isUnread = unreadCount > 0 || waiting;
           const initial = (name[0]||'?').toUpperCase();
-          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='var(--white)'">`;
-          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0">${initial}</div>`;
+          html += `<div onclick="navigate('conversation','${t.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 24px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.15s;${isUnread?'background:rgba(107,143,113,0.04);':''}" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='${isUnread?'rgba(107,143,113,0.04)':'var(--white)'}'">`;
+          html += `<div class="contact-avatar" style="width:44px;height:44px;font-size:16px;flex-shrink:0;position:relative">${initial}${isUnread?'<span style="position:absolute;top:-2px;right:-2px;width:12px;height:12px;border-radius:50%;background:var(--sage);border:2px solid var(--white)"></span>':''}</div>`;
           html += `<div style="flex:1;min-width:0">`;
-          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${unread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${unread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${unread?600:400}">${time}</div></div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:2px"><div style="font-weight:${isUnread?600:500};font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name)}</div><div style="font-size:11px;color:${isUnread?'var(--sage)':'#A09080'};flex-shrink:0;font-weight:${isUnread?600:400}">${time}</div></div>`;
           if (sub) html += `<div style="font-size:11px;color:#A09080;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(sub)}</div>`;
-          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${unread?'var(--espresso)':'#8A7D72'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
-          if (unread) html += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unread}</div>`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div style="font-size:13px;color:${isUnread?'var(--espresso)':'#8A7D72'};font-weight:${isUnread?500:400};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(preview)}</div>`;
+          if (unreadCount > 0) {
+            html += `<div style="background:var(--sage);color:var(--white);font-size:11px;font-weight:600;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 6px;flex-shrink:0">${unreadCount}</div>`;
+          }
           html += `</div></div></div>`;
         }
         html += `</div>`;
