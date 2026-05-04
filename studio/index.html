@@ -1447,7 +1447,7 @@
 
     // ── Meldinger split-panel ──
     function renderMeldinger(el) {
-      el.style.cssText = 'flex:1;display:flex;overflow:hidden;padding:0;';
+      el.style.cssText = 'flex:1;display:flex;flex-direction:row;overflow:hidden;padding:0;';
       if (messageThreads.length === 0) {
         el.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#A09080"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg><div style="font-size:15px;font-weight:600;color:var(--espresso)">Ingen meldinger enda</div><div style="font-size:13px">Meldinger synkroniseres fra appen</div></div>`;
         return;
