@@ -499,6 +499,24 @@
     </div>
   </div>
 
+  <!-- Møte modal -->
+  <div id="moteModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <h3 id="moteModalTitle" style="font-family:'Playfair Display',serif;font-size:20px">Legg til møtenotat</h3>
+        <button onclick="hideMoteModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <input type="hidden" id="moteId">
+      <div class="form-group"><label>Tittel *</label><input type="text" id="moteTitle" placeholder="f.eks. Første møte" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Dato</label><input type="date" id="moteDate" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)"></div>
+      <div class="form-group"><label>Notater</label><textarea id="moteNotes" rows="5" placeholder="Hva ble diskutert…" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn-outline" style="flex:1" onclick="hideMoteModal()">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="moteSaveBtn" onclick="saveMote()">Lagre</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Dagplan modal -->
   <div id="dagplanModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
@@ -1348,19 +1366,26 @@
       }
 
       // Møtenotater
-      if (meetings.length > 0) {
+      {
         html += `<div class="card">`;
-        html += sectionTitle('Møtenotater');
-        meetings.forEach((m, i) => {
-          const border = i < meetings.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:14px;margin-bottom:14px;' : '';
-          html += `<div style="${border}">`;
-          html += `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">`;
-          html += `<div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(m.title || 'Møte')}</div>`;
-          html += `<div style="font-size:11px;color:#A09080">${m.meeting_date ? df(m.meeting_date) : ''}</div>`;
-          html += `</div>`;
-          if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(m.notes)}</div>`;
-          html += `</div>`;
-        });
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Møtenotater').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showMoteModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
+        if (meetings.length === 0) {
+          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen møtenotater enda</div>`;
+        } else {
+          meetings.forEach((m, i) => {
+            const border = i < meetings.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:14px;margin-bottom:14px;' : '';
+            html += `<div style="${border}" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
+            html += `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px">`;
+            html += `<div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(m.title || 'Møte')}</div>`;
+            html += `<div style="display:flex;align-items:center;gap:8px"><div style="font-size:11px;color:#A09080">${m.meeting_date ? df(m.meeting_date) : ''}</div>`;
+            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;transition:opacity 0.15s">`;
+            html += `<button onclick="showMoteModal(${JSON.stringify(m)})" title="Rediger" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">✏️</button>`;
+            html += `<button onclick="deleteMote('${m.id}')" title="Slett" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button>`;
+            html += `</div></div></div>`;
+            if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(m.notes)}</div>`;
+            html += `</div>`;
+          });
+        }
         html += `</div>`;
       }
 
@@ -1431,6 +1456,39 @@
       html += `</div>`; // end right column
       html += `</div>`; // end grid
       el.innerHTML = html;
+    }
+
+    // ── Møtenotat modal ──────────────────────────────────────────
+    function showMoteModal(m) {
+      document.getElementById('moteId').value = m?.id || '';
+      document.getElementById('moteTitle').value = m?.title || '';
+      document.getElementById('moteDate').value = m?.meeting_date ? m.meeting_date.slice(0, 10) : '';
+      document.getElementById('moteNotes').value = m?.notes || '';
+      document.getElementById('moteModalTitle').textContent = m?.id ? 'Rediger møtenotat' : 'Legg til møtenotat';
+      document.getElementById('moteModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('moteTitle').focus(), 50);
+    }
+    function hideMoteModal() { document.getElementById('moteModal').style.display = 'none'; }
+    async function saveMote() {
+      const btn = document.getElementById('moteSaveBtn');
+      const title = document.getElementById('moteTitle').value.trim();
+      if (!title) { showToast('Tittel er påkrevd'); return; }
+      btn.disabled = true; btn.textContent = 'Lagrer…';
+      const id = document.getElementById('moteId').value;
+      const date = document.getElementById('moteDate').value || null;
+      const payload = { title, meeting_date: date, notes: document.getElementById('moteNotes').value.trim() || null, wedding_id: detailWeddingId, user_id: currentUser.id };
+      const { error } = id
+        ? await sb.from('wedding_meetings').update(payload).eq('id', id)
+        : await sb.from('wedding_meetings').insert(payload);
+      btn.disabled = false; btn.textContent = 'Lagre';
+      if (error) { showToast('Feil: ' + error.message); return; }
+      hideMoteModal();
+      renderOppdragInfoTab();
+    }
+    async function deleteMote(id) {
+      if (!confirm('Slett dette møtenotatet?')) return;
+      await sb.from('wedding_meetings').delete().eq('id', id);
+      renderOppdragInfoTab();
     }
 
     // ── Dagplan modal ────────────────────────────────────────────
