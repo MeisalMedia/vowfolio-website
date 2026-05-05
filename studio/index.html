@@ -393,7 +393,7 @@
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Gi tilbakemelding
         </div>
         <div class="nav-item" id="navSettings" onclick="navigate('settings')">
-          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Innstillinger
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profil
         </div>
       </div>
       <div class="sidebar-footer">
@@ -2668,7 +2668,7 @@
       const inp = (key, placeholder, type='text', extra='') => `<input type="${type}" value="${esc(settingsDraft[key]||'')}" oninput="settingsDraft['${key}']=this.value" placeholder="${placeholder}" style="width:100%;padding:8px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso);outline:none" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'" ${extra}>`;
 
       let html = `<div class="main-content" style="max-width:700px">`;
-      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:20px"><button class="btn-primary" onclick="saveStudioSettings()">Lagre innstillinger</button></div>`;
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:20px"><button class="btn-primary" onclick="saveStudioSettings()">Lagre profil</button></div>`;
 
       // ── Profil ──
       html += `<div class="settings-section"><h3>Profil</h3><div class="card" style="padding:0 20px">`;
@@ -2924,7 +2924,7 @@
         sb.from('crew_profiles').upsert(cpPayload, { onConflict: 'user_id' }),
       ]);
 
-      if (btn) { btn.disabled = false; btn.textContent = 'Lagre innstillinger'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Lagre profil'; }
       if (r1.error || r2.error) {
         const msg = (r1.error?.message || r2.error?.message || 'ukjent feil');
         showToast('Feil ved lagring: ' + msg);
