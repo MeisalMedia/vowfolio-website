@@ -1605,18 +1605,30 @@
 
     let _currentPortalUrl = '';
 
+    // Returnerer et stabilt portal-token for et oppdrag.
+    // Cacher i localStorage (som appen bruker UserDefaults) — oppretter bare én
+    // rad i document_share_links per oppdrag, aldri duplikater.
+    async function getOrCreatePortalToken(weddingId) {
+      const cacheKey = `vf_portal_token_${weddingId}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return cached;
+
+      const bytes = crypto.getRandomValues(new Uint8Array(6));
+      const rawToken = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+      const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawToken));
+      const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
+      const { error } = await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
+      if (error) throw error;
+      localStorage.setItem(cacheKey, rawToken);
+      return rawToken;
+    }
+
     async function openPortalLink(btn, weddingId, projectType) {
       btn.textContent = '…';
       btn.disabled = true;
       try {
-        const bytes = crypto.getRandomValues(new Uint8Array(6));
-        const rawToken = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-        const msgBuf = new TextEncoder().encode(rawToken);
-        const hashBuf = await crypto.subtle.digest('SHA-256', msgBuf);
-        const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
-        const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
-        const { error } = await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
-        if (error) throw error;
+        const rawToken = await getOrCreatePortalToken(weddingId);
         const prefix = (projectType === 'wedding' || !projectType) ? 'p' : 'ps';
         _currentPortalUrl = `https://vowfolio.com/${prefix}/${rawToken}`;
 
@@ -1665,13 +1677,8 @@
         const w = weddings.find(x => x.id === weddingId) || {};
         const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : (w.partner1 || '');
 
-        // Generer portal-lenke
-        const bytes = crypto.getRandomValues(new Uint8Array(6));
-        const rawToken = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
-        const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawToken));
-        const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
-        const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
-        await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
+        // Gjenbruk stabilt portal-token (caches i localStorage)
+        const rawToken = await getOrCreatePortalToken(weddingId);
         const prefix = (projectType === 'wedding' || !projectType) ? 'p' : 'ps';
         _intakePortalUrl = `https://vowfolio.com/${prefix}/${rawToken}`;
 
