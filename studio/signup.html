@@ -175,7 +175,7 @@
           display_name: fullName || null,
           studio_name: studioName,
           role: 'photographer',
-          is_discoverable: false,
+          is_discoverable: true,
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' }),
       ]);
