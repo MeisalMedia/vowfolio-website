@@ -372,6 +372,9 @@
         <div class="nav-item" id="navKontakter" onclick="navigate('kontakter')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.5-3 3-4.5 5.5-4.5S14 16 14.5 19"/><circle cx="16.5" cy="9.5" r="2.5"/><path d="M14.5 14.5c.3-.2.9-.3 2-.3 2 0 4 1.2 4.5 3.8"/></svg> Kontakter
         </div>
+        <div class="nav-item" id="navCrew" onclick="navigate('crew')">
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg> Crew
+        </div>
         <div class="nav-item" id="navShotliste" onclick="navigate('shotliste')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg> Shotlister
         </div>
@@ -799,6 +802,7 @@
         editTaskTemplate: 'navMaler', newTaskTemplate: 'navMaler',
         settings: 'navSettings',
         feedback: 'navFeedback',
+        crew: 'navCrew', crewProfile: 'navCrew',
       };
       if (['kontrakter','maler','createDoc','viewDoc','newTemplate','editTemplate','editShotTemplate','newShotTemplate','editTaskTemplate','newTaskTemplate'].includes(view)) expandDokumenter();
       document.getElementById(navMap[view] || 'navHjem')?.classList.add('active');
@@ -824,6 +828,7 @@
         case 'newShotTemplate': renderShotTemplateEditor(main, null); break;
         case 'editTaskTemplate': renderTaskTemplateEditor(main, params); break;
         case 'newTaskTemplate': renderTaskTemplateEditor(main, null); break;
+        case 'crew': renderCrew(main); break;
         case 'feedback': renderFeedback(main); break;
       }
     }
@@ -2550,6 +2555,374 @@
       html += `</div>`;
       el.innerHTML = html;
     }
+
+    // ── Crew ──────────────────────────────────────────────────────────────────
+
+    let _crewFavorites = new Set();   // Set<user_id string>
+    let _crewAllProfiles = [];        // All discoverable profiles (loaded once)
+    let _crewMode = 'favoritter';     // 'favoritter' | 'finn'
+    let _crewRoleFilter = 'alle';     // 'alle' | 'photographer' | 'videographer'
+    let _crewSearchQuery = '';
+    let _crewSelectedId = null;
+    let _crewDetailMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
+    let _crewBusyDates = [];          // busy dates for currently viewed profile
+    let _myBusyDates = [];            // own busy dates
+    let _myCalMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+    async function renderCrew(el) {
+      el.style.cssText = 'display:flex;height:100%;overflow:hidden;padding:0';
+      el.innerHTML = `
+        <div style="width:320px;flex-shrink:0;border-right:1px solid var(--sand);display:flex;flex-direction:column;background:var(--white)">
+          <div style="padding:14px 12px 0">
+            <input id="crewSearchInput" placeholder="Søk etter navn eller sted…" oninput="_crewSearchQuery=this.value;renderCrewList()"
+              style="width:100%;padding:8px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box;outline:none">
+          </div>
+          <div style="display:flex;gap:6px;padding:10px 12px 0">
+            ${[['alle','Alle'],['photographer','Fotograf'],['videographer','Videograf']].map(([v,l]) =>
+              `<button onclick="crewSetRole('${v}')" id="crewRole_${v}" style="padding:5px 12px;border-radius:16px;font-size:12px;font-family:inherit;cursor:pointer;border:1.5px solid var(--sand);background:var(--white);color:var(--espresso)">${l}</button>`
+            ).join('')}
+          </div>
+          <div style="display:flex;border-bottom:1px solid var(--sand);margin-top:12px">
+            <button onclick="crewSetMode('favoritter')" id="crewTabFav" style="flex:1;padding:9px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid var(--espresso);background:none;color:var(--espresso)">Favoritter</button>
+            <button onclick="crewSetMode('finn')" id="crewTabFinn" style="flex:1;padding:9px;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;color:var(--taupe)">Finn crew</button>
+          </div>
+          <div id="crewList" style="flex:1;overflow-y:auto;padding:8px 0"></div>
+        </div>
+        <div id="crewDetail" style="flex:1;overflow-y:auto;background:var(--cream)"></div>`;
+
+      crewSetRole('alle', false);
+      await loadCrewFavorites();
+      if (_crewAllProfiles.length === 0) {
+        const { data } = await sb.from('crew_profiles').select('*').eq('is_discoverable', true);
+        _crewAllProfiles = data || [];
+      }
+      renderCrewList();
+      // Load own busy dates for own profile link
+      const { data: myBusy } = await sb.from('crew_busy_dates').select('busy_date,source').eq('user_id', currentUser.id);
+      _myBusyDates = myBusy || [];
+    }
+
+    async function loadCrewFavorites() {
+      const { data } = await sb.from('crew_favorites').select('favorited_user_id').eq('user_id', currentUser.id);
+      _crewFavorites = new Set((data || []).map(r => r.favorited_user_id));
+    }
+
+    window.crewSetMode = function(mode) {
+      _crewMode = mode;
+      const fav = document.getElementById('crewTabFav');
+      const finn = document.getElementById('crewTabFinn');
+      if (fav) { fav.style.borderBottomColor = mode === 'favoritter' ? 'var(--espresso)' : 'transparent'; fav.style.fontWeight = mode === 'favoritter' ? '600' : '500'; fav.style.color = mode === 'favoritter' ? 'var(--espresso)' : 'var(--taupe)'; }
+      if (finn) { finn.style.borderBottomColor = mode === 'finn' ? 'var(--espresso)' : 'transparent'; finn.style.fontWeight = mode === 'finn' ? '600' : '500'; finn.style.color = mode === 'finn' ? 'var(--espresso)' : 'var(--taupe)'; }
+      renderCrewList();
+    };
+
+    window.crewSetRole = function(role, refresh = true) {
+      _crewRoleFilter = role;
+      ['alle','photographer','videographer'].forEach(v => {
+        const btn = document.getElementById('crewRole_' + v);
+        if (!btn) return;
+        const active = v === role;
+        btn.style.background = active ? 'var(--espresso)' : 'var(--white)';
+        btn.style.color = active ? 'var(--white)' : 'var(--espresso)';
+        btn.style.borderColor = active ? 'var(--espresso)' : 'var(--sand)';
+        btn.style.fontWeight = active ? '600' : '400';
+      });
+      if (refresh) renderCrewList();
+    };
+
+    function crewMatchesRole(p) {
+      if (_crewRoleFilter === 'alle') return true;
+      if (_crewRoleFilter === 'photographer') return p.role === 'photographer' || p.role === 'photo_and_video';
+      if (_crewRoleFilter === 'videographer') return p.role === 'videographer' || p.role === 'photo_and_video';
+      return true;
+    }
+
+    function crewRoleLabel(role) {
+      return role === 'photographer' ? 'Fotograf' : role === 'videographer' ? 'Videograf' : 'Photo & Video';
+    }
+
+    function renderCrewList() {
+      const el = document.getElementById('crewList');
+      if (!el) return;
+      const q = (_crewSearchQuery || '').toLowerCase().trim();
+      let profiles = _crewAllProfiles.filter(p => p.user_id !== currentUser.id);
+
+      if (_crewMode === 'favoritter') {
+        profiles = profiles.filter(p => _crewFavorites.has(p.user_id));
+      }
+      if (_crewRoleFilter !== 'alle') profiles = profiles.filter(crewMatchesRole);
+      if (q) profiles = profiles.filter(p =>
+        (p.display_name || '').toLowerCase().includes(q) ||
+        (p.studio_name || '').toLowerCase().includes(q) ||
+        (p.base_location_name || '').toLowerCase().includes(q) ||
+        (p.base_city || '').toLowerCase().includes(q)
+      );
+
+      if (profiles.length === 0) {
+        el.innerHTML = `<div style="padding:32px 16px;text-align:center;color:var(--taupe);font-size:13px">${_crewMode === 'favoritter' && !q ? 'Ingen favoritter ennå.<br>Bruk "Finn crew" for å finne fotografer.' : 'Ingen treff'}</div>`;
+        return;
+      }
+
+      el.innerHTML = profiles.map(p => {
+        const initials = (p.display_name || '').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() || '?';
+        const isFav = _crewFavorites.has(p.user_id);
+        const isSelected = p.user_id === _crewSelectedId;
+        return `<div onclick="openCrewProfile('${p.user_id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;background:${isSelected ? 'var(--cream)' : 'transparent'};border-left:3px solid ${isSelected ? 'var(--espresso)' : 'transparent'};transition:background 0.1s">
+          ${p.avatar_url ? `<img src="${esc(p.avatar_url)}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div style="width:40px;height:40px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--taupe);flex-shrink:0">${initials}</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:600;color:var(--espresso);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.display_name || '—')}</div>
+            <div style="font-size:12px;color:var(--taupe);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.studio_name || '')}${p.base_city ? (p.studio_name ? ' · ' : '') + esc(p.base_city) : ''}</div>
+          </div>
+          ${isFav ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--taupe)" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>` : ''}
+        </div>`;
+      }).join('');
+    }
+
+    window.openCrewProfile = async function(userId) {
+      _crewSelectedId = userId;
+      renderCrewList(); // update highlight
+      const detail = document.getElementById('crewDetail');
+      if (!detail) return;
+      detail.innerHTML = `<div style="padding:48px;text-align:center;color:var(--taupe)">Laster…</div>`;
+
+      const [profRes, busyRes] = await Promise.all([
+        sb.from('crew_profiles').select('*').eq('user_id', userId).limit(1),
+        sb.from('crew_busy_dates').select('busy_date,source').eq('user_id', userId),
+      ]);
+      const p = profRes.data?.[0];
+      if (!p) { detail.innerHTML = `<div style="padding:48px;text-align:center;color:var(--taupe)">Profil ikke funnet</div>`; return; }
+      _crewBusyDates = busyRes.data || [];
+      _crewDetailMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
+
+      const isOwn = userId === currentUser.id;
+      const isFav = _crewFavorites.has(userId);
+
+      // Load rating + notes (only for other profiles)
+      let myRating = 0, myNote = '', workedTogether = false;
+      if (!isOwn) {
+        const [ratingRes, noteRes] = await Promise.all([
+          sb.from('crew_ratings').select('rating,note').eq('user_id', currentUser.id).eq('rated_user_id', userId).limit(1),
+          sb.from('crew_notes').select('worked_together').eq('user_id', currentUser.id).eq('crew_user_id', userId).limit(1),
+        ]);
+        myRating = ratingRes.data?.[0]?.rating || 0;
+        myNote = ratingRes.data?.[0]?.note || '';
+        workedTogether = noteRes.data?.[0]?.worked_together || false;
+      }
+
+      const roleLabel = crewRoleLabel(p.role || 'photographer');
+      const initials = (p.display_name || '').split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase() || '?';
+      const radiusLabel = !p.travel_radius_km || p.travel_radius_km >= 9999 ? 'Anywhere' : p.travel_radius_km + ' km';
+
+      let html = `<div style="max-width:620px;margin:0 auto;padding:32px 24px">`;
+
+      // Profile card
+      html += `<div class="card" style="padding:28px;text-align:center;position:relative">`;
+      // Favorite + own profile buttons
+      html += `<div style="position:absolute;top:16px;right:16px;display:flex;gap:8px">`;
+      if (!isOwn) html += `<button onclick="crewToggleFav('${userId}')" id="crewFavBtn" title="${isFav ? 'Fjern favoritt' : 'Legg til favoritt'}" style="width:36px;height:36px;border-radius:50%;border:1.5px solid var(--sand);background:${isFav ? 'var(--espresso)' : 'var(--white)'};cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? 'var(--white)' : 'none'}" stroke="${isFav ? 'var(--white)' : 'var(--taupe)'}" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>`;
+      html += `</div>`;
+
+      html += p.avatar_url ? `<img src="${esc(p.avatar_url)}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;margin-bottom:14px">` : `<div style="width:88px;height:88px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--taupe);margin:0 auto 14px">${initials}</div>`;
+      html += `<h2 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--espresso);margin:0 0 4px">${esc(p.display_name || '—')}</h2>`;
+      if (p.studio_name) html += `<div style="font-size:14px;color:var(--taupe);margin-bottom:12px">${esc(p.studio_name)}</div>`;
+      html += `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:12px;border:1px solid var(--sand);font-size:12px;color:var(--taupe);margin-bottom:14px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ${roleLabel}</span>`;
+
+      if (p.base_location_name || p.base_city) {
+        html += `<div style="display:flex;justify-content:center;gap:18px;font-size:13px;color:var(--taupe);margin-bottom:14px">`;
+        if (p.base_location_name || p.base_city) html += `<span>📍 ${esc(p.base_location_name || p.base_city)}</span>`;
+        html += `<span>🚗 ${radiusLabel}</span>`;
+        html += `</div>`;
+      }
+
+      if (p.bio) {
+        html += `<p id="crewBio" style="font-size:14px;color:var(--espresso);line-height:1.65;margin:0 0 18px;max-height:72px;overflow:hidden;position:relative">${esc(p.bio)}</p>`;
+        html += `<button onclick="document.getElementById('crewBio').style.maxHeight='none';this.style.display='none'" style="font-size:12px;color:var(--taupe);background:none;border:none;cursor:pointer;margin-bottom:18px">Les mer ▾</button>`;
+      }
+
+      // Contact icons
+      const links = [
+        p.instagram ? { icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>`, href: `https://instagram.com/${p.instagram}`, color: '#e1306c' } : null,
+        p.contact_email ? { icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`, href: `mailto:${p.contact_email}`, color: '#5a8a70' } : null,
+        p.phone ? { icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 6.29 6.29l1.62-1.62a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`, href: `tel:${p.phone}`, color: '#7a9a80' } : null,
+        p.website ? { icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`, href: p.website, color: '#8a9aaa' } : null,
+      ].filter(Boolean);
+
+      if (links.length) {
+        html += `<div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px">`;
+        links.forEach(l => { html += `<a href="${esc(l.href)}" target="_blank" style="width:44px;height:44px;border-radius:50%;background:${l.color}22;border:1.5px solid ${l.color}33;display:flex;align-items:center;justify-content:center;color:${l.color};text-decoration:none">${l.icon}</a>`; });
+        html += `</div>`;
+      }
+
+      if (!isOwn) {
+        html += `<button onclick="crewSendMessage('${userId}')" style="width:100%;padding:13px;border-radius:10px;border:1.5px solid var(--sand);background:var(--white);font-size:14px;font-weight:600;color:var(--espresso);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Send melding</button>`;
+      }
+      html += `</div>`; // end profile card
+
+      // Availability calendar
+      html += `<div style="margin-top:24px">`;
+      html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;color:var(--taupe);margin-bottom:12px">${isOwn ? 'MIN TILGJENGELIGHET' : 'TILGJENGELIGHET'}</div>`;
+      html += `<div class="card" style="padding:20px" id="crewCalendarCard">`;
+      html += crewCalendarHtml(userId, isOwn);
+      html += `</div></div>`;
+
+      // My notes (not for own profile)
+      if (!isOwn) {
+        html += `<div style="margin-top:24px">`;
+        html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.8px;color:var(--taupe);margin-bottom:12px">DINE NOTATER <span style="font-size:10px;font-weight:400;color:#B0A090;letter-spacing:0">(bare synlig for deg)</span></div>`;
+        html += `<div class="card" style="padding:20px">`;
+        // Stars
+        html += `<div style="display:flex;gap:6px;margin-bottom:16px" id="crewStars">`;
+        for (let i = 1; i <= 5; i++) {
+          html += `<svg onclick="crewSetRating(${i},'${userId}')" width="28" height="28" viewBox="0 0 24 24" fill="${i <= myRating ? '#C4A882' : 'none'}" stroke="#C4A882" stroke-width="1.5" style="cursor:pointer" id="crewStar_${i}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        }
+        html += `</div>`;
+        // Worked together
+        html += `<label style="display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:14px;color:var(--espresso);cursor:pointer"><input type="checkbox" id="crewWorked" ${workedTogether ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--sage)"> Jobbet sammen</label>`;
+        // Note
+        html += `<textarea id="crewNote" rows="3" placeholder="Legg til et privat notat…" style="width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;color:var(--espresso)">${esc(myNote)}</textarea>`;
+        html += `<button onclick="crewSaveNotes('${userId}')" style="width:100%;margin-top:12px;padding:12px;border-radius:10px;border:none;background:var(--sage);color:var(--white);font-size:14px;font-weight:600;cursor:pointer;font-family:inherit">Lagre notater</button>`;
+        html += `</div></div>`;
+        // Store rating in a hidden var
+        window._crewEditRating = myRating;
+      }
+
+      html += `</div>`; // main container
+      detail.innerHTML = html;
+    };
+
+    window._crewEditRating = 0;
+    window.crewSetRating = function(n, userId) {
+      window._crewEditRating = n;
+      for (let i = 1; i <= 5; i++) {
+        const s = document.getElementById('crewStar_' + i);
+        if (s) s.setAttribute('fill', i <= n ? '#C4A882' : 'none');
+      }
+    };
+
+    function crewCalendarHtml(userId, editable) {
+      const { year, month } = userId === currentUser.id ? _myCalMonth : _crewDetailMonth;
+      const busyDates = userId === currentUser.id ? _myBusyDates : _crewBusyDates;
+      const busy = {};
+      (busyDates || []).forEach(r => { busy[r.busy_date] = r.source; });
+
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startDow = (firstDay.getDay() + 6) % 7; // Mon=0
+      const today = new Date(); today.setHours(0,0,0,0);
+      const todayStr = crewDateStr(today);
+
+      const months = ['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
+      const days = ['M','T','O','T','F','L','S'];
+
+      const prevFn = editable ? `crewCalNav('${userId}', ${year}, ${month - 1})` : `crewCalNav('${userId}', ${year}, ${month - 1})`;
+      const nextFn = `crewCalNav('${userId}', ${year}, ${month + 1})`;
+
+      let h = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">`;
+      h += `<button onclick="${prevFn}" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--taupe);padding:4px 8px">‹</button>`;
+      h += `<span style="font-size:15px;font-weight:600;color:var(--espresso)">${months[month]} ${year}</span>`;
+      h += `<button onclick="${nextFn}" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--taupe);padding:4px 8px">›</button>`;
+      h += `</div>`;
+
+      h += `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">`;
+      days.forEach(d => { h += `<div style="font-size:11px;font-weight:600;color:var(--taupe);padding-bottom:6px">${d}</div>`; });
+
+      for (let i = 0; i < startDow; i++) h += `<div></div>`;
+
+      for (let d = 1; d <= lastDay.getDate(); d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const source = busy[dateStr];
+        const isBooked = source === 'wedding';
+        const isHeld = source === 'manual';
+        const isToday = dateStr === todayStr;
+
+        let bg = 'transparent', color = 'var(--espresso)', border = 'none', fw = '400';
+        if (isBooked) { bg = '#6B8F7122'; color = '#6B8F71'; border = '1.5px solid #6B8F7144'; }
+        else if (isHeld) { bg = '#E8956022'; color = '#E89560'; border = '1.5px solid #E8956044'; }
+        if (isToday) { bg = 'var(--espresso)'; color = 'var(--white)'; border = 'none'; fw = '700'; }
+
+        const clickFn = editable && !isBooked ? `crewToggleBusy('${userId}','${dateStr}',${isHeld})` : '';
+        h += `<div onclick="${clickFn}" style="aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:50%;background:${bg};color:${color};border:${border};font-size:13px;font-weight:${fw};${editable && !isBooked ? 'cursor:pointer' : ''}">${d}</div>`;
+      }
+      h += `</div>`;
+
+      // Legend
+      h += `<div style="display:flex;gap:16px;margin-top:14px;font-size:12px;color:var(--taupe)">`;
+      h += `<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6B8F71;margin-right:4px"></span>Bestilt</span>`;
+      h += `<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#E89560;margin-right:4px"></span>Holdt</span>`;
+      if (editable) h += `<span style="margin-left:auto;color:#B0A090">Klikk for å holde/frigi</span>`;
+      h += `</div>`;
+
+      return h;
+    }
+
+    function crewDateStr(d) {
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    window.crewCalNav = function(userId, year, month) {
+      if (month < 0) { year--; month = 11; }
+      if (month > 11) { year++; month = 0; }
+      if (userId === currentUser.id) _myCalMonth = { year, month };
+      else _crewDetailMonth = { year, month };
+      const card = document.getElementById('crewCalendarCard');
+      if (card) card.innerHTML = crewCalendarHtml(userId, userId === currentUser.id);
+    };
+
+    window.crewToggleBusy = async function(userId, dateStr, isHeld) {
+      if (userId !== currentUser.id) return;
+      if (isHeld) {
+        await sb.from('crew_busy_dates').delete().eq('user_id', userId).eq('busy_date', dateStr).eq('source', 'manual');
+        _myBusyDates = _myBusyDates.filter(r => r.busy_date !== dateStr);
+      } else {
+        await sb.from('crew_busy_dates').insert({ user_id: userId, busy_date: dateStr, source: 'manual' });
+        _myBusyDates.push({ busy_date: dateStr, source: 'manual' });
+      }
+      const card = document.getElementById('crewCalendarCard');
+      if (card) card.innerHTML = crewCalendarHtml(userId, true);
+    };
+
+    window.crewToggleFav = async function(userId) {
+      const isFav = _crewFavorites.has(userId);
+      const btn = document.getElementById('crewFavBtn');
+      if (isFav) {
+        _crewFavorites.delete(userId);
+        await sb.from('crew_favorites').delete().eq('user_id', currentUser.id).eq('favorited_user_id', userId);
+      } else {
+        _crewFavorites.add(userId);
+        await sb.from('crew_favorites').insert({ user_id: currentUser.id, favorited_user_id: userId });
+      }
+      if (btn) {
+        const nowFav = _crewFavorites.has(userId);
+        btn.style.background = nowFav ? 'var(--espresso)' : 'var(--white)';
+        btn.querySelector('svg').setAttribute('fill', nowFav ? 'var(--white)' : 'none');
+        btn.querySelector('svg').setAttribute('stroke', nowFav ? 'var(--white)' : 'var(--taupe)');
+      }
+      renderCrewList();
+    };
+
+    window.crewSaveNotes = async function(userId) {
+      const rating = window._crewEditRating || 0;
+      const note = document.getElementById('crewNote')?.value.trim() || '';
+      const worked = document.getElementById('crewWorked')?.checked || false;
+      const iso = new Date().toISOString();
+
+      await Promise.all([
+        rating > 0 || note
+          ? sb.from('crew_ratings').upsert({ user_id: currentUser.id, rated_user_id: userId, rating: Math.max(rating, 1), note, updated_at: iso }, { onConflict: 'user_id,rated_user_id' })
+          : Promise.resolve(),
+        sb.from('crew_notes').upsert({ user_id: currentUser.id, crew_user_id: userId, worked_together: worked, updated_at: iso }, { onConflict: 'user_id,crew_user_id' }),
+      ]);
+      showToast('Notater lagret');
+    };
+
+    window.crewSendMessage = async function(userId) {
+      // Find or create a crew thread with this user
+      const existing = messageThreads.find(t => t.crew_user_id === userId || (t.participants && t.participants.includes(userId)));
+      if (existing) { navigate('conversation', existing.id); return; }
+      // Create a new crew thread
+      const { data: thread } = await sb.from('message_threads').insert({ photographer_id: currentUser.id, crew_user_id: userId, last_message_at: new Date().toISOString() }).select().limit(1).single();
+      if (thread) { messageThreads.unshift(thread); navigate('conversation', thread.id); }
+    };
 
     function renderFeedback(el) {
       el.innerHTML = `
