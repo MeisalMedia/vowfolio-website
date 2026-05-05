@@ -389,6 +389,9 @@
             <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="4" y1="9" x2="20" y2="9"/><line x1="9" y1="9" x2="9" y2="20"/></svg> Maler
           </div>
         </div>
+        <div class="nav-item" id="navFeedback" onclick="navigate('feedback')">
+          <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Gi tilbakemelding
+        </div>
         <div class="nav-item" id="navSettings" onclick="navigate('settings')">
           <svg class="icon" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Innstillinger
         </div>
@@ -795,6 +798,7 @@
         editShotTemplate: 'navMaler', newShotTemplate: 'navMaler',
         editTaskTemplate: 'navMaler', newTaskTemplate: 'navMaler',
         settings: 'navSettings',
+        feedback: 'navFeedback',
       };
       if (['kontrakter','maler','createDoc','viewDoc','newTemplate','editTemplate','editShotTemplate','newShotTemplate','editTaskTemplate','newTaskTemplate'].includes(view)) expandDokumenter();
       document.getElementById(navMap[view] || 'navHjem')?.classList.add('active');
@@ -820,6 +824,7 @@
         case 'newShotTemplate': renderShotTemplateEditor(main, null); break;
         case 'editTaskTemplate': renderTaskTemplateEditor(main, params); break;
         case 'newTaskTemplate': renderTaskTemplateEditor(main, null); break;
+        case 'feedback': renderFeedback(main); break;
       }
     }
 
@@ -2546,6 +2551,74 @@
       el.innerHTML = html;
     }
 
+    function renderFeedback(el) {
+      el.innerHTML = `
+        <div style="max-width:580px;margin:40px auto;padding:0 24px">
+          <h2 style="font-family:'Playfair Display',serif;font-size:22px;color:var(--espresso);margin:0 0 6px">Gi tilbakemelding</h2>
+          <p style="font-size:14px;color:var(--taupe);margin:0 0 28px;line-height:1.6">Har du forslag til forbedringer, nye funksjoner eller noe som ikke fungerer som det skal? Vi setter stor pris på tilbakemeldinger!</p>
+          <div class="card" style="padding:24px">
+            <div class="form-group" style="margin-bottom:18px">
+              <label style="font-size:13px;font-weight:600;color:var(--espresso);display:block;margin-bottom:6px">Type tilbakemelding</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap" id="fbTypeGroup">
+                ${[['forslag','💡 Forslag'],['feil','🐛 Feil / bug'],['ros','👏 Ros'],['annet','💬 Annet']].map(([v,l],i) =>
+                  `<button onclick="selectFbType('${v}')" id="fbType_${v}" style="padding:7px 16px;border-radius:20px;border:${i===0?'2px solid var(--espresso)':'1.5px solid var(--sand)'};background:${i===0?'var(--espresso)':'var(--white)'};color:${i===0?'var(--white)':'var(--espresso)'};font-size:13px;font-weight:${i===0?600:400};cursor:pointer;font-family:inherit">${l}</button>`
+                ).join('')}
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:18px">
+              <label style="font-size:13px;font-weight:600;color:var(--espresso);display:block;margin-bottom:6px">Melding</label>
+              <textarea id="fbMessage" rows="6" placeholder="Beskriv gjerne så detaljert som mulig…" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;box-sizing:border-box;color:var(--espresso)"></textarea>
+            </div>
+            <div style="display:flex;justify-content:flex-end">
+              <button id="fbSendBtn" class="btn-primary" onclick="sendFeedback()">Send tilbakemelding</button>
+            </div>
+          </div>
+        </div>`;
+      window._fbType = 'forslag';
+    }
+
+    window.selectFbType = function(v) {
+      window._fbType = v;
+      ['forslag','feil','ros','annet'].forEach(t => {
+        const btn = document.getElementById('fbType_' + t);
+        if (!btn) return;
+        const active = t === v;
+        btn.style.border = active ? '2px solid var(--espresso)' : '1.5px solid var(--sand)';
+        btn.style.background = active ? 'var(--espresso)' : 'var(--white)';
+        btn.style.color = active ? 'var(--white)' : 'var(--espresso)';
+        btn.style.fontWeight = active ? '600' : '400';
+      });
+    };
+
+    window.sendFeedback = async function() {
+      const message = document.getElementById('fbMessage')?.value.trim();
+      if (!message) { showToast('Skriv en melding først'); return; }
+      const btn = document.getElementById('fbSendBtn');
+      btn.disabled = true; btn.textContent = 'Sender…';
+      const type = window._fbType || 'annet';
+      const typeLabels = { forslag: '💡 Forslag', feil: '🐛 Feil / bug', ros: '👏 Ros', annet: '💬 Annet' };
+      const from = currentUser?.email || 'ukjent';
+      const { data: { session } } = await sb.auth.getSession();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            to: 'hello@vowfolio.no',
+            subject: `[Studio] ${typeLabels[type]} fra ${from}`,
+            html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 8px">Studio-tilbakemelding</h2><div style="font-size:12px;color:#A09080;margin-bottom:20px">${typeLabels[type]} · ${from}</div><div style="font-size:15px;color:#3D3229;line-height:1.7;white-space:pre-wrap">${message.replace(/</g,'&lt;')}</div></div></div>`,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Takk! Tilbakemeldingen er sendt.');
+        document.getElementById('fbMessage').value = '';
+      } catch(e) {
+        showToast('Kunne ikke sende: ' + (e.message || e));
+      } finally {
+        btn.disabled = false; btn.textContent = 'Send tilbakemelding';
+      }
+    };
+
     let settingsDraft = null;
 
     function renderSettings(el) {
@@ -2594,9 +2667,9 @@
       // Avatar
       const av = settingsDraft.avatar_url;
       html += `<div style="display:flex;flex-direction:column;align-items:center;padding:24px 0 16px;border-bottom:1px solid var(--sand)">`;
-      html += av ? `<img src="${esc(av)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;color:#A09080">👤</div>`;
-      html += `<div style="font-size:13px;color:#A09080;margin-bottom:8px">Profilbilde-URL</div>`;
-      html += `<input type="url" value="${esc(av)}" oninput="settingsDraft.avatar_url=this.value" placeholder="https://..." style="width:100%;max-width:320px;padding:7px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;text-align:center;outline:none">`;
+      html += `<div id="avatarPreview">` + (av ? `<img src="${esc(av)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;color:#A09080">👤</div>`) + `</div>`;
+      html += `<label id="avatarUploadLabel" style="display:inline-flex;align-items:center;gap:7px;padding:7px 16px;border-radius:8px;border:1.5px solid var(--sand);background:var(--cream);cursor:pointer;font-size:13px;font-weight:600;color:var(--taupe);margin-top:4px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Last opp bilde<input type="file" accept="image/*" onchange="uploadAvatar(this)" style="display:none"></label>`;
+      html += `<div style="font-size:11px;color:#A09080;margin-top:6px">Max 200×200 px · JPEG · 80 KB</div>`;
       html += `</div>`;
       html += row('Navn', inp('display_name', 'Fullt navn'));
       html += row('Studio', inp('crew_studio_name', 'Studio-navn'));
@@ -2686,6 +2759,66 @@
 
       html += `</div>`;
       el.innerHTML = html;
+    }
+
+    async function uploadAvatar(input) {
+      const file = input.files?.[0];
+      if (!file || !currentUser) return;
+      const label = document.getElementById('avatarUploadLabel');
+      if (label) { label.style.opacity = '0.5'; label.style.pointerEvents = 'none'; }
+
+      // Compress: resize to max 200×200, JPEG, target ≤ 80 KB
+      const blob = await new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const MAX = 200, MAX_BYTES = 80_000;
+          const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+          const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          for (const q of [0.6, 0.5, 0.4, 0.3, 0.2]) {
+            canvas.toBlob(b => { if (b && (b.size <= MAX_BYTES || q === 0.2)) resolve(b); }, 'image/jpeg', q);
+            // Break after first successful attempt inside the loop via early resolve
+            // (toBlob is async so we try sequentially below instead)
+          }
+          // Sequential fallback using canvas.toDataURL
+          let chosen = null;
+          for (const q of [0.6, 0.5, 0.4, 0.3, 0.2]) {
+            const dataUrl = canvas.toDataURL('image/jpeg', q);
+            const bytes = Math.round((dataUrl.length - 'data:image/jpeg;base64,'.length) * 3 / 4);
+            if (bytes <= MAX_BYTES || q === 0.2) { chosen = dataUrl; break; }
+          }
+          // Convert dataUrl to blob
+          const arr = chosen.split(','), mime = arr[0].match(/:(.*?);/)[1];
+          const bstr = atob(arr[1]); let n = bstr.length;
+          const u8 = new Uint8Array(n); while (n--) u8[n] = bstr.charCodeAt(n);
+          resolve(new Blob([u8], { type: mime }));
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+
+      const path = `${currentUser.id}/avatar.jpg`;
+      const { error } = await sb.storage.from('crew-avatars').upload(path, blob, { contentType: 'image/jpeg', upsert: true });
+      if (label) { label.style.opacity = ''; label.style.pointerEvents = ''; }
+      if (error) { showToast('Feil ved opplastning'); return; }
+
+      const { data: urlData } = sb.storage.from('crew-avatars').getPublicUrl(path);
+      const url = urlData.publicUrl + '?t=' + Date.now();
+      settingsDraft.avatar_url = url;
+
+      // Update preview
+      const preview = document.getElementById('avatarPreview');
+      if (preview) {
+        preview.style.background = 'none';
+        preview.innerHTML = `<img src="${url}" style="width:80px;height:80px;border-radius:50%;object-fit:cover">`;
+      }
+
+      // Save immediately to crew_profiles
+      await sb.from('crew_profiles').upsert({ user_id: currentUser.id, avatar_url: url, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (crewProfilesById[currentUser.id]) crewProfilesById[currentUser.id].avatar_url = url;
+      showToast('Profilbilde lastet opp · ' + Math.round(blob.size / 1024) + ' KB');
     }
 
     async function uploadLogo(input) {
