@@ -420,45 +420,8 @@
 
   <!-- Nytt oppdrag modal -->
   <div id="nyttOppdragModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
-    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-        <h3 style="font-family:'Playfair Display',serif;font-size:20px">Nytt oppdrag</h3>
-        <button onclick="hideNyttOppdragModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Partner 1 *</label><input type="text" id="noP1" placeholder="Fornavn Etternavn" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-        <div class="form-group"><label>Partner 2</label><input type="text" id="noP2" placeholder="Fornavn Etternavn" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      </div>
-      <div class="form-group"><label>E-post</label><input type="email" id="noEmail" placeholder="epost@eksempel.no" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      <div class="form-group"><label>Telefon</label><input type="tel" id="noPhone" placeholder="+47 000 00 000" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Bryllupsdato</label><input type="date" id="noDate" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)"></div>
-        <div class="form-group"><label>Kontraktsverdi</label><input type="number" id="noValue" placeholder="0" min="0" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      </div>
-      <div class="form-group"><label>Lokale</label><input type="text" id="noVenue" placeholder="Lokale" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div class="form-group"><label>Prosjekttype</label>
-          <select id="noType" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)">
-            <option value="wedding">Bryllup</option>
-            <option value="couple">Par</option>
-            <option value="family">Familie</option>
-            <option value="portrait">Portrett</option>
-            <option value="commercial">Kommersielt</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Status</label>
-          <select id="noStatus" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)">
-            <option value="inquiry">Forespørsel</option>
-            <option value="booked">Booket</option>
-            <option value="active">Aktiv</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group"><label>Kilde</label><input type="text" id="noSource" placeholder="f.eks. Instagram, Referral" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
-      <div style="display:flex;gap:10px;margin-top:8px">
-        <button class="btn-outline" style="flex:1" onclick="hideNyttOppdragModal()">Avbryt</button>
-        <button class="btn-primary" style="flex:1" onclick="saveNyttOppdrag()">Opprett oppdrag</button>
-      </div>
+    <div style="background:var(--white);border-radius:16px;max-width:520px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div id="nyttOppdragContent" style="overflow-y:auto;padding:32px;flex:1"></div>
     </div>
   </div>
 
@@ -4046,62 +4009,210 @@
     }
 
     // ── Nytt oppdrag modal ──
+    let _noSelectedContact = null;  // { id, primary_name, partner_name, email, phone } or null (=ny)
+    let _noIsNew = false;           // true = brukeren vil opprette ny kontakt
+
     function showNyttOppdragModal() {
-      const m = document.getElementById('nyttOppdragModal');
-      m.style.display = 'flex';
-      ['noP1','noP2','noEmail','noPhone','noDate','noValue','noVenue','noSource'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-      document.getElementById('noType').value = 'wedding';
-      document.getElementById('noStatus').value = 'inquiry';
-      setTimeout(() => document.getElementById('noP1').focus(), 50);
+      _noSelectedContact = null;
+      _noIsNew = false;
+      document.getElementById('nyttOppdragModal').style.display = 'flex';
+      renderNoStep1();
     }
+
     function hideNyttOppdragModal() {
       document.getElementById('nyttOppdragModal').style.display = 'none';
     }
+
+    // Steg 1: velg kontakt
+    function renderNoStep1(query) {
+      const q = (query || '').toLowerCase().trim();
+      const filtered = contacts.filter(c =>
+        !q ||
+        (c.primary_name || '').toLowerCase().includes(q) ||
+        (c.partner_name || '').toLowerCase().includes(q) ||
+        (c.email || '').toLowerCase().includes(q)
+      );
+      const inp = (id, ph, type='text') => `<input type="${type}" id="${id}" placeholder="${ph}" autocomplete="off"
+        style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box"
+        onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'">`;
+      document.getElementById('nyttOppdragContent').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0">Nytt oppdrag</h3>
+          <button onclick="hideNyttOppdragModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+        </div>
+        <div style="margin-bottom:16px">
+          <input id="noSearch" type="search" placeholder="Søk i kontakter…" value="${esc(query||'')}"
+            oninput="renderNoStep1(this.value)"
+            style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box"
+            onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'">
+        </div>
+        <div style="max-height:280px;overflow-y:auto;border:1.5px solid var(--sand);border-radius:10px;margin-bottom:16px">
+          ${filtered.length === 0 ? `<div style="padding:24px;text-align:center;color:#A09080;font-size:13px">${q ? 'Ingen treff' : 'Ingen kontakter ennå'}</div>` :
+            filtered.map(c => {
+              const name = c.partner_name ? `${c.primary_name} & ${c.partner_name}` : c.primary_name;
+              const already = weddings.some(w => contacts.find(x => x.id===c.id && x.linked_wedding_id===w.id));
+              return `<div onclick="noSelectContact('${c.id}')"
+                style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--sand);cursor:pointer;transition:background 0.1s"
+                onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='transparent'">
+                <div class="contact-avatar" style="width:34px;height:34px;font-size:11px;flex-shrink:0">${avatarInitials(name)}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:600;color:var(--espresso)">${esc(name)}</div>
+                  ${c.email ? `<div style="font-size:12px;color:#A09080;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.email)}</div>` : ''}
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0B0A0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>`;
+            }).join('')
+          }
+        </div>
+        <button onclick="noNewContact()" style="width:100%;padding:11px;border:1.5px dashed var(--sand);border-radius:10px;background:none;font-size:14px;font-family:inherit;color:var(--taupe);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"
+          onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='none'">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Opprett ny kontakt
+        </button>`;
+      setTimeout(() => document.getElementById('noSearch')?.focus(), 50);
+    }
+
+    window.noSelectContact = function(contactId) {
+      _noSelectedContact = contacts.find(c => c.id === contactId);
+      _noIsNew = false;
+      renderNoStep2();
+    };
+
+    window.noNewContact = function() {
+      _noSelectedContact = null;
+      _noIsNew = true;
+      renderNoStep2();
+    };
+
+    // Steg 2: oppdragsdetaljer
+    function renderNoStep2() {
+      const c = _noSelectedContact;
+      const name = c ? (c.partner_name ? `${c.primary_name} & ${c.partner_name}` : c.primary_name) : '';
+      const selStyle = `width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso);box-sizing:border-box`;
+      const inpStyle = `width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box`;
+
+      document.getElementById('nyttOppdragContent').innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <button onclick="renderNoStep1()" style="background:none;border:none;cursor:pointer;color:#8A7D72;padding:4px;display:flex;align-items:center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0">Nytt oppdrag</h3>
+          </div>
+          <button onclick="hideNyttOppdragModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+        </div>
+
+        ${c ? `<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--cream);border-radius:10px;margin-bottom:20px">
+          <div class="contact-avatar" style="width:34px;height:34px;font-size:11px;flex-shrink:0">${avatarInitials(name)}</div>
+          <div>
+            <div style="font-size:14px;font-weight:600;color:var(--espresso)">${esc(name)}</div>
+            ${c.email ? `<div style="font-size:12px;color:#A09080">${esc(c.email)}</div>` : ''}
+          </div>
+        </div>` : `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Partner 1 *</label>
+            <input id="noP1" placeholder="Fornavn Etternavn" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Partner 2</label>
+            <input id="noP2" placeholder="Fornavn Etternavn" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">E-post</label>
+            <input id="noEmail" type="email" placeholder="epost@eksempel.no" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Telefon</label>
+            <input id="noPhone" type="tel" placeholder="+47" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+        </div>`}
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Dato</label>
+            <input id="noDate" type="date" style="${inpStyle};background:var(--white)" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Kontraktsverdi</label>
+            <input id="noValue" type="number" placeholder="0" min="0" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+        </div>
+        <div style="margin-bottom:16px"><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Lokale</label>
+          <input id="noVenue" placeholder="Lokale" style="${inpStyle}" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Type</label>
+            <select id="noType" style="${selStyle}">
+              <option value="wedding">Bryllup</option>
+              <option value="couple">Par</option>
+              <option value="family">Familie</option>
+              <option value="portrait">Portrett</option>
+              <option value="commercial">Kommersielt</option>
+            </select></div>
+          <div><label style="font-size:12px;font-weight:600;color:var(--espresso);display:block;margin-bottom:5px">Status</label>
+            <select id="noStatus" style="${selStyle}">
+              <option value="inquiry">Forespørsel</option>
+              <option value="booked">Booket</option>
+              <option value="active">Aktiv</option>
+            </select></div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-outline" style="flex:1" onclick="renderNoStep1()">← Tilbake</button>
+          <button class="btn-primary" style="flex:1" id="noSaveBtn" onclick="saveNyttOppdrag()">Opprett oppdrag</button>
+        </div>`;
+    }
+
     async function saveNyttOppdrag() {
-      const btn = document.querySelector('#nyttOppdragModal .btn-primary');
-      if (btn.disabled) return;
+      const btn = document.getElementById('noSaveBtn');
+      if (!btn || btn.disabled) return;
       btn.disabled = true; btn.textContent = 'Oppretter…';
-      const p1 = document.getElementById('noP1').value.trim();
-      if (!p1) { btn.disabled = false; btn.textContent = 'Opprett oppdrag'; showToast('Partner 1 er påkrevd'); return; }
-      const p2 = document.getElementById('noP2').value.trim();
-      const email = document.getElementById('noEmail').value.trim();
-      const phone = document.getElementById('noPhone').value.trim();
-      const weddingDate = document.getElementById('noDate').value || null;
-      const contractValue = parseFloat(document.getElementById('noValue').value) || null;
-      const venue = document.getElementById('noVenue').value.trim();
-      const projectType = document.getElementById('noType').value;
-      const status = document.getElementById('noStatus').value;
-      const source = document.getElementById('noSource').value.trim();
 
-      const { data: wedding, error: wErr } = await sb.from('weddings').insert({
-        partner1: p1,
-        partner2: p2 || null,
-        wedding_date: weddingDate,
-        venue: venue || null,
-        contract_value: contractValue,
-        project_type: projectType,
-        user_id: currentUser.id,
-      }).select().single();
-      if (wErr) { showToast('Feil: ' + wErr.message); return; }
+      try {
+        const weddingDate = document.getElementById('noDate')?.value || null;
+        const contractValue = parseFloat(document.getElementById('noValue')?.value) || null;
+        const venue = document.getElementById('noVenue')?.value.trim() || null;
+        const projectType = document.getElementById('noType')?.value || 'wedding';
+        const status = document.getElementById('noStatus')?.value || 'inquiry';
 
-      const { error: cErr } = await sb.from('crm_contacts').insert({
-        primary_name: p1,
-        partner_name: p2 || '',
-        email: email || '',
-        phone: phone || '',
-        status,
-        source: source || '',
-        wedding_date: weddingDate,
-        venue_name: venue || '',
-        notes: '',
-        linked_wedding_id: wedding.id,
-      });
-      if (cErr) { showToast('Oppdrag opprettet, men kontakt feilet: ' + cErr.message); }
+        let p1, p2, email, phone;
+        if (_noIsNew) {
+          p1 = document.getElementById('noP1')?.value.trim();
+          if (!p1) { showToast('Partner 1 er påkrevd'); btn.disabled = false; btn.textContent = 'Opprett oppdrag'; return; }
+          p2 = document.getElementById('noP2')?.value.trim() || null;
+          email = document.getElementById('noEmail')?.value.trim() || '';
+          phone = document.getElementById('noPhone')?.value.trim() || '';
+        } else {
+          p1 = _noSelectedContact.primary_name;
+          p2 = _noSelectedContact.partner_name || null;
+          email = _noSelectedContact.email || '';
+          phone = _noSelectedContact.phone || '';
+        }
 
-      await loadData();
-      hideNyttOppdragModal();
-      showToast('Oppdrag opprettet');
-      navigate('oppdragDetail', wedding.id);
+        // Opprett wedding
+        const { data: wedding, error: wErr } = await sb.from('weddings').insert({
+          partner1: p1, partner2: p2 || null,
+          wedding_date: weddingDate, venue: venue || null,
+          contract_value: contractValue, project_type: projectType,
+          user_id: currentUser.id,
+        }).select().single();
+        if (wErr) throw wErr;
+
+        if (_noIsNew) {
+          // Ny kontakt + koble
+          const { error: cErr } = await sb.from('crm_contacts').insert({
+            primary_name: p1, partner_name: p2 || '',
+            email, phone, status, source: '', wedding_date: weddingDate,
+            venue_name: venue || '', notes: '', linked_wedding_id: wedding.id,
+          });
+          if (cErr) showToast('Oppdrag opprettet, men kontakt feilet: ' + cErr.message);
+        } else {
+          // Koble eksisterende kontakt til wedding
+          await sb.from('crm_contacts').update({
+            linked_wedding_id: wedding.id,
+            status,
+            ...(weddingDate && !_noSelectedContact.wedding_date ? { wedding_date: weddingDate } : {}),
+            ...(venue && !_noSelectedContact.venue_name ? { venue_name: venue } : {}),
+          }).eq('id', _noSelectedContact.id);
+        }
+
+        await loadData();
+        hideNyttOppdragModal();
+        showToast('Oppdrag opprettet');
+        navigate('oppdragDetail', wedding.id);
+      } catch (e) {
+        showToast('Feil: ' + (e.message || e));
+        btn.disabled = false; btn.textContent = 'Opprett oppdrag';
+      }
     }
 
     // ── Slett kontakt ──
