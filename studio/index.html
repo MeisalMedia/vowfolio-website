@@ -569,6 +569,7 @@
         <button onclick="hideLeveranseModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
       </div>
       <input type="hidden" id="lvId">
+      <div id="lvQuickPicks" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px"></div>
       <div class="form-group"><label>Tittel *</label><input type="text" id="lvTitle" placeholder="f.eks. Fullt galleri" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
       <div class="form-group"><label>Frist</label><input type="date" id="lvDueDate" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)"></div>
       <div class="form-group" style="display:flex;align-items:center;gap:10px">
@@ -1579,12 +1580,59 @@
     }
 
     // ── Leveranse modal ───────────────────────────────────────────
+    function lvDateFromWedding(daysOrWeeks, unit) {
+      if (!daysOrWeeks) return '';
+      const w = weddings.find(x => x.id === detailWeddingId);
+      if (!w?.wedding_date) return '';
+      const base = new Date(w.wedding_date);
+      const days = unit === 'uker' ? daysOrWeeks * 7 : daysOrWeeks;
+      base.setDate(base.getDate() + days);
+      return base.toISOString().slice(0, 10);
+    }
+
     function showLeveranseModal(d) {
       document.getElementById('lvId').value = d?.id || '';
       document.getElementById('lvTitle').value = d?.title || '';
-      document.getElementById('lvDueDate').value = d?.due_date ? d.due_date.slice(0, 10) : '';
       document.getElementById('lvClientVisible').checked = d?.client_visible ?? true;
       document.getElementById('lvModalTitle').textContent = d?.id ? 'Rediger leveranse' : 'Legg til leveranse';
+
+      const isNew = !d?.id;
+      const s = studioSettings || {};
+
+      // Build quick-pick chips (only for new deliverables)
+      const qp = document.getElementById('lvQuickPicks');
+      qp.innerHTML = '';
+      if (isNew) {
+        const picks = [
+          { label: 'Sneak peek', days: s.delivery_days_preview, unit: 'dager' },
+          { label: 'Bilder',     days: s.delivery_days_photos,  unit: 'uker'  },
+          { label: 'Album',      days: s.delivery_days_album,   unit: 'uker'  },
+          { label: 'Preview film', days: s.delivery_days_film_preview, unit: 'uker' },
+          { label: 'Film',       days: s.delivery_days_film,    unit: 'uker'  },
+        ];
+        picks.forEach(p => {
+          if (!p.days) return;
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = p.label;
+          btn.style.cssText = 'background:var(--cream);border:1.5px solid var(--sand);border-radius:20px;padding:5px 13px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--espresso);white-space:nowrap';
+          btn.onmouseenter = () => btn.style.borderColor = 'var(--taupe)';
+          btn.onmouseleave = () => btn.style.borderColor = 'var(--sand)';
+          btn.onclick = () => {
+            document.getElementById('lvTitle').value = p.label;
+            document.getElementById('lvDueDate').value = lvDateFromWedding(p.days, p.unit);
+          };
+          qp.appendChild(btn);
+        });
+      }
+
+      // Auto-fill date for new deliverable (use 'Bilder' as default if set)
+      if (isNew) {
+        document.getElementById('lvDueDate').value = lvDateFromWedding(s.delivery_days_photos, 'uker');
+      } else {
+        document.getElementById('lvDueDate').value = d?.due_date ? d.due_date.slice(0, 10) : '';
+      }
+
       document.getElementById('leveranseModal').style.display = 'flex';
       setTimeout(() => document.getElementById('lvTitle').focus(), 50);
     }
@@ -1899,32 +1947,100 @@
       const el = document.getElementById('oppdragTabContent');
       if (!el) return;
       const wDocs = documents.filter(d => d.wedding_id === detailWeddingId);
+      const contracts = wDocs.filter(d => d.type !== 'info_document');
+      const uploads = wDocs.filter(d => d.type === 'info_document');
 
       let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">`;
       html += `<div style="font-size:14px;font-weight:600;color:#8A7D72">${wDocs.length} dokument${wDocs.length !== 1 ? 'er' : ''}</div>`;
+      html += `<div style="display:flex;gap:8px">`;
+      html += `<button class="btn-outline btn-sm" onclick="uploadWeddingPdf('${detailWeddingId}')">⬆ Last opp PDF</button>`;
       html += `<button class="btn-primary" onclick="navigate('createDoc','${detailWeddingId}')">+ Ny kontrakt</button>`;
-      html += `</div>`;
+      html += `</div></div>`;
 
       if (wDocs.length === 0) {
         html += `<div class="card" style="text-align:center;padding:56px 20px;color:#A09080">`;
         html += `<svg width="40" height="40" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto 12px;display:block;opacity:0.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
         html += `<div style="font-size:15px;font-weight:600;color:var(--espresso);margin-bottom:6px">Ingen dokumenter enda</div>`;
-        html += `<div style="font-size:13px">Opprett en kontrakt for dette oppdraget</div>`;
+        html += `<div style="font-size:13px">Opprett en kontrakt eller last opp en PDF</div>`;
         html += `</div>`;
       } else {
         html += `<div class="card" style="padding:0;overflow:hidden">`;
-        for (let i = 0; i < wDocs.length; i++) {
-          const doc = wDocs[i];
-          const border = i < wDocs.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
-          html += `<div onclick="navigate('viewDoc','${doc.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;${border}cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">`;
-          html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${esc(doc.title)}</div>`;
-          html += `<div style="font-size:12px;color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'})}</div></div>`;
-          html += statusBadge(doc.status);
-          html += `</div>`;
+        const all = [...contracts, ...uploads];
+        for (let i = 0; i < all.length; i++) {
+          const doc = all[i];
+          const border = i < all.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+          const isUpload = doc.type === 'info_document';
+          if (isUpload) {
+            html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;${border}">`;
+            html += `<div style="display:flex;align-items:center;gap:10px">`;
+            html += `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A09080" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+            html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:2px">${esc(doc.title || doc.uploaded_filename || 'Vedlegg')}</div>`;
+            html += `<div style="font-size:12px;color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'})}</div></div></div>`;
+            html += `<div style="display:flex;gap:8px;align-items:center">`;
+            html += `<button class="btn-outline btn-sm" onclick="event.stopPropagation();openWeddingAttachment('${doc.id}')">Åpne</button>`;
+            html += `<button class="btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="event.stopPropagation();deleteWeddingAttachment('${doc.id}')">Slett</button>`;
+            html += `</div></div>`;
+          } else {
+            html += `<div onclick="navigate('viewDoc','${doc.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;${border}cursor:pointer;transition:background 0.1s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">`;
+            html += `<div><div style="font-size:14px;font-weight:600;margin-bottom:3px">${esc(doc.title)}</div>`;
+            html += `<div style="font-size:12px;color:#8A7D72">${new Date(doc.created_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'})}</div></div>`;
+            html += statusBadge(doc.status);
+            html += `</div>`;
+          }
         }
         html += `</div>`;
       }
       el.innerHTML = html;
+    }
+
+    async function uploadWeddingPdf(weddingId) {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/pdf';
+      input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.type !== 'application/pdf') { showToast('Kun PDF er støttet'); return; }
+        showToast('Laster opp…');
+        const path = `${currentUser.id}/${weddingId}/attachments/${crypto.randomUUID()}.pdf`;
+        const { error: upErr } = await sb.storage.from('document-files').upload(path, file, { contentType: file.type });
+        if (upErr) { showToast('Opplasting feilet: ' + upErr.message); return; }
+        const { error: insErr } = await sb.from('document_instances').insert({
+          wedding_id: weddingId,
+          type: 'info_document',
+          status: 'uploaded',
+          title: file.name.replace(/\.pdf$/i, ''),
+          content: '',
+          pdf_storage_path: path,
+          uploaded_filename: file.name,
+          uploaded_mime_type: file.type,
+        });
+        if (insErr) { showToast('Lagring feilet: ' + insErr.message); return; }
+        await loadData();
+        renderOppdragDokumenterTab();
+        showToast('PDF lastet opp ✓');
+      };
+      input.click();
+    }
+
+    async function openWeddingAttachment(docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc?.pdf_storage_path) { showToast('Finner ikke filen'); return; }
+      const { data, error } = await sb.storage.from('document-files').createSignedUrl(doc.pdf_storage_path, 300);
+      if (error) { showToast('Kunne ikke åpne: ' + error.message); return; }
+      window.open(data.signedUrl, '_blank');
+    }
+
+    async function deleteWeddingAttachment(docId) {
+      const doc = documents.find(d => d.id === docId);
+      if (!doc) return;
+      if (!confirm(`Slette "${doc.title || doc.uploaded_filename || 'vedlegget'}"?`)) return;
+      if (doc.pdf_storage_path) await sb.storage.from('document-files').remove([doc.pdf_storage_path]);
+      const { error } = await sb.from('document_instances').delete().eq('id', docId);
+      if (error) { showToast('Feil: ' + error.message); return; }
+      await loadData();
+      renderOppdragDokumenterTab();
+      showToast('Slettet');
     }
 
     async function renderOppdragBetalingerTab() {
