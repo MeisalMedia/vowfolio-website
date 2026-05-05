@@ -159,20 +159,31 @@
         await sb.auth.updateUser({ data: { full_name: fullName } });
       }
 
-      const { error } = await sb.from('studio_settings').insert({
-        id: crypto.randomUUID(),
-        user_id: newUser.id,
-        studio_name: studioName,
-        country: country,
-        currency_code: currency.code || null,
-        currency_symbol: currency.symbol || null,
-        timezone: currency.tz || null,
-        updated_at: new Date().toISOString(),
-      });
+      const [r1, r2] = await Promise.all([
+        sb.from('studio_settings').insert({
+          id: crypto.randomUUID(),
+          user_id: newUser.id,
+          studio_name: studioName,
+          country: country,
+          currency_code: currency.code || null,
+          currency_symbol: currency.symbol || null,
+          timezone: currency.tz || null,
+          updated_at: new Date().toISOString(),
+        }),
+        sb.from('crew_profiles').upsert({
+          user_id: newUser.id,
+          display_name: fullName || null,
+          studio_name: studioName,
+          role: 'photographer',
+          is_discoverable: false,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' }),
+      ]);
 
+      const error = r1.error || r2.error;
       if (error) { err.textContent = error.message; btn.disabled = false; btn.textContent = 'Kom i gang'; return; }
 
-      window.location.href = '/studio/';
+      window.location.href = '/';
     }
   </script>
 </body>
