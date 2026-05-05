@@ -3865,6 +3865,18 @@
     }
 
     // ── Document view ──
+    function renderContractContent(doc) {
+      const content = doc.content || '';
+      // HTML-innhold (fra PDF-generering eller mal) vises i sandbox-iframe
+      if (content.trimStart().startsWith('<')) {
+        return `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);overflow:hidden;height:80vh">
+          <iframe srcdoc="${content.replace(/&/g,'&amp;').replace(/"/g,'&quot;')}" style="width:100%;height:100%;border:none" title="${esc(doc.title)}" sandbox="allow-same-origin"></iframe>
+        </div>`;
+      }
+      // Markdown-innhold
+      return `<div class="contract-preview">${mdToHtml(content)}</div>`;
+    }
+
     async function renderDocumentView(el, docId) {
       const doc = documents.find(d=>d.id===docId);
       if (!doc) { el.innerHTML = '<div class="main-content"><p>Ikke funnet.</p></div>'; return; }
@@ -3899,10 +3911,10 @@
           html += `</div>`;
           html += `<div style="text-align:center;margin-top:10px"><a href="${urlData.signedUrl}" target="_blank" style="font-size:13px;color:var(--taupe);text-decoration:none">↗ Åpne i nytt vindu</a></div>`;
         } else {
-          html += `<div style="text-align:center;padding:40px;color:#A09080;font-size:14px">Kunne ikke laste PDF</div>`;
+          html += renderContractContent(doc);
         }
       } else if (doc.content) {
-        html += `<div class="contract-preview">${mdToHtml(doc.content)}</div>`;
+        html += renderContractContent(doc);
       } else {
         html += `<div style="text-align:center;padding:60px;color:#A09080;font-size:14px">Ingen innhold</div>`;
       }
