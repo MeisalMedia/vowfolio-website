@@ -1243,7 +1243,13 @@
         <div style="display:flex;align-items:center;gap:12px">
           <button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button>
           <div style="font-family:'Playfair Display',serif;font-size:17px">${esc(couple)}</div>
-          <span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span>
+          <select onchange="changeOppdragStatus('${weddingId}',this)" style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;background:${st.bg};color:${st.color};border:none;cursor:pointer;font-family:inherit;appearance:none;-webkit-appearance:none;outline:none">
+            <option value="inquiry"  ${(c?.status||'inquiry')==='inquiry'  ?'selected':''}>Lead</option>
+            <option value="booked"   ${(c?.status||'inquiry')==='booked'   ?'selected':''}>Booket</option>
+            <option value="active"   ${(c?.status||'inquiry')==='active'   ?'selected':''}>Aktiv</option>
+            <option value="completed"${(c?.status||'inquiry')==='completed'?'selected':''}>Fullført</option>
+            <option value="archived" ${(c?.status||'inquiry')==='archived' ?'selected':''}>Arkivert</option>
+          </select>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn-outline btn-sm" onclick="openPortalLink(this,'${weddingId}','${w.project_type||'wedding'}')">🔗 Send portal</button>
@@ -1666,6 +1672,21 @@
       } finally {
         btn.disabled = false; btn.textContent = 'Send e-post';
       }
+    }
+
+    async function changeOppdragStatus(weddingId, selectEl) {
+      const newStatus = selectEl.value;
+      const c = contacts.find(x => x.linked_wedding_id === weddingId);
+      if (!c) { showToast('Ingen kontakt knyttet til dette oppdraget'); selectEl.value = 'inquiry'; return; }
+      const { error } = await sb.from('crm_contacts').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', c.id);
+      if (error) { showToast('Feil: ' + error.message); return; }
+      c.status = newStatus;
+      const labels = { inquiry:'Lead', booked:'Booket', active:'Aktiv', completed:'Fullført', archived:'Arkivert' };
+      const colors = { inquiry:['#E8EFF8','#3A6BA5'], booked:['#E8F4EA','#4A8A55'], active:['#EAF0F8','#5577A0'], completed:['#EEF4EE','#5A8060'], archived:['#F0EBE4','#9B7E5E'] };
+      const [bg, color] = colors[newStatus] || colors.inquiry;
+      selectEl.style.background = bg;
+      selectEl.style.color = color;
+      showToast('Status → ' + labels[newStatus]);
     }
 
     function goToWeddingMessages(weddingId) {
