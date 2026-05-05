@@ -473,6 +473,90 @@
     </div>
   </div>
 
+  <!-- Send portal modal -->
+  <div id="sendPortalModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px">Send portallenke</h3>
+        <button onclick="hideSendPortalModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <div style="background:var(--cream);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--taupe);word-break:break-all;margin-bottom:20px;display:flex;align-items:center;gap:10px">
+        <span id="portalUrlDisplay" style="flex:1;font-family:monospace"></span>
+        <button onclick="copyPortalUrl()" style="flex-shrink:0;padding:6px 12px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);font-size:12px;font-weight:600;color:var(--taupe);cursor:pointer" id="copyUrlBtn">Kopier</button>
+      </div>
+      <div class="form-group">
+        <label>Send til e-post</label>
+        <input type="email" id="portalEmailInput" placeholder="kunde@epost.no" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit">
+      </div>
+      <div class="form-group">
+        <label>Melding (valgfritt)</label>
+        <textarea id="portalEmailMsg" rows="3" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical" placeholder="Hei! Her er lenken til din kundeportal…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn-outline" style="flex:1" onclick="hideSendPortalModal()">Lukk</button>
+        <button class="btn-primary" style="flex:1" id="sendPortalEmailBtn" onclick="sendPortalEmail()">Send e-post</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dagplan modal -->
+  <div id="dagplanModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <h3 id="dagplanModalTitle" style="font-family:'Playfair Display',serif;font-size:20px">Legg til hendelse</h3>
+        <button onclick="hideDagplanModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <input type="hidden" id="dpId">
+      <div class="form-group"><label>Klokkeslett *</label><input type="text" id="dpTime" placeholder="f.eks. 12:00" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Tittel *</label><input type="text" id="dpTitle" placeholder="f.eks. Vielse" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Notat</label><textarea id="dpNotes" placeholder="Valgfritt…" rows="2" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical"></textarea></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn-outline" style="flex:1" onclick="hideDagplanModal()">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="dpSaveBtn" onclick="saveDagplanItem()">Lagre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bryllupscontakt modal -->
+  <div id="bryllupskontaktModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <h3 id="bkModalTitle" style="font-family:'Playfair Display',serif;font-size:20px">Legg til kontakt</h3>
+        <button onclick="hideBryllupskontaktModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <input type="hidden" id="bkId">
+      <div class="form-group"><label>Navn *</label><input type="text" id="bkName" placeholder="f.eks. Kari Hansen" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Rolle</label><input type="text" id="bkRole" placeholder="f.eks. Koordinator, DJ, Blomster…" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Telefon</label><input type="tel" id="bkPhone" placeholder="+47 000 00 000" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>E-post</label><input type="email" id="bkEmail" placeholder="navn@eksempel.no" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn-outline" style="flex:1" onclick="hideBryllupskontaktModal()">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="bkSaveBtn" onclick="saveBryllupskontakt()">Lagre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leveranse modal -->
+  <div id="leveranseModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+        <h3 id="lvModalTitle" style="font-family:'Playfair Display',serif;font-size:20px">Legg til leveranse</h3>
+        <button onclick="hideLeveranseModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <input type="hidden" id="lvId">
+      <div class="form-group"><label>Tittel *</label><input type="text" id="lvTitle" placeholder="f.eks. Fullt galleri" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit"></div>
+      <div class="form-group"><label>Frist</label><input type="date" id="lvDueDate" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--white)"></div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="lvClientVisible" style="width:16px;height:16px;accent-color:var(--sage)">
+        <label for="lvClientVisible" style="font-size:14px;margin:0">Vis til kunden i portalen</label>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <button class="btn-outline" style="flex:1" onclick="hideLeveranseModal()">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="lvSaveBtn" onclick="saveLeveranse()">Lagre</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Contact modal -->
   <div id="kontaktModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:16px;padding:32px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
@@ -1243,16 +1327,23 @@
       }
 
       // Dagplan card
-      if (timeline.length > 0) {
+      {
         html += `<div class="card">`;
-        html += sectionTitle('Dagplan');
-        timeline.forEach((item, i) => {
-          const border = i < timeline.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
-          html += `<div style="display:flex;gap:14px;padding:10px 0;${border}">`;
-          html += `<div style="min-width:52px;font-size:13px;font-weight:600;color:var(--taupe);flex-shrink:0">${esc(item.event_time || '')}</div>`;
-          html += `<div><div style="font-size:13px;color:var(--espresso);font-weight:500">${esc(item.title || '')}</div>${item.notes ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${esc(item.notes)}</div>` : ''}</div>`;
-          html += `</div>`;
-        });
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Dagplan').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showDagplanModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
+        if (timeline.length === 0) {
+          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen dagplan enda</div>`;
+        } else {
+          timeline.forEach((item, i) => {
+            const border = i < timeline.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+            html += `<div style="display:flex;gap:14px;padding:10px 0;${border};align-items:flex-start" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
+            html += `<div style="min-width:52px;font-size:13px;font-weight:600;color:var(--taupe);flex-shrink:0;padding-top:1px">${esc(item.event_time || '')}</div>`;
+            html += `<div style="flex:1"><div style="font-size:13px;color:var(--espresso);font-weight:500">${esc(item.title || '')}</div>${item.notes ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${esc(item.notes)}</div>` : ''}</div>`;
+            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">`;
+            html += `<button onclick="showDagplanModal(${JSON.stringify(item)})" title="Rediger" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">✏️</button>`;
+            html += `<button onclick="deleteDagplanItem('${item.id}')" title="Slett" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">🗑</button>`;
+            html += `</div></div>`;
+          });
+        }
         html += `</div>`;
       }
 
@@ -1295,34 +1386,45 @@
       }
 
       // Kontakter i bryllupet
-      if (wContacts.length > 0) {
+      {
         html += `<div class="card">`;
-        html += sectionTitle('Kontakter i bryllupet');
-        wContacts.forEach((p, i) => {
-          const border = i < wContacts.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:10px;margin-bottom:10px;' : '';
-          html += `<div style="${border}">`;
-          html += `<div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(p.name)}</div>`;
-          if (p.role) html += `<div style="font-size:11px;color:#A09080;margin-top:1px">${esc(p.role)}</div>`;
-          html += `<div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">`;
-          if (p.phone) html += `<a href="tel:${esc(p.phone)}" style="font-size:12px;color:var(--taupe);text-decoration:none">📞 ${esc(p.phone)}</a>`;
-          if (p.email) html += `<a href="mailto:${esc(p.email)}" style="font-size:12px;color:var(--taupe);text-decoration:none">✉ ${esc(p.email)}</a>`;
-          html += `</div></div>`;
-        });
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Kontakter i bryllupet').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showBryllupskontaktModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
+        if (wContacts.length === 0) {
+          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen kontakter enda</div>`;
+        } else {
+          wContacts.forEach((p, i) => {
+            const border = i < wContacts.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:10px;margin-bottom:10px;' : '';
+            html += `<div style="${border};position:relative" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
+            html += `<div style="display:flex;align-items:flex-start;justify-content:space-between">`;
+            html += `<div><div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(p.name)}</div>${p.role ? `<div style="font-size:11px;color:#A09080;margin-top:1px">${esc(p.role)}</div>` : ''}<div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap">${p.phone ? `<a href="tel:${esc(p.phone)}" style="font-size:12px;color:var(--taupe);text-decoration:none">📞 ${esc(p.phone)}</a>` : ''}${p.email ? `<a href="mailto:${esc(p.email)}" style="font-size:12px;color:var(--taupe);text-decoration:none">✉ ${esc(p.email)}</a>` : ''}</div></div>`;
+            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">`;
+            html += `<button onclick="showBryllupskontaktModal(${JSON.stringify(p)})" title="Rediger" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">✏️</button>`;
+            html += `<button onclick="deleteBryllupskontakt('${p.id}')" title="Slett" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button>`;
+            html += `</div></div></div>`;
+          });
+        }
         html += `</div>`;
       }
 
       // Leveranser
-      if (deliverables.length > 0) {
+      {
         html += `<div class="card">`;
-        html += sectionTitle('Leveranser');
-        deliverables.forEach(d => {
-          const done = d.is_complete || d.status === 'delivered';
-          html += `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sand);cursor:pointer" onclick="toggleDeliverable('${d.id}',${done})">`;
-          html += `<div style="width:18px;height:18px;border-radius:50%;border:2px solid ${done ? 'var(--sage)' : 'var(--sand)'};background:${done ? 'var(--sage)' : 'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer">${done ? '<svg width="10" height="10" viewBox="0 0 10 10" stroke="white" fill="none" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>' : ''}</div>`;
-          html += `<div style="flex:1;font-size:13px;color:${done ? '#A09080' : 'var(--espresso)'};text-decoration:${done ? 'line-through' : 'none'}">${esc(d.title)}</div>`;
-          if (d.due_date) html += `<div style="font-size:11px;color:#A09080">${df(d.due_date)}</div>`;
-          html += `</div>`;
-        });
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Leveranser').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showLeveranseModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
+        if (deliverables.length === 0) {
+          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen leveranser enda</div>`;
+        } else {
+          deliverables.forEach(d => {
+            const done = d.is_complete || d.status === 'delivered';
+            html += `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--sand)" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
+            html += `<div onclick="toggleDeliverable('${d.id}',${done})" style="width:18px;height:18px;border-radius:50%;border:2px solid ${done?'var(--sage)':'var(--sand)'};background:${done?'var(--sage)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer">${done?'<svg width="10" height="10" viewBox="0 0 10 10" stroke="white" fill="none" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>':''}</div>`;
+            html += `<div style="flex:1;font-size:13px;color:${done?'#A09080':'var(--espresso)'};text-decoration:${done?'line-through':'none'}">${esc(d.title)}</div>`;
+            if (d.due_date) html += `<div style="font-size:11px;color:#A09080">${df(d.due_date)}</div>`;
+            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">`;
+            html += `<button onclick="showLeveranseModal(${JSON.stringify(d)})" title="Rediger" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">✏️</button>`;
+            html += `<button onclick="deleteLeveranse('${d.id}')" title="Slett" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button>`;
+            html += `</div></div>`;
+          });
+        }
         html += `</div>`;
       }
 
@@ -1331,11 +1433,112 @@
       el.innerHTML = html;
     }
 
+    // ── Dagplan modal ────────────────────────────────────────────
+    function showDagplanModal(item) {
+      document.getElementById('dpId').value = item?.id || '';
+      document.getElementById('dpTime').value = item?.event_time || '';
+      document.getElementById('dpTitle').value = item?.title || '';
+      document.getElementById('dpNotes').value = item?.notes || '';
+      document.getElementById('dagplanModalTitle').textContent = item?.id ? 'Rediger hendelse' : 'Legg til hendelse';
+      document.getElementById('dagplanModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('dpTime').focus(), 50);
+    }
+    function hideDagplanModal() { document.getElementById('dagplanModal').style.display = 'none'; }
+    async function saveDagplanItem() {
+      const btn = document.getElementById('dpSaveBtn');
+      const time = document.getElementById('dpTime').value.trim();
+      const title = document.getElementById('dpTitle').value.trim();
+      if (!time || !title) { showToast('Klokkeslett og tittel er påkrevd'); return; }
+      btn.disabled = true; btn.textContent = 'Lagrer…';
+      const id = document.getElementById('dpId').value;
+      const payload = { event_time: time, title, notes: document.getElementById('dpNotes').value.trim() || null, wedding_id: detailWeddingId, user_id: currentUser.id };
+      const { error } = id
+        ? await sb.from('day_timeline_items').update(payload).eq('id', id)
+        : await sb.from('day_timeline_items').insert({ ...payload, sort_order: Date.now() });
+      btn.disabled = false; btn.textContent = 'Lagre';
+      if (error) { showToast('Feil: ' + error.message); return; }
+      hideDagplanModal();
+      renderOppdragInfoTab();
+    }
+    async function deleteDagplanItem(id) {
+      if (!confirm('Slett denne hendelsen?')) return;
+      await sb.from('day_timeline_items').delete().eq('id', id);
+      renderOppdragInfoTab();
+    }
+
+    // ── Bryllupscontakt modal ─────────────────────────────────────
+    function showBryllupskontaktModal(p) {
+      document.getElementById('bkId').value = p?.id || '';
+      document.getElementById('bkName').value = p?.name || '';
+      document.getElementById('bkRole').value = p?.role || '';
+      document.getElementById('bkPhone').value = p?.phone || '';
+      document.getElementById('bkEmail').value = p?.email || '';
+      document.getElementById('bkModalTitle').textContent = p?.id ? 'Rediger kontakt' : 'Legg til kontakt';
+      document.getElementById('bryllupskontaktModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('bkName').focus(), 50);
+    }
+    function hideBryllupskontaktModal() { document.getElementById('bryllupskontaktModal').style.display = 'none'; }
+    async function saveBryllupskontakt() {
+      const btn = document.getElementById('bkSaveBtn');
+      const name = document.getElementById('bkName').value.trim();
+      if (!name) { showToast('Navn er påkrevd'); return; }
+      btn.disabled = true; btn.textContent = 'Lagrer…';
+      const id = document.getElementById('bkId').value;
+      const payload = { name, role: document.getElementById('bkRole').value.trim() || null, phone: document.getElementById('bkPhone').value.trim() || null, email: document.getElementById('bkEmail').value.trim() || null, wedding_id: detailWeddingId, user_id: currentUser.id };
+      const { error } = id
+        ? await sb.from('contacts').update(payload).eq('id', id)
+        : await sb.from('contacts').insert(payload);
+      btn.disabled = false; btn.textContent = 'Lagre';
+      if (error) { showToast('Feil: ' + error.message); return; }
+      hideBryllupskontaktModal();
+      renderOppdragInfoTab();
+    }
+    async function deleteBryllupskontakt(id) {
+      if (!confirm('Slett denne kontakten?')) return;
+      await sb.from('contacts').delete().eq('id', id);
+      renderOppdragInfoTab();
+    }
+
+    // ── Leveranse modal ───────────────────────────────────────────
+    function showLeveranseModal(d) {
+      document.getElementById('lvId').value = d?.id || '';
+      document.getElementById('lvTitle').value = d?.title || '';
+      document.getElementById('lvDueDate').value = d?.due_date ? d.due_date.slice(0, 10) : '';
+      document.getElementById('lvClientVisible').checked = d?.client_visible ?? true;
+      document.getElementById('lvModalTitle').textContent = d?.id ? 'Rediger leveranse' : 'Legg til leveranse';
+      document.getElementById('leveranseModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('lvTitle').focus(), 50);
+    }
+    function hideLeveranseModal() { document.getElementById('leveranseModal').style.display = 'none'; }
+    async function saveLeveranse() {
+      const btn = document.getElementById('lvSaveBtn');
+      const title = document.getElementById('lvTitle').value.trim();
+      if (!title) { showToast('Tittel er påkrevd'); return; }
+      btn.disabled = true; btn.textContent = 'Lagrer…';
+      const id = document.getElementById('lvId').value;
+      const due = document.getElementById('lvDueDate').value || null;
+      const payload = { title, due_date: due, client_visible: document.getElementById('lvClientVisible').checked, wedding_id: detailWeddingId };
+      const { error } = id
+        ? await sb.from('deliverables').update(payload).eq('id', id)
+        : await sb.from('deliverables').insert({ ...payload, sort_order: Date.now(), is_complete: false, status: 'pending' });
+      btn.disabled = false; btn.textContent = 'Lagre';
+      if (error) { showToast('Feil: ' + error.message); return; }
+      hideLeveranseModal();
+      renderOppdragInfoTab();
+    }
+    async function deleteLeveranse(id) {
+      if (!confirm('Slett denne leveransen?')) return;
+      await sb.from('deliverables').delete().eq('id', id);
+      renderOppdragInfoTab();
+    }
+
     async function toggleDeliverable(id, currentDone) {
       const newDone = !currentDone;
       await sb.from('deliverables').update({ is_complete: newDone, status: newDone ? 'delivered' : 'pending' }).eq('id', id);
       renderOppdragInfoTab();
     }
+
+    let _currentPortalUrl = '';
 
     async function openPortalLink(btn, weddingId, projectType) {
       btn.textContent = '…';
@@ -1350,14 +1553,60 @@
         const { error } = await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
         if (error) throw error;
         const prefix = (projectType === 'wedding' || !projectType) ? 'p' : 'ps';
-        const url = `https://vowfolio.com/${prefix}/${rawToken}`;
-        await navigator.clipboard.writeText(url);
-        showToast('Portallenke kopiert! Del med kunden.');
+        _currentPortalUrl = `https://vowfolio.com/${prefix}/${rawToken}`;
+
+        // Pre-fill client email if available
+        const c = contacts.find(x => x.linked_wedding_id === weddingId) || {};
+        document.getElementById('portalUrlDisplay').textContent = _currentPortalUrl;
+        document.getElementById('portalEmailInput').value = c.email || '';
+        const w = weddings.find(x => x.id === weddingId) || {};
+        const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : (w.partner1 || '');
+        document.getElementById('portalEmailMsg').value = `Hei${couple ? ' ' + couple : ''}!\n\nHer er lenken til din kundeportal hvor du kan følge med på dokumenter, dagplan og meldinger:\n\n${_currentPortalUrl}\n\nTa gjerne kontakt om du har spørsmål.`;
+        document.getElementById('copyUrlBtn').textContent = 'Kopier';
+        document.getElementById('sendPortalModal').style.display = 'flex';
       } catch (e) {
         showToast('Kunne ikke generere lenke: ' + (e.message || e));
       } finally {
         btn.textContent = '🔗 Send portal';
         btn.disabled = false;
+      }
+    }
+
+    function hideSendPortalModal() { document.getElementById('sendPortalModal').style.display = 'none'; }
+
+    async function copyPortalUrl() {
+      await navigator.clipboard.writeText(_currentPortalUrl);
+      const btn = document.getElementById('copyUrlBtn');
+      btn.textContent = 'Kopiert!';
+      setTimeout(() => { btn.textContent = 'Kopier'; }, 2000);
+    }
+
+    async function sendPortalEmail() {
+      const to = document.getElementById('portalEmailInput').value.trim();
+      if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { showToast('Skriv inn en gyldig e-postadresse'); return; }
+      const btn = document.getElementById('sendPortalEmailBtn');
+      btn.disabled = true; btn.textContent = 'Sender…';
+      const msg = document.getElementById('portalEmailMsg').value.trim();
+      const htmlBody = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      const studioName = studioSettings?.studio_name || 'Fotografen din';
+      const { data: { session } } = await sb.auth.getSession();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            to,
+            subject: `Din kundeportal fra ${studioName}`,
+            html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 16px">${studioName}</h2><div style="font-size:15px;color:#3D3229;line-height:1.6">${htmlBody}</div></div></div>`,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('E-post sendt til ' + to);
+        hideSendPortalModal();
+      } catch (e) {
+        showToast('Kunne ikke sende: ' + (e.message || e));
+      } finally {
+        btn.disabled = false; btn.textContent = 'Send e-post';
       }
     }
 
