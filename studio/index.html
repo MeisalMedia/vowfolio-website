@@ -1237,6 +1237,7 @@
       const w = weddings.find(x => x.id === weddingId);
       if (!w) { el.innerHTML = '<div class="main-content"><p>Ikke funnet.</p></div>'; return; }
       const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
+      const c = contacts.find(x => x.linked_wedding_id === weddingId);
       const st = weddingStatusInfo(w);
 
       let html = `<div style="padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;flex-wrap:wrap">
