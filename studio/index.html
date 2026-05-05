@@ -319,6 +319,10 @@
     /* ── Message delete button ── */
     .msg-row .del-btn { visibility: hidden; }
     .msg-row:hover .del-btn { visibility: visible; }
+
+    /* ── Oppdrag list row hover actions ── */
+    .oppdrag-row .row-actions-inline { visibility: hidden; }
+    .oppdrag-row:hover .row-actions-inline { visibility: visible; }
   </style>
 </head>
 <body>
@@ -1193,22 +1197,23 @@
         html += `</div>`;
       } else {
         // ── Listevisning med hover-actions ──
-        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Dato</th><th>Lokale</th><th>Type</th><th>Status</th></tr></thead><tbody>`;
+        html += `<div class="table-wrap"><table class="data-table"><thead><tr><th>Navn</th><th>Dato</th><th>Lokale</th><th>Type</th><th>Status</th><th style="width:170px"></th></tr></thead><tbody>`;
         for (const w of filtered) {
           const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
           const wDate = w.wedding_date ? df(w.wedding_date) : '—';
           const st = weddingStatusInfo(w);
           const pt = projectTypeInfo(w.project_type);
           const thread = messageThreads.find(t => t.wedding_id === w.id);
-          html += `<tr onclick="navigate('oppdragDetail','${w.id}')" onmouseenter="showRowActs(this)" onmouseleave="hideRowActs(this)">`;
-          html += `<td><strong>${esc(couple)}</strong><span class="row-actions-inline" style="margin-left:8px;gap:5px;visibility:hidden">`;
-          if (thread) html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();navigate('conversation','${thread.id}')">Meldinger</button>`;
-          html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();copyPortalLink('${w.id}')">Del portal</button>`;
-          html += `</span></td>`;
+          html += `<tr class="oppdrag-row" onclick="navigate('oppdragDetail','${w.id}')">`;
+          html += `<td><strong>${esc(couple)}</strong></td>`;
           html += `<td style="color:#8A7D72">${wDate}</td>`;
           html += `<td style="color:#8A7D72">${esc(w.venue||'—')}</td>`;
           html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${pt.bg};color:${pt.color}">${pt.label}</span></td>`;
           html += `<td><span style="font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:${st.bg};color:${st.color}">${st.label}</span></td>`;
+          html += `<td style="text-align:right;white-space:nowrap"><span class="row-actions-inline" style="display:inline-flex;gap:5px;align-items:center">`;
+          if (thread) html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();navigate('conversation','${thread.id}')">Meldinger</button>`;
+          html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();copyPortalLink('${w.id}')">Del portal</button>`;
+          html += `</span></td>`;
           html += `</tr>`;
         }
         html += `</tbody></table></div>`;
@@ -1217,8 +1222,6 @@
       el.innerHTML = html;
     }
 
-    function showRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.visibility='visible'); }
-    function hideRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.visibility='hidden'); }
 
     function dragKanban(event, weddingId) {
       _dragWeddingId = weddingId;
