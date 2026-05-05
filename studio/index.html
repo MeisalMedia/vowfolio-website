@@ -2559,7 +2559,6 @@
         currency_code: s.currency_code || '',
         currency_symbol: s.currency_symbol || '',
         timezone: s.timezone || '',
-        portal_hero_url: s.portal_hero_url || '',
         logo_url: s.logo_url || '',
         delivery_days_preview: s.delivery_days_preview ?? null,
         delivery_days_photos: s.delivery_days_photos ?? null,
@@ -2657,11 +2656,16 @@
       html += `</div></div>`;
 
       // ── Merkevare ──
-      html += `<div class="settings-section"><h3>Merkevare</h3><div class="card" style="display:flex;flex-direction:column;gap:16px">`;
-      html += `<div><label style="${fieldLabel}">Logo URL</label><input type="url" value="${esc(settingsDraft.logo_url)}" oninput="settingsDraft.logo_url=this.value;document.getElementById('logoPreview').src=this.value||''" placeholder="https://..." style="${fieldInput}">`;
-      html += `<div style="margin-top:8px">${settingsDraft.logo_url ? `<img id="logoPreview" src="${esc(settingsDraft.logo_url)}" style="max-height:60px;max-width:200px;border-radius:6px;border:1px solid var(--sand);padding:4px;background:var(--white)" onerror="this.style.display='none'">` : `<img id="logoPreview" style="display:none">`}</div></div>`;
-      html += `<div><label style="${fieldLabel}">Portal hero-bilde URL</label><input type="url" value="${esc(settingsDraft.portal_hero_url)}" oninput="settingsDraft.portal_hero_url=this.value;document.getElementById('heroPreview').src=this.value||''" placeholder="https://..." style="${fieldInput}">`;
-      html += `<div style="margin-top:8px">${settingsDraft.portal_hero_url ? `<img id="heroPreview" src="${esc(settingsDraft.portal_hero_url)}" style="max-height:120px;max-width:100%;border-radius:6px;border:1px solid var(--sand);object-fit:cover" onerror="this.style.display='none'">` : `<img id="heroPreview" style="display:none">`}</div></div>`;
+      html += `<div class="settings-section"><h3>Merkevare</h3><div class="card" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px">`;
+      const logoSrc = settingsDraft.logo_url;
+      html += `<div style="width:200px;height:100px;border-radius:10px;border:1.5px solid var(--sand);background:var(--cream);display:flex;align-items:center;justify-content:center;overflow:hidden">`;
+      html += logoSrc ? `<img id="logoPreview" src="${esc(logoSrc)}" style="max-width:100%;max-height:100%;object-fit:contain;padding:8px" onerror="this.parentElement.innerHTML='<span style=color:#A09080;font-size:13px>Ingen logo</span>'">` : `<span id="logoPreview" style="color:#A09080;font-size:13px">Ingen logo lastet opp</span>`;
+      html += `</div>`;
+      html += `<div style="display:flex;gap:10px;align-items:center">`;
+      html += `<label style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:8px;border:1.5px solid var(--sand);background:var(--cream);cursor:pointer;font-size:13px;font-weight:600;color:var(--taupe)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Velg logo<input type="file" accept="image/*" onchange="uploadLogo(this)" style="display:none"></label>`;
+      html += logoSrc ? `<button onclick="removeLogo()" style="font-size:12px;color:var(--danger);background:none;border:none;cursor:pointer;padding:4px">Fjern</button>` : '';
+      html += `</div>`;
+      html += `<p style="font-size:12px;color:#A09080;text-align:center;margin:0">Logoen vises i klientportalen, intake-skjema og e-poster til klienter.</p>`;
       html += `</div></div>`;
 
       // ── Studio-innstillinger ──
@@ -2682,6 +2686,49 @@
 
       html += `</div>`;
       el.innerHTML = html;
+    }
+
+    async function uploadLogo(input) {
+      const file = input.files?.[0];
+      if (!file || !currentUser) return;
+      const label = input.closest('label');
+      if (label) { label.style.opacity = '0.5'; label.style.pointerEvents = 'none'; }
+      const path = `${currentUser.id}/studio-logo.png`;
+      const { error } = await sb.storage.from('crew-avatars').upload(path, file, { contentType: 'image/png', upsert: true });
+      if (label) { label.style.opacity = ''; label.style.pointerEvents = ''; }
+      if (error) { showToast('Feil ved opplastning'); return; }
+      const { data: urlData } = sb.storage.from('crew-avatars').getPublicUrl(path);
+      const url = urlData.publicUrl + '?t=' + Date.now();
+      settingsDraft.logo_url = url;
+      // Update preview inline
+      const container = input.closest('.card');
+      const previewBox = container?.querySelector('div[style*="200px"]');
+      if (previewBox) previewBox.innerHTML = `<img id="logoPreview" src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;padding:8px">`;
+      // Save immediately
+      const { error: saveErr } = await sb.from('studio_settings').upsert({
+        id: studioSettings?.id || crypto.randomUUID(),
+        user_id: currentUser.id,
+        logo_url: url,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+      if (!saveErr) { if (studioSettings) studioSettings.logo_url = url; showToast('Logo lastet opp'); }
+    }
+
+    async function removeLogo() {
+      if (!currentUser) return;
+      settingsDraft.logo_url = '';
+      const path = `${currentUser.id}/studio-logo.png`;
+      await sb.storage.from('crew-avatars').remove([path]);
+      await sb.from('studio_settings').upsert({
+        id: studioSettings?.id || crypto.randomUUID(),
+        user_id: currentUser.id,
+        logo_url: null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
+      if (studioSettings) studioSettings.logo_url = null;
+      // Re-render merkevare section by re-rendering full settings
+      renderSettings(document.getElementById('mainContent'));
+      showToast('Logo fjernet');
     }
 
     function adjDelivery(key, unit, delta) {
@@ -2705,7 +2752,6 @@
         currency_code: settingsDraft.currency_code.trim() || null,
         currency_symbol: settingsDraft.currency_symbol.trim() || null,
         timezone: settingsDraft.timezone.trim() || null,
-        portal_hero_url: settingsDraft.portal_hero_url.trim() || null,
         logo_url: settingsDraft.logo_url.trim() || null,
         delivery_days_preview: settingsDraft.delivery_days_preview,
         delivery_days_photos: settingsDraft.delivery_days_photos,
