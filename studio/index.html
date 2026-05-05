@@ -484,6 +484,24 @@
     </div>
   </div>
 
+  <!-- Fotograf signering modal -->
+  <div id="photographerSignModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:400px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0">Signer kontrakt</h3>
+        <button onclick="document.getElementById('photographerSignModal').style.display='none'" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <p style="font-size:13px;color:#8A7D72;margin:0 0 18px">Skriv inn ditt fulle navn for å signere kontrakten som fotograf.</p>
+      <label style="font-size:13px;font-weight:600;color:var(--espresso);display:block;margin-bottom:6px">Signatur (fullt navn)</label>
+      <input type="text" id="photographerSignName" placeholder="Ditt fulle navn" style="width:100%;padding:12px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:15px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box;margin-bottom:16px">
+      <div style="display:flex;gap:10px">
+        <button class="btn-outline" style="flex:1" onclick="document.getElementById('photographerSignModal').style.display='none'">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="photographerSignBtn" onclick="submitPhotographerSign()">Signer</button>
+      </div>
+      <p class="error" id="photographerSignError" style="margin-top:10px"></p>
+    </div>
+  </div>
+
   <!-- Møte modal -->
   <div id="moteModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
@@ -3858,7 +3876,8 @@
       html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-weight:600;font-size:14px">Signeringsstatus</span>${statusBadge(doc.status)}</div>`;
       if (signers) for (const s of signers) {
         const signed = s.status === 'signed';
-        html += `<div class="signer-row"><div class="signer-dot" style="background:${signed?'var(--success)':'var(--sand)'}"></div><strong style="font-size:13px">${esc(s.name||s.role)}</strong> <span style="color:#8A7D72;font-size:12px">(${({client:'Klient',photographer:'Fotograf'}[s.role]||s.role)})</span><span style="margin-left:auto;font-size:12px;color:${signed?'var(--success)':'#8A7D72'}">${signed?'✓ Signert':'Venter'}</span></div>`;
+        const canSign = !signed && s.role === 'photographer' && doc.status !== 'draft';
+        html += `<div class="signer-row"><div class="signer-dot" style="background:${signed?'var(--success)':'var(--sand)'}"></div><strong style="font-size:13px">${esc(s.name||s.role)}</strong> <span style="color:#8A7D72;font-size:12px">(${({client:'Klient',photographer:'Fotograf'}[s.role]||s.role)})</span><span style="margin-left:auto;font-size:12px;color:${signed?'var(--success)':'#8A7D72'}">${signed?'✓ Signert':canSign?`<button class="btn-primary btn-sm" onclick="openPhotographerSignModal('${docId}','${s.id}','${esc(s.name||'')}')">Signer</button>`:'Venter'}</span></div>`;
       }
       html += `</div>`;
       if (doc.pdf_storage_path) {
@@ -3907,6 +3926,61 @@
         await loadData(); navigate('viewDoc',docId); showToast('Kontrakt sendt til ' + cs.email);
       } else {
         await loadData(); navigate('viewDoc',docId); showToast('Signeringslenke kopiert! (ingen e-post registrert)');
+      }
+    }
+
+    let _psDocId = null, _psSignerId = null;
+
+    function openPhotographerSignModal(docId, signerId, existingName) {
+      _psDocId = docId; _psSignerId = signerId;
+      document.getElementById('photographerSignName').value = existingName || studioSettings?.studio_name || '';
+      document.getElementById('photographerSignError').textContent = '';
+      document.getElementById('photographerSignBtn').disabled = false;
+      document.getElementById('photographerSignBtn').textContent = 'Signer';
+      document.getElementById('photographerSignModal').style.display = 'flex';
+    }
+
+    async function submitPhotographerSign() {
+      const name = document.getElementById('photographerSignName').value.trim();
+      const err = document.getElementById('photographerSignError');
+      const btn = document.getElementById('photographerSignBtn');
+      err.textContent = '';
+      if (!name) { err.textContent = 'Navn er påkrevd'; return; }
+
+      btn.disabled = true; btn.textContent = 'Signerer…';
+      try {
+        // Opprett midlertidig share link for fotografen
+        const rawToken = genToken();
+        const hash = await hashToken(rawToken);
+        const exp = new Date(); exp.setDate(exp.getDate() + 1);
+        const { error: linkErr } = await sb.from('document_share_links').insert({
+          document_id: _psDocId,
+          signer_id: _psSignerId,
+          token_hash: hash,
+          expires_at: exp.toISOString(),
+        });
+        if (linkErr) throw linkErr;
+
+        // Kall sign-document Edge Function
+        const { data: { session } } = await sb.auth.getSession();
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/sign-document`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({ token: rawToken, signer_id: _psSignerId, type: 'typed', typed_name: name }),
+        });
+        if (!res.ok) {
+          const body = await res.text();
+          throw new Error(body || `HTTP ${res.status}`);
+        }
+
+        document.getElementById('photographerSignModal').style.display = 'none';
+        await loadData();
+        const main = document.getElementById('main');
+        renderDocumentView(main, _psDocId);
+        showToast('Kontrakt signert ✓');
+      } catch (e) {
+        err.textContent = 'Feil: ' + (e.message || e);
+        btn.disabled = false; btn.textContent = 'Signer';
       }
     }
 
