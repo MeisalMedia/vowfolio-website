@@ -514,6 +514,13 @@
     </div>
   </div>
 
+  <!-- Spørreskjema modal -->
+  <div id="sendIntakeModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
+    <div style="background:var(--white);border-radius:16px;padding:32px;max-width:480px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15);max-height:90vh;overflow-y:auto">
+      <div id="sendIntakeContent"></div>
+    </div>
+  </div>
+
   <!-- Møte modal -->
   <div id="moteModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
@@ -1287,6 +1294,7 @@
           </select>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-outline btn-sm" onclick="openIntakeForm(this,'${weddingId}','${w.project_type||'wedding'}')" id="intakeBtn_${weddingId}">📋 Spørreskjema</button>
           <button class="btn-outline btn-sm" onclick="openPortalLink(this,'${weddingId}','${w.project_type||'wedding'}')">🔗 Send portal</button>
           <button class="btn-outline btn-sm" onclick="goToWeddingMessages('${weddingId}')">💬 Melding</button>
           <button class="btn-primary btn-sm" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
@@ -1673,6 +1681,137 @@
       const btn = document.getElementById('copyUrlBtn');
       btn.textContent = 'Kopiert!';
       setTimeout(() => { btn.textContent = 'Kopier'; }, 2000);
+    }
+
+    // ── Spørreskjema ─────────────────────────────────────────────────────────
+
+    let _intakePortalUrl = '';
+    let _intakeWeddingId = '';
+
+    async function openIntakeForm(btn, weddingId, projectType) {
+      btn.textContent = '…'; btn.disabled = true;
+      _intakeWeddingId = weddingId;
+      try {
+        // Hent eksisterende intake + kontakt parallelt
+        const [intakeRes, contactRes] = await Promise.all([
+          sb.from('wedding_intake_forms').select('*').eq('wedding_id', weddingId).limit(1),
+          Promise.resolve(contacts.find(x => x.linked_wedding_id === weddingId) || {}),
+        ]);
+        const intake = intakeRes.data?.[0] || null;
+        const c = contactRes;
+        const w = weddings.find(x => x.id === weddingId) || {};
+        const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : (w.partner1 || '');
+
+        // Generer portal-lenke
+        const bytes = crypto.getRandomValues(new Uint8Array(6));
+        const rawToken = Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join('');
+        const hashBuf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(rawToken));
+        const tokenHash = Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,'0')).join('');
+        const expiresAt = new Date(Date.now() + 2 * 365 * 24 * 60 * 60 * 1000).toISOString();
+        await sb.from('document_share_links').insert({ wedding_id: weddingId, token_hash: tokenHash, expires_at: expiresAt, link_type: 'portal' });
+        const prefix = (projectType === 'wedding' || !projectType) ? 'p' : 'ps';
+        _intakePortalUrl = `https://vowfolio.com/${prefix}/${rawToken}`;
+
+        const intakeField = (label, val) => val
+          ? `<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--sand);font-size:13px"><span style="color:#A09080;min-width:160px;flex-shrink:0">${label}</span><span style="color:var(--espresso)">${esc(String(val))}</span></div>`
+          : '';
+
+        const el = document.getElementById('sendIntakeContent');
+
+        if (intake) {
+          // Skjema allerede innsendt — vis svar
+          el.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+              <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0">Spørreskjema</h3>
+              <button onclick="hideIntakeModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;background:#F0F7F1;border-radius:8px;padding:10px 14px;margin-bottom:20px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B8F71" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span style="font-size:13px;font-weight:600;color:#6B8F71">Skjema innsendt av kunden</span>
+            </div>
+            <div style="margin-bottom:20px">
+              ${intakeField('Navn', intake.partner1_name)}
+              ${intakeField('E-post', intake.email)}
+              ${intakeField('Getting ready', intake.getting_ready_time)}
+              ${intakeField('Getting ready-sted', intake.getting_ready_location)}
+              ${intakeField('Seremoni', intake.ceremony_time)}
+              ${intakeField('Seremonisted', intake.ceremony_address)}
+              ${intakeField('Mottakelse', intake.reception_time)}
+              ${intakeField('Mottakelsessted', intake.reception_address)}
+              ${intakeField('First look', intake.first_look ? (intake.first_look_time || 'Ja') : null)}
+              ${intakeField('Antall gjester', intake.guest_count)}
+              ${intakeField('Koordinator', intake.coordinator)}
+              ${intakeField('Seremoniform', intake.ceremony_type)}
+              ${intakeField('Pakke', intake.booked_package)}
+            </div>
+            ${intake.must_have_shots ? `<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:#A09080;margin-bottom:6px">MUST-HAVE BILDER</div><div style="font-size:13px;color:var(--espresso);line-height:1.7;white-space:pre-wrap;background:var(--cream);border-radius:8px;padding:10px 12px">${esc(intake.must_have_shots)}</div></div>` : ''}
+            <div style="border-top:1px solid var(--sand);padding-top:16px">
+              <div style="font-size:12px;color:#A09080;margin-bottom:12px">Send påminnelse / be om oppdatering</div>
+              ${renderIntakeSendForm(couple, c.email || '')}
+            </div>`;
+        } else {
+          // Ikke innsendt — send skjema
+          el.innerHTML = `
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+              <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0">Send spørreskjema</h3>
+              <button onclick="hideIntakeModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+            </div>
+            <p style="font-size:14px;color:var(--taupe);margin:0 0 20px;line-height:1.6">Kunden fyller ut logistikk og ønsker direkte i portalen. Svarene vises automatisk her under Info.</p>
+            ${renderIntakeSendForm(couple, c.email || '')}`;
+        }
+        document.getElementById('sendIntakeModal').style.display = 'flex';
+      } catch(e) {
+        showToast('Kunne ikke åpne spørreskjema: ' + (e.message || e));
+      } finally {
+        btn.textContent = '📋 Spørreskjema'; btn.disabled = false;
+      }
+    }
+
+    function renderIntakeSendForm(couple, defaultEmail) {
+      const defaultMsg = `Hei${couple ? ' ' + couple : ''}!\n\nFør bryllupet ønsker vi å lære mer om dagen deres. Fyll gjerne ut spørreskjemaet på lenken nedenfor — det tar bare noen minutter og hjelper oss å planlegge alt til det perfekte.\n\n${_intakePortalUrl}\n\nTa gjerne kontakt om du lurer på noe!`;
+      return `<div class="form-group" style="margin-bottom:12px">
+        <label style="font-size:13px;font-weight:600;color:var(--espresso);display:block;margin-bottom:6px">Send til e-post</label>
+        <input type="email" id="intakeEmailInput" value="${esc(defaultEmail)}" placeholder="kunde@epost.no"
+          style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;background:var(--cream);color:var(--espresso);box-sizing:border-box">
+      </div>
+      <div class="form-group" style="margin-bottom:16px">
+        <label style="font-size:13px;font-weight:600;color:var(--espresso);display:block;margin-bottom:6px">Melding</label>
+        <textarea id="intakeEmailMsg" rows="5" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:10px;font-size:14px;font-family:inherit;resize:vertical;background:var(--cream);color:var(--espresso);box-sizing:border-box">${esc(defaultMsg)}</textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-outline" style="flex:1" onclick="hideIntakeModal()">Avbryt</button>
+        <button class="btn-primary" style="flex:1" id="sendIntakeBtn" onclick="sendIntakeEmail()">Send spørreskjema</button>
+      </div>`;
+    }
+
+    function hideIntakeModal() { document.getElementById('sendIntakeModal').style.display = 'none'; }
+
+    async function sendIntakeEmail() {
+      const to = document.getElementById('intakeEmailInput').value.trim();
+      if (!to || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) { showToast('Skriv inn en gyldig e-postadresse'); return; }
+      const btn = document.getElementById('sendIntakeBtn');
+      btn.disabled = true; btn.textContent = 'Sender…';
+      const msg = document.getElementById('intakeEmailMsg').value.trim();
+      const htmlBody = msg.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+      const studio = studioSettings?.studio_name || 'Fotografen din';
+      const { data: { session } } = await sb.auth.getSession();
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
+          body: JSON.stringify({
+            to,
+            subject: `Spørreskjema fra ${studio}`,
+            html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 16px">${esc(studio)}</h2><div style="font-size:15px;color:#3D3229;line-height:1.6">${htmlBody}</div><div style="margin-top:24px"><a href="${_intakePortalUrl}" style="display:inline-block;padding:12px 28px;background:#6B8F71;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">Fyll ut spørreskjema</a></div></div></div>`,
+          }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        showToast('Spørreskjema sendt til ' + to);
+        hideIntakeModal();
+      } catch(e) {
+        showToast('Feil ved sending: ' + (e.message || e));
+        btn.disabled = false; btn.textContent = 'Send spørreskjema';
+      }
     }
 
     async function sendPortalEmail() {
