@@ -1377,27 +1377,6 @@
         html += `</div>`;
       }
 
-      // Dagplan card
-      {
-        html += `<div class="card">`;
-        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Dagplan').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showDagplanModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
-        if (timeline.length === 0) {
-          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen dagplan enda</div>`;
-        } else {
-          timeline.forEach((item, i) => {
-            const border = i < timeline.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
-            html += `<div style="display:flex;gap:14px;padding:10px 0;${border};align-items:flex-start" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
-            html += `<div style="min-width:52px;font-size:13px;font-weight:600;color:var(--taupe);flex-shrink:0;padding-top:1px">${esc(item.event_time || '')}</div>`;
-            html += `<div style="flex:1"><div style="font-size:13px;color:var(--espresso);font-weight:500">${esc(item.title || '')}</div>${item.notes ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${esc(item.notes)}</div>` : ''}</div>`;
-            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">`;
-            html += `<button onclick="showDagplanModal(${JSON.stringify(item)})" title="Rediger" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">✏️</button>`;
-            html += `<button onclick="deleteDagplanItem('${item.id}')" title="Slett" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">🗑</button>`;
-            html += `</div></div>`;
-          });
-        }
-        html += `</div>`;
-      }
-
       // Møtenotater
       {
         html += `<div class="card">`;
@@ -1417,6 +1396,27 @@
             html += `</div></div></div>`;
             if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(m.notes)}</div>`;
             html += `</div>`;
+          });
+        }
+        html += `</div>`;
+      }
+
+      // Dagplan card
+      {
+        html += `<div class="card">`;
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Dagplan').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showDagplanModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
+        if (timeline.length === 0) {
+          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen dagplan enda</div>`;
+        } else {
+          timeline.forEach((item, i) => {
+            const border = i < timeline.length - 1 ? 'border-bottom:1px solid var(--sand);' : '';
+            html += `<div style="display:flex;gap:14px;padding:10px 0;${border};align-items:flex-start" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
+            html += `<div style="min-width:52px;font-size:13px;font-weight:600;color:var(--taupe);flex-shrink:0;padding-top:1px">${esc(item.event_time || '')}</div>`;
+            html += `<div style="flex:1"><div style="font-size:13px;color:var(--espresso);font-weight:500">${esc(item.title || '')}</div>${item.notes ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${esc(item.notes)}</div>` : ''}</div>`;
+            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">`;
+            html += `<button onclick="showDagplanModal(${JSON.stringify(item)})" title="Rediger" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">✏️</button>`;
+            html += `<button onclick="deleteDagplanItem('${item.id}')" title="Slett" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">🗑</button>`;
+            html += `</div></div>`;
           });
         }
         html += `</div>`;
