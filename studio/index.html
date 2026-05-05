@@ -2896,7 +2896,7 @@
       const cpPayload = {
         user_id: currentUser.id,
         display_name: settingsDraft.display_name.trim() || null,
-        studio_name: settingsDraft.crew_studio_name.trim() || null,
+        studio_name: settingsDraft.crew_studio_name.trim() || '',
         role: settingsDraft.role || 'photographer',
         bio: settingsDraft.bio.trim() || '',
         contact_email: settingsDraft.contact_email.trim() || null,
