@@ -1958,9 +1958,11 @@
         if (w) return w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
         return 'Kunde';
       }
+      // Crew-to-crew thread: show the OTHER person
+      const otherUserId = t.photographer_id === currentUser?.id ? t.crew_user_id : t.photographer_id;
       const fromMessages = otherPartyByThread[t.id];
       if (fromMessages) return fromMessages;
-      const profile = crewProfilesById[t.photographer_id];
+      const profile = crewProfilesById[otherUserId];
       if (profile?.display_name) return profile.display_name;
       return 'Crew';
     }
@@ -1983,6 +1985,12 @@
           if (w.venue) parts.push(w.venue);
           return parts.join(' · ');
         }
+      }
+      // Crew thread: show studio name or role
+      if (t.crew_user_id || t.photographer_id) {
+        const otherUserId = t.photographer_id === currentUser?.id ? t.crew_user_id : t.photographer_id;
+        const profile = crewProfilesById[otherUserId];
+        return profile?.studio_name || crewRoleLabel(profile?.role) || 'Crew';
       }
       return '';
     }
@@ -2958,9 +2966,24 @@
     };
 
     window.crewSendMessage = async function(userId) {
-      const existing = messageThreads.find(t=>t.crew_user_id===userId);
+      // Check both directions (I sent or they sent first)
+      const existing = messageThreads.find(t =>
+        (t.photographer_id === currentUser.id && t.crew_user_id === userId) ||
+        (t.crew_user_id === currentUser.id && t.photographer_id === userId)
+      );
       if (existing) { navigate('conversation', existing.id); return; }
-      const { data: thread } = await sb.from('message_threads').insert({photographer_id:currentUser.id,crew_user_id:userId,last_message_at:new Date().toISOString()}).select().limit(1).single();
+      // Also check in DB in case thread exists but wasn't loaded
+      const { data: dbThread } = await sb.from('message_threads')
+        .select('*')
+        .or(`and(photographer_id.eq.${currentUser.id},crew_user_id.eq.${userId}),and(crew_user_id.eq.${currentUser.id},photographer_id.eq.${userId})`)
+        .limit(1).maybeSingle();
+      if (dbThread) { messageThreads.unshift(dbThread); navigate('conversation', dbThread.id); return; }
+      // Create new thread
+      const { data: thread } = await sb.from('message_threads').insert({
+        photographer_id: currentUser.id,
+        crew_user_id: userId,
+        last_message_at: new Date().toISOString(),
+      }).select().limit(1).single();
       if (thread) { messageThreads.unshift(thread); navigate('conversation', thread.id); }
     };
 
