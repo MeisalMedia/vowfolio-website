@@ -4181,7 +4181,7 @@
         // Opprett wedding
         const { data: wedding, error: wErr } = await sb.from('weddings').insert({
           partner1: p1, partner2: p2 || '',
-          wedding_date: weddingDate, venue: venue || null,
+          wedding_date: weddingDate, venue: venue || '',
           contract_value: contractValue, project_type: projectType,
           user_id: currentUser.id,
         }).select().single();
