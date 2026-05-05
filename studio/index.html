@@ -2621,7 +2621,15 @@
 
     let settingsDraft = null;
 
-    function renderSettings(el) {
+    async function renderSettings(el) {
+      // Fetch fresh studio_settings + full crew profile so all app-entered values show up
+      const [sRes, pRes] = await Promise.all([
+        sb.from('studio_settings').select('*').eq('user_id', currentUser.id).limit(1),
+        sb.from('crew_profiles').select('*').eq('user_id', currentUser.id).limit(1),
+      ]);
+      if (sRes.data?.[0]) { studioSettings = sRes.data[0]; studioName = studioSettings.studio_name || ''; }
+      if (pRes.data?.[0]) crewProfilesById[currentUser.id] = pRes.data[0];
+
       const s = studioSettings || {};
       const p = crewProfilesById[currentUser?.id] || {};
 
