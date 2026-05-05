@@ -1790,7 +1790,7 @@
           body: JSON.stringify({
             to,
             subject: `Spørreskjema fra ${studio}`,
-            html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 16px">${esc(studio)}</h2><div style="font-size:15px;color:#3D3229;line-height:1.6">${htmlBody}</div><div style="margin-top:24px"><a href="${_intakePortalUrl}" style="display:inline-block;padding:12px 28px;background:#6B8F71;color:#fff;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">Fyll ut spørreskjema</a></div></div></div>`,
+            html: `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 16px 0">Fra ${esc(studio)}</p><div style="font-size:15px;color:#3D3229;line-height:1.6;margin:0 0 24px 0">${htmlBody}</div><a href="${_intakePortalUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Fyll ut spørreskjema</a></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`,
           }),
         });
         if (!res.ok) throw new Error(await res.text());
@@ -1818,7 +1818,7 @@
           body: JSON.stringify({
             to,
             subject: `Din kundeportal fra ${studioName}`,
-            html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 16px">${studioName}</h2><div style="font-size:15px;color:#3D3229;line-height:1.6">${htmlBody}</div></div></div>`,
+            html: `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 16px 0">Fra ${studioName}</p><div style="font-size:15px;color:#3D3229;line-height:1.6;margin:0 0 24px 0">${htmlBody}</div><a href="${_currentPortalUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Åpne portal</a></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`,
           }),
         });
         if (!res.ok) throw new Error(await res.text());
