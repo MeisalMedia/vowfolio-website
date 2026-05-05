@@ -2662,8 +2662,8 @@
         const p = _ownCrewProfile;
         const loc = p.base_city || p.base_location_name || '';
         const radius = !p.travel_radius_km || p.travel_radius_km >= 9999 ? 'Anywhere' : p.travel_radius_km + ' km';
-        ownHtml = `<div style="margin-bottom:28px">
-          <div style="font-size:11px;font-weight:700;letter-spacing:0.7px;color:var(--taupe);margin-bottom:10px">DIN PROFIL</div>
+        ownHtml = `<div style="margin-bottom:32px">
+          <h2 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--espresso);margin:0 0 14px">Din profil</h2>
           <div onclick="openCrewProfile('${p.user_id}')" style="display:flex;align-items:center;gap:16px;background:var(--white);border:1.5px solid var(--espresso);border-radius:12px;padding:18px 20px;cursor:pointer;transition:box-shadow 0.15s;max-width:480px" onmouseover="this.style.boxShadow='0 4px 16px rgba(61,50,41,0.12)'" onmouseout="this.style.boxShadow='none'">
             ${crewAvatar(p, 52)}
             <div style="flex:1;min-width:0">
@@ -2693,8 +2693,11 @@
         (p.base_city||'').toLowerCase().includes(q)
       );
 
+      const sectionTitle = _crewMode === 'favoritter' ? 'Favoritter' : 'Finn crew';
+
       if (profiles.length === 0) {
-        el.innerHTML = ownHtml + `<div style="padding:64px 0;text-align:center;color:var(--taupe)">
+        el.innerHTML = ownHtml + `<h2 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--espresso);margin:0 0 14px">${sectionTitle}</h2>
+        <div style="padding:48px 0;text-align:center;color:var(--taupe)">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="opacity:0.3;margin-bottom:16px"><circle cx="9" cy="7" r="3"/><path d="M3 21v-2a5 5 0 0 1 5-5h4a5 5 0 0 1 5 5v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
           <div style="font-size:16px;font-weight:600;color:var(--espresso);margin-bottom:6px">${_crewMode==='favoritter'&&!q?'Ingen favoritter ennå':'Ingen treff'}</div>
           <div style="font-size:14px">${_crewMode==='favoritter'&&!q?'Bytt til "Finn crew" for å søke etter fotografer og videografer.':''}</div>
@@ -2702,7 +2705,8 @@
         return;
       }
 
-      el.innerHTML = ownHtml + `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">` +
+      el.innerHTML = ownHtml + `<h2 style="font-family:'Playfair Display',serif;font-size:20px;color:var(--espresso);margin:0 0 14px">${sectionTitle}</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px">` +
         profiles.map(p => {
           const isFav = _crewFavorites.has(p.user_id);
           const loc = p.base_city || p.base_location_name || '';
