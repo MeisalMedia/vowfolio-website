@@ -3972,12 +3972,19 @@
           const body = await res.text();
           throw new Error(body || `HTTP ${res.status}`);
         }
+        const result = await res.json();
+
+        // Oppdater lokal documents-array umiddelbart med EF-returnert status
+        const docIdx = documents.findIndex(d => d.id === _psDocId);
+        if (docIdx >= 0 && result.status) {
+          documents[docIdx] = { ...documents[docIdx], status: result.status };
+        }
 
         document.getElementById('photographerSignModal').style.display = 'none';
-        await loadData();
         const main = document.getElementById('main');
-        renderDocumentView(main, _psDocId);
+        await renderDocumentView(main, _psDocId);
         showToast('Kontrakt signert ✓');
+        loadData(); // Refresh all data i bakgrunnen
       } catch (e) {
         err.textContent = 'Feil: ' + (e.message || e);
         btn.disabled = false; btn.textContent = 'Signer';
