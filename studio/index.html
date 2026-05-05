@@ -2561,7 +2561,7 @@
     let _crewFavorites = new Set();
     let _crewAllProfiles = [];
     let _ownCrewProfile = null;
-    let _crewMode = 'favoritter';
+    let _crewMode = 'finn';
     let _crewRoleFilter = 'alle';
     let _crewSearchQuery = '';
     let _crewDetailMonth = { year: new Date().getFullYear(), month: new Date().getMonth() };
@@ -2610,8 +2610,8 @@
           </div>
         </div>
         <div style="display:flex;gap:0;margin-top:20px;border-bottom:2px solid var(--sand)">
-          <button onclick="crewSetMode('favoritter')" id="crewTabFav" style="padding:8px 20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid var(--espresso);margin-bottom:-2px;background:none;color:var(--espresso)">Favoritter</button>
-          <button onclick="crewSetMode('finn')" id="crewTabFinn" style="padding:8px 20px;font-size:14px;font-weight:400;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;color:var(--taupe)">Finn crew</button>
+          <button onclick="crewSetMode('finn')" id="crewTabFinn" style="padding:8px 20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid var(--espresso);margin-bottom:-2px;background:none;color:var(--espresso)">Finn crew</button>
+          <button onclick="crewSetMode('favoritter')" id="crewTabFav" style="padding:8px 20px;font-size:14px;font-weight:400;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;color:var(--taupe)">Favoritter</button>
         </div>
       </div>
       <div id="crewGrid" style="padding:28px 32px;overflow-y:auto"></div>`;
