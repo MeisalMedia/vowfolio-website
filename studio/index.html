@@ -1791,6 +1791,7 @@
             to,
             subject: `Spørreskjema fra ${studio}`,
             html: `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 16px 0">Fra ${esc(studio)}</p><div style="font-size:15px;color:#3D3229;line-height:1.6;margin:0 0 24px 0">${htmlBody}</div><a href="${_intakePortalUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Fyll ut spørreskjema</a></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`,
+            ...(studioSettings?.reply_to_email ? { replyTo: studioSettings.reply_to_email } : {}),
           }),
         });
         if (!res.ok) throw new Error(await res.text());
@@ -1819,6 +1820,7 @@
             to,
             subject: `Din kundeportal fra ${studioName}`,
             html: `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 16px 0">Fra ${studioName}</p><div style="font-size:15px;color:#3D3229;line-height:1.6;margin:0 0 24px 0">${htmlBody}</div><a href="${_currentPortalUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Åpne portal</a></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`,
+            ...(studioSettings?.reply_to_email ? { replyTo: studioSettings.reply_to_email } : {}),
           }),
         });
         if (!res.ok) throw new Error(await res.text());
@@ -3209,6 +3211,7 @@
         delivery_days_album: s.delivery_days_album ?? null,
         delivery_days_film_preview: s.delivery_days_film_preview ?? null,
         delivery_days_film: s.delivery_days_film ?? null,
+        reply_to_email: s.reply_to_email || '',
         // crew_profiles
         display_name: p.display_name || '',
         crew_studio_name: p.studio_name || '',
@@ -3318,6 +3321,13 @@
       html += `<div><label style="${fieldLabel}">Valutasymbol</label><input type="text" value="${esc(settingsDraft.currency_symbol)}" oninput="settingsDraft.currency_symbol=this.value" placeholder="kr" maxlength="3" style="${fieldInput}"></div>`;
       html += `<div><label style="${fieldLabel}">Tidssone</label><input type="text" value="${esc(settingsDraft.timezone)}" oninput="settingsDraft.timezone=this.value" placeholder="Europe/Oslo" style="${fieldInput}"></div>`;
       html += `</div></div>`;
+
+      // ── E-post ──
+      html += `<div class="settings-section"><h3>E-post</h3><div class="card" style="padding:0 20px">`;
+      html += `<div style="display:flex;align-items:flex-start;padding:14px 0;gap:12px">`;
+      html += `<div style="flex:1"><div style="font-size:14px;font-weight:500;margin-bottom:2px">Svar-til adresse</div><div style="font-size:12px;color:#A09080;line-height:1.5">Når du sender portal, kontrakt eller spørreskjema til kunder vil svar gå til denne adressen — ikke til noreply@vowfolio.com. Valgfritt.</div></div>`;
+      html += `<div style="min-width:220px"><input type="email" value="${esc(settingsDraft.reply_to_email)}" oninput="settingsDraft.reply_to_email=this.value" placeholder="foto@eksempel.no" style="${fieldInput}"></div>`;
+      html += `</div></div></div>`;
 
       // ── Konto ──
       html += `<div class="settings-section"><h3>Konto</h3><div class="card" style="display:flex;flex-direction:column;gap:12px">`;
@@ -3461,6 +3471,7 @@
         delivery_days_album: settingsDraft.delivery_days_album,
         delivery_days_film_preview: settingsDraft.delivery_days_film_preview,
         delivery_days_film: settingsDraft.delivery_days_film,
+        reply_to_email: settingsDraft.reply_to_email?.trim() || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -3915,13 +3926,17 @@
         const doc = documents.find(d => d.id === docId);
         const photographerName = studioName || currentUser.email || 'Fotografen';
         const clientName = cs.name || 'der';
-        const emailHtml = `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 8px 0">Fra ${esc(photographerName)}</p><h2 style="color:#3D3229;font-size:18px;margin:0 0 14px 0">Hei ${esc(clientName)},</h2><p style="color:#2C2C2E;font-size:15px;line-height:1.6;margin:0 0 20px 0">Du har mottatt en kontrakt til gjennomlesning og signering: <strong>${esc(doc?.title||'Kontrakt')}</strong></p><a href="${signingUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Les og signer kontrakt</a><p style="color:#8A7D6E;font-size:13px;margin:20px 0 0 0">Lenken er gyldig i 30 dager. Hvis du har spørsmål, svar gjerne på denne e-posten.</p></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`;
+        const replyTo = studioSettings?.reply_to_email || null;
+        const contactLine = replyTo
+          ? `Har du spørsmål? Svar på denne e-posten og du når ${esc(photographerName)} direkte.`
+          : `Lenken er gyldig i 30 dager.`;
+        const emailHtml = `<div style="font-family:-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#FAF7F2"><div style="background:white;border-radius:14px;padding:32px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><p style="color:#8A7D6E;font-size:12px;margin:0 0 8px 0">Fra ${esc(photographerName)}</p><h2 style="color:#3D3229;font-size:18px;margin:0 0 14px 0">Hei ${esc(clientName)},</h2><p style="color:#2C2C2E;font-size:15px;line-height:1.6;margin:0 0 20px 0">Du har mottatt en kontrakt til gjennomlesning og signering: <strong>${esc(doc?.title||'Kontrakt')}</strong></p><a href="${signingUrl}" style="display:inline-block;background:#6B8F71;color:white;text-decoration:none;padding:13px 28px;border-radius:10px;font-weight:600;font-size:15px">Les og signer kontrakt</a><p style="color:#8A7D6E;font-size:13px;margin:20px 0 0 0">${contactLine}</p></div><p style="color:#B0A090;font-size:11px;text-align:center;margin-top:20px">Sendt via VowFolio</p></div>`;
         const { data: { session } } = await sb.auth.getSession();
         const token = session?.access_token || SUPABASE_KEY;
         fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_KEY },
-          body: JSON.stringify({ to: cs.email, subject: `Kontrakt til signering fra ${photographerName}`, html: emailHtml }),
+          body: JSON.stringify({ to: cs.email, subject: `Kontrakt til signering fra ${photographerName}`, html: emailHtml, ...(replyTo ? { replyTo } : {}) }),
         }).catch(() => {});
         await loadData(); navigate('viewDoc',docId); showToast('Kontrakt sendt til ' + cs.email);
       } else {
