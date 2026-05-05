@@ -1295,6 +1295,7 @@
 
       html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
         <div class="tab active" id="dtab-info" onclick="switchOppdragTab('info')">Info</div>
+        <div class="tab" id="dtab-moeter" onclick="switchOppdragTab('moeter')">Møter</div>
         <div class="tab" id="dtab-dokumenter" onclick="switchOppdragTab('dokumenter')">Dokumenter</div>
         <div class="tab" id="dtab-betalinger" onclick="switchOppdragTab('betalinger')">Betalinger</div>
       </div>`;
@@ -1313,6 +1314,7 @@
       const content = document.getElementById('oppdragTabContent');
       if (content) { content.style.cssText = 'flex:1;overflow-y:auto;padding:24px 28px'; }
       if (tab === 'info') renderOppdragInfoTab();
+      else if (tab === 'moeter') renderOppdragMoeterTab();
       else if (tab === 'dokumenter') renderOppdragDokumenterTab();
       else if (tab === 'betalinger') renderOppdragBetalingerTab();
     }
@@ -1328,14 +1330,12 @@
 
       el.innerHTML = `<div style="color:#A09080;text-align:center;padding:60px;font-size:14px">Laster…</div>`;
 
-      const [meetingsRes, timelineRes, deliverablesRes, wContactsRes, intakeRes] = await Promise.all([
-        sb.from('wedding_meetings').select('*').eq('wedding_id', detailWeddingId).order('meeting_date', { ascending: false }),
+      const [timelineRes, deliverablesRes, wContactsRes, intakeRes] = await Promise.all([
         sb.from('day_timeline_items').select('*').eq('wedding_id', detailWeddingId).order('sort_order', { ascending: true }),
         sb.from('deliverables').select('*').eq('wedding_id', detailWeddingId).order('sort_order', { ascending: true }),
         sb.from('contacts').select('*').eq('wedding_id', detailWeddingId).order('created_at', { ascending: true }),
         sb.from('wedding_intake_forms').select('*').eq('wedding_id', detailWeddingId).limit(1),
       ]);
-      const meetings = meetingsRes.data || [];
       const timeline = timelineRes.data || [];
       const deliverables = deliverablesRes.data || [];
       const wContacts = wContactsRes.data || [];
@@ -1374,30 +1374,6 @@
         if (intake.ceremony_type) html += fieldRow('Seremoniform', esc(intake.ceremony_type));
         if (intake.booked_package) html += fieldRow('Pakke', esc(intake.booked_package));
         if (intake.must_have_shots) html += `<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;margin-bottom:4px">Must-have bilder</div><div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(intake.must_have_shots)}</div></div>`;
-        html += `</div>`;
-      }
-
-      // Møtenotater
-      {
-        html += `<div class="card">`;
-        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Møtenotater').replace('margin-bottom:12px','margin-bottom:0')}<button onclick="showMoteModal()" style="font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--sand);background:var(--white);color:var(--taupe);cursor:pointer">+ Legg til</button></div>`;
-        if (meetings.length === 0) {
-          html += `<div style="font-size:13px;color:#A09080;text-align:center;padding:16px 0">Ingen møtenotater enda</div>`;
-        } else {
-          meetings.forEach((m, i) => {
-            const border = i < meetings.length - 1 ? 'border-bottom:1px solid var(--sand);padding-bottom:14px;margin-bottom:14px;' : '';
-            html += `<div style="${border}" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">`;
-            html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">`;
-            html += `<div style="display:flex;align-items:center;gap:8px"><div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(m.title || 'Møte')}</div>${m.client_summary ? `<span style="font-size:10px;font-weight:600;color:#7A9E8E;background:#EBF4F1;padding:2px 7px;border-radius:10px;letter-spacing:0.02em">PORTAL</span>` : ''}</div>`;
-            html += `<div style="display:flex;align-items:center;gap:8px"><div style="font-size:11px;color:#A09080">${m.meeting_date ? df(m.meeting_date) : ''}</div>`;
-            html += `<div class="row-acts" style="opacity:0;display:flex;gap:4px;transition:opacity 0.15s">`;
-            html += `<button onclick="showMoteModal(${JSON.stringify(m)})" title="Rediger" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">✏️</button>`;
-            html += `<button onclick="deleteMote('${m.id}')" title="Slett" style="background:none;border:none;cursor:pointer;font-size:13px;padding:2px 4px">🗑</button>`;
-            html += `</div></div></div>`;
-            if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(m.notes)}</div>`;
-            html += `</div>`;
-          });
-        }
         html += `</div>`;
       }
 
@@ -1524,12 +1500,12 @@
       btn.disabled = false; btn.textContent = 'Lagre';
       if (error) { showToast('Feil: ' + error.message); return; }
       hideMoteModal();
-      renderOppdragInfoTab();
+      renderOppdragMoeterTab();
     }
     async function deleteMote(id) {
       if (!confirm('Slett dette møtenotatet?')) return;
       await sb.from('wedding_meetings').delete().eq('id', id);
-      renderOppdragInfoTab();
+      renderOppdragMoeterTab();
     }
 
     // ── Dagplan modal ────────────────────────────────────────────
@@ -1728,6 +1704,51 @@
       const thread = messageThreads.find(t => t.wedding_id === weddingId);
       if (thread) { navigate('conversation', thread.id); }
       else { navigate('meldinger'); showToast('Ingen meldingstråd funnet for dette oppdraget'); }
+    }
+
+    async function renderOppdragMoeterTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el) return;
+      const df = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      el.innerHTML = `<div style="color:#A09080;text-align:center;padding:60px;font-size:14px">Laster…</div>`;
+      const { data: meetings } = await sb.from('wedding_meetings').select('*').eq('wedding_id', detailWeddingId).order('meeting_date', { ascending: false });
+      const list = meetings || [];
+
+      let html = `<div style="max-width:680px;margin:0 auto">`;
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:20px">`;
+      html += `<button onclick="showMoteModal()" class="btn-primary btn-sm">+ Nytt møtenotat</button>`;
+      html += `</div>`;
+
+      if (list.length === 0) {
+        html += `<div style="text-align:center;padding:60px 0;color:#A09080;font-size:14px">Ingen møtenotater enda</div>`;
+      } else {
+        list.forEach(m => {
+          const hasPortal = !!m.client_summary;
+          html += `<div class="card" style="margin-bottom:16px">`;
+          html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${m.notes || hasPortal ? '12px' : '0'}">`;
+          html += `<div style="display:flex;align-items:center;gap:10px">`;
+          html += `<div style="font-size:15px;font-weight:600;color:var(--espresso)">${esc(m.title || 'Møte')}</div>`;
+          if (hasPortal) html += `<span style="font-size:10px;font-weight:600;color:#7A9E8E;background:#EBF4F1;padding:2px 8px;border-radius:10px;letter-spacing:0.02em">PORTAL</span>`;
+          html += `</div>`;
+          html += `<div style="display:flex;align-items:center;gap:12px">`;
+          if (m.meeting_date) html += `<div style="font-size:12px;color:#A09080">${df(m.meeting_date)}</div>`;
+          html += `<button onclick="showMoteModal(${JSON.stringify(m)})" style="background:none;border:1.5px solid var(--sand);border-radius:7px;cursor:pointer;font-size:12px;padding:3px 10px;color:var(--taupe)">Rediger</button>`;
+          html += `<button onclick="deleteMote('${m.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#C0A898;line-height:1" title="Slett">🗑</button>`;
+          html += `</div></div>`;
+          if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.7;white-space:pre-wrap;margin-bottom:${hasPortal ? '14px' : '0'}">${esc(m.notes)}</div>`;
+          if (hasPortal) {
+            html += `<div style="border-top:1px solid var(--sand);padding-top:12px;margin-top:${m.notes ? '0' : '4px'}">`;
+            html += `<div style="font-size:11px;font-weight:600;color:#7A9E8E;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.04em">Kundesammendrag (portal)</div>`;
+            html += `<div style="font-size:13px;color:var(--espresso);line-height:1.7;white-space:pre-wrap">${esc(m.client_summary)}</div>`;
+            html += `</div>`;
+          }
+          html += `</div>`;
+        });
+      }
+
+      html += `</div>`;
+      el.innerHTML = html;
     }
 
     function renderOppdragDokumenterTab() {
