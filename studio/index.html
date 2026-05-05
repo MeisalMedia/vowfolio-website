@@ -1188,7 +1188,7 @@
           const pt = projectTypeInfo(w.project_type);
           const thread = messageThreads.find(t => t.wedding_id === w.id);
           html += `<tr onclick="navigate('oppdragDetail','${w.id}')" onmouseenter="showRowActs(this)" onmouseleave="hideRowActs(this)">`;
-          html += `<td><strong>${esc(couple)}</strong><span class="row-actions-inline" style="margin-left:8px;gap:5px">`;
+          html += `<td><strong>${esc(couple)}</strong><span class="row-actions-inline" style="margin-left:8px;gap:5px;visibility:hidden">`;
           if (thread) html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();navigate('conversation','${thread.id}')">Meldinger</button>`;
           html += `<button class="btn-outline btn-sm" style="font-size:11px;padding:3px 8px" onclick="event.stopPropagation();copyPortalLink('${w.id}')">Del portal</button>`;
           html += `</span></td>`;
@@ -1204,8 +1204,8 @@
       el.innerHTML = html;
     }
 
-    function showRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.display='inline-flex'); }
-    function hideRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.display='none'); }
+    function showRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.visibility='visible'); }
+    function hideRowActs(tr) { tr.querySelectorAll('.row-actions-inline').forEach(el => el.style.visibility='hidden'); }
 
     function dragKanban(event, weddingId) {
       _dragWeddingId = weddingId;
