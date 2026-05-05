@@ -2977,7 +2977,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.access_token}` },
           body: JSON.stringify({
-            to: 'hello@vowfolio.no',
+            to: 'hello@vowfolio.com',
             subject: `[Studio] ${typeLabels[type]} fra ${from}`,
             html: `<div style="font-family:-apple-system,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#FAF7F2"><div style="background:#fff;border-radius:12px;padding:28px;box-shadow:0 2px 8px rgba(61,50,41,0.06)"><h2 style="font-family:Georgia,serif;color:#3D3229;margin:0 0 8px">Studio-tilbakemelding</h2><div style="font-size:12px;color:#A09080;margin-bottom:20px">${typeLabels[type]} · ${from}</div><div style="font-size:15px;color:#3D3229;line-height:1.7;white-space:pre-wrap">${message.replace(/</g,'&lt;')}</div></div></div>`,
           }),
