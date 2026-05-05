@@ -2550,7 +2550,10 @@
 
     function renderSettings(el) {
       const s = studioSettings || {};
+      const p = crewProfilesById[currentUser?.id] || {};
+
       settingsDraft = {
+        // studio_settings
         studio_name: s.studio_name || '',
         country: s.country || '',
         currency_code: s.currency_code || '',
@@ -2558,21 +2561,102 @@
         timezone: s.timezone || '',
         portal_hero_url: s.portal_hero_url || '',
         logo_url: s.logo_url || '',
+        delivery_days_preview: s.delivery_days_preview ?? null,
+        delivery_days_photos: s.delivery_days_photos ?? null,
+        delivery_days_album: s.delivery_days_album ?? null,
+        delivery_days_film_preview: s.delivery_days_film_preview ?? null,
+        delivery_days_film: s.delivery_days_film ?? null,
+        // crew_profiles
+        display_name: p.display_name || '',
+        crew_studio_name: p.studio_name || '',
+        role: p.role || 'photographer',
+        bio: p.bio || '',
+        contact_email: p.contact_email || '',
+        phone: p.phone || '',
+        instagram: p.instagram || '',
+        website: p.website || '',
+        google_review_url: p.google_review_url || '',
+        avatar_url: p.avatar_url || '',
+        base_location_name: p.base_location_name || '',
+        travel_radius_km: p.travel_radius_km ?? 0,
+        is_discoverable: p.is_discoverable ?? true,
       };
 
       const fieldLabel = 'font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px';
       const fieldInput = 'width:100%;padding:10px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso)';
+      const row = (label, content) => `<div style="display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--sand);gap:12px"><div style="font-size:14px;color:#8A7D72;min-width:110px;flex-shrink:0">${label}</div><div style="flex:1">${content}</div></div>`;
+      const inp = (key, placeholder, type='text', extra='') => `<input type="${type}" value="${esc(settingsDraft[key]||'')}" oninput="settingsDraft['${key}']=this.value" placeholder="${placeholder}" style="width:100%;padding:8px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso);outline:none" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'" ${extra}>`;
 
-      let html = `<div class="main-content"><div style="display:flex;justify-content:flex-end;margin-bottom:20px"><button class="btn-primary" onclick="saveStudioSettings()">Lagre</button></div>`;
+      let html = `<div class="main-content" style="max-width:700px">`;
+      html += `<div style="display:flex;justify-content:flex-end;margin-bottom:20px"><button class="btn-primary" onclick="saveStudioSettings()">Lagre innstillinger</button></div>`;
 
-      html += `<div class="settings-section"><h3>Studio-profil</h3><div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">`;
-      html += `<div><label style="${fieldLabel}">Studio-navn</label><input type="text" value="${esc(settingsDraft.studio_name)}" oninput="settingsDraft.studio_name=this.value" placeholder="f.eks. Ole Foto" style="${fieldInput}"></div>`;
-      html += `<div><label style="${fieldLabel}">Land</label><input type="text" value="${esc(settingsDraft.country)}" oninput="settingsDraft.country=this.value" placeholder="Norge" style="${fieldInput}"></div>`;
-      html += `<div><label style="${fieldLabel}">Valuta</label><input type="text" value="${esc(settingsDraft.currency_code)}" oninput="settingsDraft.currency_code=this.value.toUpperCase()" placeholder="NOK" maxlength="3" style="${fieldInput}"></div>`;
-      html += `<div><label style="${fieldLabel}">Valutasymbol</label><input type="text" value="${esc(settingsDraft.currency_symbol)}" oninput="settingsDraft.currency_symbol=this.value" placeholder="kr" maxlength="3" style="${fieldInput}"></div>`;
-      html += `<div><label style="${fieldLabel}">Tidssone</label><input type="text" value="${esc(settingsDraft.timezone)}" oninput="settingsDraft.timezone=this.value" placeholder="Europe/Oslo" style="${fieldInput}"></div>`;
+      // ── Profil ──
+      html += `<div class="settings-section"><h3>Profil</h3><div class="card" style="padding:0 20px">`;
+      // Avatar
+      const av = settingsDraft.avatar_url;
+      html += `<div style="display:flex;flex-direction:column;align-items:center;padding:24px 0 16px;border-bottom:1px solid var(--sand)">`;
+      html += av ? `<img src="${esc(av)}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px">` : `<div style="width:80px;height:80px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:10px;color:#A09080">👤</div>`;
+      html += `<div style="font-size:13px;color:#A09080;margin-bottom:8px">Profilbilde-URL</div>`;
+      html += `<input type="url" value="${esc(av)}" oninput="settingsDraft.avatar_url=this.value" placeholder="https://..." style="width:100%;max-width:320px;padding:7px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;text-align:center;outline:none">`;
+      html += `</div>`;
+      html += row('Navn', inp('display_name', 'Fullt navn'));
+      html += row('Studio', inp('crew_studio_name', 'Studio-navn'));
+      html += `<div style="padding:13px 0;border-bottom:1px solid var(--sand)">`;
+      html += `<div style="font-size:14px;color:#8A7D72;margin-bottom:10px">Rolle</div>`;
+      html += `<div style="display:flex;gap:8px;flex-wrap:wrap">`;
+      for (const [val, label] of [['photographer','Photographer'],['videographer','Videographer'],['photo_and_video','Photo & Video']]) {
+        const active = settingsDraft.role === val;
+        html += `<button onclick="settingsDraft.role='${val}';this.parentElement.querySelectorAll('button').forEach((b,i)=>b.style.cssText=i===${['photographer','videographer','photo_and_video'].indexOf(val)}?'padding:8px 18px;border-radius:20px;border:2px solid var(--espresso);background:var(--espresso);color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit':'padding:8px 18px;border-radius:20px;border:1.5px solid var(--sand);background:var(--white);color:var(--espresso);font-size:13px;cursor:pointer;font-family:inherit')" style="padding:8px 18px;border-radius:20px;border:${active?'2px solid var(--espresso)':'1.5px solid var(--sand)'};background:${active?'var(--espresso)':'var(--white)'};color:${active?'var(--white)':'var(--espresso)'};font-size:13px;font-weight:${active?'600':'400'};cursor:pointer;font-family:inherit">${label}</button>`;
+      }
+      html += `</div></div>`;
+      html += row('Bio', `<textarea oninput="settingsDraft.bio=this.value" placeholder="Kort om deg…" rows="2" style="width:100%;padding:8px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;outline:none" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'">${esc(settingsDraft.bio)}</textarea>`);
+      html += row('Sted', inp('base_location_name', 'f.eks. Fornebu, Norge'));
+      html += row('E-post', inp('contact_email', 'kontakt@eksempel.no', 'email'));
+      html += row('Telefon', inp('phone', '+47 000 00 000', 'tel'));
+      html += row('Instagram', `<div style="display:flex;align-items:center;gap:6px"><span style="color:#A09080">@</span>${inp('instagram', 'brukernavn')}</div>`);
+      html += row('Nettside', inp('website', 'https://...', 'url'));
+      html += `<div style="display:flex;align-items:flex-start;padding:13px 0;gap:12px"><div style="font-size:14px;color:#8A7D72;min-width:110px;flex-shrink:0;padding-top:2px">Google review</div><div style="flex:1">${inp('google_review_url', 'g.page/din-studio', 'url')}</div></div>`;
       html += `</div></div>`;
 
+      // ── Reise ──
+      html += `<div class="settings-section"><h3>Reise</h3><div class="card" style="padding:0 20px">`;
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--sand);gap:12px">`;
+      html += `<div><div style="font-size:14px;font-weight:500">Reiseradius</div><div style="font-size:12px;color:#A09080;margin-top:2px">Antall km fra hjemsted</div></div>`;
+      html += `<select onchange="settingsDraft.travel_radius_km=parseInt(this.value)" style="padding:7px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;background:var(--white);color:var(--espresso);cursor:pointer">`;
+      for (const [v, l] of [[0,'Anywhere'],[50,'50 km'],[100,'100 km'],[200,'200 km'],[500,'500 km'],[1000,'1000 km']]) {
+        html += `<option value="${v}" ${settingsDraft.travel_radius_km===v?'selected':''}>${l}</option>`;
+      }
+      html += `</select></div>`;
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;gap:12px">`;
+      html += `<div><div style="font-size:14px;font-weight:500">Gjør meg synlig</div><div style="font-size:12px;color:#A09080;margin-top:2px">Andre VowFolio-brukere kan finne og kontakte deg</div></div>`;
+      html += `<label style="position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0"><input type="checkbox" ${settingsDraft.is_discoverable?'checked':''} onchange="settingsDraft.is_discoverable=this.checked" style="opacity:0;width:0;height:0"><span onclick="this.previousElementSibling.click()" style="position:absolute;inset:0;background:${settingsDraft.is_discoverable?'var(--sage)':'#ccc'};border-radius:13px;cursor:pointer;transition:0.2s"><span style="position:absolute;left:${settingsDraft.is_discoverable?'20':'2'}px;top:2px;width:22px;height:22px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></span></span></label>`;
+      html += `</div></div></div>`;
+
+      // ── Leveringstider ──
+      html += `<div class="settings-section"><h3>Leveringstider</h3>`;
+      html += `<p style="font-size:13px;color:#8A7D72;margin:-8px 0 14px">Antall dager etter bryllupet. Vises som forventet dato i klientportalen.</p>`;
+      html += `<div class="card" style="padding:0 20px">`;
+      const delivRow = (label, key, unit) => {
+        const days = settingsDraft[key] ?? 0;
+        const val = unit === 'uker' ? Math.round(days/7) : days;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--sand);gap:12px" id="drow_${key}">
+          <div style="font-size:14px">${label}</div>
+          <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+            <button onclick="adjDelivery('${key}','${unit}',-1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--sand);background:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--taupe)">−</button>
+            <span id="dval_${key}" style="min-width:24px;text-align:center;font-size:15px;font-weight:600">${val}</span>
+            <button onclick="adjDelivery('${key}','${unit}',1)" style="width:30px;height:30px;border-radius:50%;border:1.5px solid var(--sand);background:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--taupe)">+</button>
+            <span style="font-size:13px;color:#A09080;min-width:32px">${unit}</span>
+          </div>
+        </div>`;
+      };
+      html += delivRow('Sneak peek',   'delivery_days_preview',      'dager');
+      html += delivRow('Bilder',       'delivery_days_photos',       'uker');
+      html += delivRow('Album',        'delivery_days_album',        'uker');
+      html += delivRow('Preview film', 'delivery_days_film_preview', 'uker');
+      html += delivRow('Film',         'delivery_days_film',         'uker').replace('border-bottom:1px solid var(--sand);','');
+      html += `</div></div>`;
+
+      // ── Merkevare ──
       html += `<div class="settings-section"><h3>Merkevare</h3><div class="card" style="display:flex;flex-direction:column;gap:16px">`;
       html += `<div><label style="${fieldLabel}">Logo URL</label><input type="url" value="${esc(settingsDraft.logo_url)}" oninput="settingsDraft.logo_url=this.value;document.getElementById('logoPreview').src=this.value||''" placeholder="https://..." style="${fieldInput}">`;
       html += `<div style="margin-top:8px">${settingsDraft.logo_url ? `<img id="logoPreview" src="${esc(settingsDraft.logo_url)}" style="max-height:60px;max-width:200px;border-radius:6px;border:1px solid var(--sand);padding:4px;background:var(--white)" onerror="this.style.display='none'">` : `<img id="logoPreview" style="display:none">`}</div></div>`;
@@ -2580,10 +2664,19 @@
       html += `<div style="margin-top:8px">${settingsDraft.portal_hero_url ? `<img id="heroPreview" src="${esc(settingsDraft.portal_hero_url)}" style="max-height:120px;max-width:100%;border-radius:6px;border:1px solid var(--sand);object-fit:cover" onerror="this.style.display='none'">` : `<img id="heroPreview" style="display:none">`}</div></div>`;
       html += `</div></div>`;
 
+      // ── Studio-innstillinger ──
+      html += `<div class="settings-section"><h3>Studio-innstillinger</h3><div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">`;
+      html += `<div><label style="${fieldLabel}">Land</label><input type="text" value="${esc(settingsDraft.country)}" oninput="settingsDraft.country=this.value" placeholder="Norge" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Valuta</label><input type="text" value="${esc(settingsDraft.currency_code)}" oninput="settingsDraft.currency_code=this.value.toUpperCase()" placeholder="NOK" maxlength="3" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Valutasymbol</label><input type="text" value="${esc(settingsDraft.currency_symbol)}" oninput="settingsDraft.currency_symbol=this.value" placeholder="kr" maxlength="3" style="${fieldInput}"></div>`;
+      html += `<div><label style="${fieldLabel}">Tidssone</label><input type="text" value="${esc(settingsDraft.timezone)}" oninput="settingsDraft.timezone=this.value" placeholder="Europe/Oslo" style="${fieldInput}"></div>`;
+      html += `</div></div>`;
+
+      // ── Konto ──
       html += `<div class="settings-section"><h3>Konto</h3><div class="card" style="display:flex;flex-direction:column;gap:12px">`;
-      html += `<div class="field" style="margin:0"><label style="${fieldLabel}">E-post</label><p style="font-size:14px">${esc(currentUser?.email || '—')}</p></div>`;
+      html += `<div style="font-size:14px;color:#8A7D72">${esc(currentUser?.email || '—')}</div>`;
       const proBadge = (s.is_pro ? '<span class="badge" style="background:rgba(107,143,113,0.15);color:var(--sage);font-weight:600">Pro</span>' : '<span class="badge badge-draft">Gratis</span>');
-      html += `<div class="field" style="margin:0"><label style="${fieldLabel}">Plan</label><div>${proBadge}</div></div>`;
+      html += `<div>${proBadge}</div>`;
       html += `<div><button class="btn-outline btn-sm" onclick="logout()" style="color:var(--danger);border-color:var(--danger)">Logg ut</button></div>`;
       html += `</div></div>`;
 
@@ -2591,25 +2684,68 @@
       el.innerHTML = html;
     }
 
+    function adjDelivery(key, unit, delta) {
+      const step = unit === 'uker' ? 7 : 1;
+      const cur = settingsDraft[key] ?? 0;
+      settingsDraft[key] = Math.max(0, cur + delta * step);
+      const display = unit === 'uker' ? Math.round(settingsDraft[key]/7) : settingsDraft[key];
+      document.getElementById('dval_' + key).textContent = display;
+    }
+
     async function saveStudioSettings() {
       if (!currentUser) return;
-      const payload = {
+      const btn = document.querySelector('[onclick="saveStudioSettings()"]');
+      if (btn) { btn.disabled = true; btn.textContent = 'Lagrer…'; }
+
+      const stPayload = {
         id: studioSettings?.id || crypto.randomUUID(),
         user_id: currentUser.id,
-        studio_name: settingsDraft.studio_name.trim() || null,
+        studio_name: settingsDraft.crew_studio_name.trim() || settingsDraft.studio_name.trim() || null,
         country: settingsDraft.country.trim() || null,
         currency_code: settingsDraft.currency_code.trim() || null,
         currency_symbol: settingsDraft.currency_symbol.trim() || null,
         timezone: settingsDraft.timezone.trim() || null,
         portal_hero_url: settingsDraft.portal_hero_url.trim() || null,
         logo_url: settingsDraft.logo_url.trim() || null,
+        delivery_days_preview: settingsDraft.delivery_days_preview,
+        delivery_days_photos: settingsDraft.delivery_days_photos,
+        delivery_days_album: settingsDraft.delivery_days_album,
+        delivery_days_film_preview: settingsDraft.delivery_days_film_preview,
+        delivery_days_film: settingsDraft.delivery_days_film,
         updated_at: new Date().toISOString(),
       };
-      const { error } = await sb.from('studio_settings').upsert(payload, { onConflict: 'id' });
-      if (error) { showToast('Feil ved lagring'); console.error(error); return; }
+
+      const cpPayload = {
+        user_id: currentUser.id,
+        display_name: settingsDraft.display_name.trim() || null,
+        studio_name: settingsDraft.crew_studio_name.trim() || null,
+        role: settingsDraft.role || 'photographer',
+        bio: settingsDraft.bio.trim() || '',
+        contact_email: settingsDraft.contact_email.trim() || null,
+        phone: settingsDraft.phone.trim() || null,
+        instagram: settingsDraft.instagram.trim() || null,
+        website: settingsDraft.website.trim() || null,
+        google_review_url: settingsDraft.google_review_url.trim() || null,
+        avatar_url: settingsDraft.avatar_url.trim() || null,
+        base_location_name: settingsDraft.base_location_name.trim() || '',
+        travel_radius_km: settingsDraft.travel_radius_km ?? 0,
+        is_discoverable: settingsDraft.is_discoverable ?? true,
+        updated_at: new Date().toISOString(),
+      };
+
+      const [r1, r2] = await Promise.all([
+        sb.from('studio_settings').upsert(stPayload, { onConflict: 'id' }),
+        sb.from('crew_profiles').upsert(cpPayload, { onConflict: 'user_id' }),
+      ]);
+
+      if (btn) { btn.disabled = false; btn.textContent = 'Lagre innstillinger'; }
+      if (r1.error || r2.error) { showToast('Feil ved lagring'); console.error(r1.error, r2.error); return; }
+
       const { data } = await sb.from('studio_settings').select('*').limit(1);
       studioSettings = data?.[0] || studioSettings;
       studioName = studioSettings?.studio_name || '';
+      const { data: cp } = await sb.from('crew_profiles').select('*').eq('user_id', currentUser.id).limit(1);
+      if (cp?.[0]) crewProfilesById[currentUser.id] = cp[0];
       showToast('Lagret');
     }
 
