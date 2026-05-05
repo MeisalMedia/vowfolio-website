@@ -1596,7 +1596,7 @@
         el.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#A09080"><svg width="48" height="48" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg><div style="font-size:15px;font-weight:600;color:var(--espresso)">Ingen meldinger enda</div><div style="font-size:13px">Meldinger synkroniseres fra appen</div></div>`;
         return;
       }
-      el.innerHTML = `<div id="threadListPanel" style="width:300px;flex-shrink:0;border-right:1px solid var(--sand);overflow-y:auto;background:var(--white)"></div><div id="msgPanel" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--white)"><div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#A09080"><svg width="36" height="36" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.25"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg><div style="font-size:13px">Velg en samtale</div></div></div>`;
+      el.innerHTML = `<div style="width:300px;flex-shrink:0;border-right:1px solid var(--sand);display:flex;flex-direction:column;background:var(--white)"><div style="padding:12px 12px 10px;border-bottom:1px solid var(--sand);flex-shrink:0"><input id="threadSearch" type="search" placeholder="Søk…" oninput="filterThreads(this.value)" style="width:100%;padding:7px 10px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;background:var(--cream);color:var(--espresso);outline:none" onfocus="this.style.borderColor='var(--taupe)'" onblur="this.style.borderColor='var(--sand)'"></div><div id="threadListPanel" style="flex:1;overflow-y:auto"></div></div><div id="msgPanel" style="flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--white)"><div style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:#A09080"><svg width="36" height="36" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.25"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 3.5V17H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></svg><div style="font-size:13px">Velg en samtale</div></div></div>`;
       renderThreadList(null);
     }
 
@@ -1628,6 +1628,13 @@
     // ── Conversation view ──
     let currentThreadId = null;
     let currentMessages = [];
+
+    function filterThreads(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('#threadListPanel .thread-item').forEach(el => {
+        el.style.display = (!q || el.textContent.toLowerCase().includes(q)) ? '' : 'none';
+      });
+    }
 
     async function openMeldingerThread(threadId) {
       const msgPanel = document.getElementById('msgPanel');
