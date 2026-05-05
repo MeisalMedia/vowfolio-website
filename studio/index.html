@@ -1246,8 +1246,16 @@
       const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1;
       const c = contacts.find(x => x.linked_wedding_id === weddingId);
       const st = weddingStatusInfo(w);
+      const curr = studioSettings?.currency_symbol || 'kr';
+      const dfShort = d => new Date(d).toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' });
+      let daysInfo = '';
+      if (w.wedding_date) {
+        const days = Math.ceil((new Date(w.wedding_date) - new Date()) / 86400000);
+        daysInfo = days > 0 ? `${days} dager til bryllupet` : days === 0 ? 'I dag!' : `${Math.abs(days)} dager siden`;
+      }
 
-      let html = `<div style="padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;flex-wrap:wrap">
+      // Top bar: back + name + status + actions
+      let html = `<div style="padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0;flex-wrap:wrap;border-bottom:1px solid var(--sand)">
         <div style="display:flex;align-items:center;gap:12px">
           <button class="btn-outline btn-sm" onclick="navigate('oppdrag')">← Tilbake</button>
           <div style="font-family:'Playfair Display',serif;font-size:17px">${esc(couple)}</div>
@@ -1265,6 +1273,25 @@
           <button class="btn-primary btn-sm" onclick="navigate('createDoc','${weddingId}')">+ Ny kontrakt</button>
         </div>
       </div>`;
+
+      // Full-width oppdrag summary strip
+      html += `<div style="padding:16px 28px;background:var(--cream);border-bottom:1px solid var(--sand);flex-shrink:0;display:flex;align-items:center;gap:32px;flex-wrap:wrap">`;
+      if (w.wedding_date) {
+        html += `<div><div style="font-size:15px;font-weight:700;color:var(--espresso)">${dfShort(w.wedding_date)}</div>${daysInfo ? `<div style="font-size:11px;color:#8A7D72;margin-top:1px">${daysInfo}</div>` : ''}</div>`;
+      }
+      if (w.venue) {
+        html += `<div style="height:28px;width:1px;background:var(--sand);flex-shrink:0"></div>`;
+        html += `<div><div style="font-size:11px;color:#A09080;margin-bottom:1px">Lokale</div><div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(w.venue)}${w.venue_address ? `<span style="font-weight:400;color:#A09080"> · ${esc(w.venue_address)}</span>` : ''}</div></div>`;
+      }
+      if (w.contract_value) {
+        html += `<div style="height:28px;width:1px;background:var(--sand);flex-shrink:0"></div>`;
+        html += `<div><div style="font-size:11px;color:#A09080;margin-bottom:1px">Kontraktsverdi</div><div style="font-size:13px;font-weight:700;color:var(--espresso)">${w.contract_value.toLocaleString('nb-NO')} ${curr}</div></div>`;
+      }
+      if (w.photo_style) {
+        html += `<div style="height:28px;width:1px;background:var(--sand);flex-shrink:0"></div>`;
+        html += `<div><div style="font-size:11px;color:#A09080;margin-bottom:1px">Stil</div><div style="font-size:13px;color:var(--espresso)">${esc(w.photo_style)}</div></div>`;
+      }
+      html += `</div>`;
 
       html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
         <div class="tab active" id="dtab-info" onclick="switchOppdragTab('info')">Info</div>
@@ -1317,26 +1344,18 @@
       const sectionTitle = t => `<div style="font-size:11px;font-weight:600;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px">${t}</div>`;
       const fieldRow = (label, val) => val ? `<div style="margin-bottom:10px"><span style="font-size:11px;color:#A09080">${label}: </span><span style="font-size:13px;color:var(--espresso)">${val}</span></div>` : '';
 
-      let daysInfo = '';
-      if (w.wedding_date) {
-        const days = Math.ceil((new Date(w.wedding_date) - new Date()) / 86400000);
-        daysInfo = days > 0 ? `${days} dager til bryllupet` : days === 0 ? 'I dag!' : `${Math.abs(days)} dager siden`;
-      }
-
       let html = `<div class="detail-info-grid">`;
 
       // ── LEFT COLUMN ──────────────────────────────────────────────
       html += `<div style="display:flex;flex-direction:column;gap:16px">`;
 
-      // Basis-info card
-      html += `<div class="card">`;
-      html += sectionTitle('Oppdrag');
-      if (w.wedding_date) html += `<div style="margin-bottom:10px"><div style="font-size:16px;font-weight:600;color:var(--espresso)">${df(w.wedding_date)}</div>${daysInfo ? `<div style="font-size:12px;color:#8A7D72;margin-top:2px">${daysInfo}</div>` : ''}</div>`;
-      if (w.venue) html += fieldRow('Lokale', esc(w.venue) + (w.venue_address ? ` <span style="color:#A09080">· ${esc(w.venue_address)}</span>` : ''));
-      if (w.contract_value) html += fieldRow('Kontraktsverdi', `<strong>${w.contract_value.toLocaleString('nb-NO')} ${curr}</strong>`);
-      if (w.photo_style) html += fieldRow('Stil', esc(w.photo_style));
-      if (c.notes) html += `<div style="margin-top:8px;padding-top:10px;border-top:1px solid var(--sand)"><div style="font-size:11px;color:#A09080;margin-bottom:4px">Notater</div><div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</div></div>`;
-      html += `</div>`;
+      // Notater (from CRM contact)
+      if (c.notes) {
+        html += `<div class="card">`;
+        html += sectionTitle('Notater');
+        html += `<div style="font-size:13px;color:var(--espresso);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</div>`;
+        html += `</div>`;
+      }
 
       // Logistikk card (from intake form)
       if (intake) {
