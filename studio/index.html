@@ -2917,7 +2917,13 @@
       ]);
 
       if (btn) { btn.disabled = false; btn.textContent = 'Lagre innstillinger'; }
-      if (r1.error || r2.error) { showToast('Feil ved lagring'); console.error(r1.error, r2.error); return; }
+      if (r1.error || r2.error) {
+        const msg = (r1.error?.message || r2.error?.message || 'ukjent feil');
+        showToast('Feil ved lagring: ' + msg);
+        console.error('studio_settings error:', r1.error);
+        console.error('crew_profiles error:', r2.error);
+        return;
+      }
 
       const { data } = await sb.from('studio_settings').select('*').limit(1);
       studioSettings = data?.[0] || studioSettings;
