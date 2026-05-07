@@ -752,16 +752,20 @@
     }
 
     function threadWaitingForYou(thread) {
+      // Hvis siste kjente melding er sendt av meg → ikke ulest.
+      const last = lastMessageByThread[thread.id];
+      if (last) {
+        const mine = last.sender_id === currentUser?.id || last.sender_role === 'photographer';
+        if (mine) return false;
+      }
       // Hvis vi har åpnet tråden ETTER siste melding, er den lest.
       const viewedAt = viewedAtByThread[thread.id];
       if (viewedAt && thread.last_message_at && viewedAt >= thread.last_message_at) {
         return false;
       }
       if ((thread.unread_count || 0) > 0) return true;
-      const last = lastMessageByThread[thread.id];
       if (!last) return false;
-      const mine = last.sender_id === currentUser?.id || last.sender_role === 'photographer';
-      return !mine;
+      return true; // siste melding er fra motparten og ikke lest
     }
 
     // ── Navigation ──
@@ -1935,7 +1939,9 @@
         html += `<button onclick="showMoteModal()" class="btn-primary" style="margin-top:20px;width:auto;padding:10px 24px">+ Skriv første møtenotat</button>`;
         html += `</div>`;
       } else {
+        window._moteCache = {};
         list.forEach(m => {
+          window._moteCache[m.id] = m;
           const hasPortal = !!m.client_summary;
           html += `<div class="card" style="margin-bottom:16px">`;
           html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:${m.notes || hasPortal ? '12px' : '0'}">`;
@@ -1945,7 +1951,7 @@
           html += `</div>`;
           html += `<div style="display:flex;align-items:center;gap:12px">`;
           if (m.meeting_date) html += `<div style="font-size:12px;color:#A09080">${df(m.meeting_date)}</div>`;
-          html += `<button onclick="showMoteModal(${JSON.stringify(m)})" style="background:none;border:1.5px solid var(--sand);border-radius:7px;cursor:pointer;font-size:12px;padding:3px 10px;color:var(--taupe)">Rediger</button>`;
+          html += `<button onclick="showMoteModal(window._moteCache['${m.id}'])" style="background:none;border:1.5px solid var(--sand);border-radius:7px;cursor:pointer;font-size:12px;padding:3px 10px;color:var(--taupe)">Rediger</button>`;
           html += `<button onclick="deleteMote('${m.id}')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#C0A898;line-height:1" title="Slett">🗑</button>`;
           html += `</div></div>`;
           if (m.notes) html += `<div style="font-size:13px;color:var(--espresso);line-height:1.7;white-space:pre-wrap;margin-bottom:${hasPortal ? '14px' : '0'}">${esc(m.notes)}</div>`;
