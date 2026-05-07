@@ -1547,7 +1547,7 @@
       const payload = { event_time: time, title, notes: document.getElementById('dpNotes').value.trim() || null, wedding_id: detailWeddingId, user_id: currentUser.id };
       const { error } = id
         ? await sb.from('day_timeline_items').update(payload).eq('id', id)
-        : await sb.from('day_timeline_items').insert({ ...payload, sort_order: Date.now() });
+        : await sb.from('day_timeline_items').insert({ ...payload, sort_order: Math.floor(Date.now() / 1000) });
       btn.disabled = false; btn.textContent = 'Lagre';
       if (error) { showToast('Feil: ' + error.message); return; }
       hideDagplanModal();
@@ -1660,7 +1660,7 @@
       const payload = { title, due_date: due, client_visible: document.getElementById('lvClientVisible').checked, wedding_id: detailWeddingId };
       const { error } = id
         ? await sb.from('deliverables').update(payload).eq('id', id)
-        : await sb.from('deliverables').insert({ ...payload, sort_order: Date.now(), is_complete: false, status: 'pending' });
+        : await sb.from('deliverables').insert({ ...payload, sort_order: Math.floor(Date.now() / 1000), is_complete: false, status: 'pending' });
       btn.disabled = false; btn.textContent = 'Lagre';
       if (error) { showToast('Feil: ' + error.message); return; }
       hideLeveranseModal();
