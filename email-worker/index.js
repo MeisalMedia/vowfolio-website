@@ -124,12 +124,17 @@ function stripQuotedContent(text) {
   const result = [];
 
   for (const line of lines) {
+    const trimmed = line.trim();
     if (
       line.startsWith('>') ||
-      /^On .{10,} wrote:?$/i.test(line.trim()) ||
-      /^-{3,}/.test(line) ||
-      /^_{3,}/.test(line) ||
-      /^From:\s/i.test(line)
+      /^On .{10,} wrote:?$/i.test(trimmed) ||
+      /^-{3,}/.test(trimmed) ||
+      /^_{3,}/.test(trimmed) ||
+      /^From:\s/i.test(trimmed) ||
+      // Vanlige mobil-/app-signaturer
+      /^Sent from (my )?(iPhone|iPad|Android|Outlook|Samsung|Galaxy|Mail for Windows)/i.test(trimmed) ||
+      /^Get Outlook for (iOS|Android)/i.test(trimmed) ||
+      /^Sendt fra (min )?(iPhone|iPad|Android|Outlook)/i.test(trimmed)
     ) {
       break;
     }
