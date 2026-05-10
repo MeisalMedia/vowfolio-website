@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "vowfolio-email-worker",
+  "main": "index.js",
+  "compatibility_date": "2026-04-12",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Secrets settes via CLI — aldri hardkod disse:
+  //   wrangler secret put SUPABASE_URL
+  //   wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+  //
+  // Deploy:
+  //   cd email-worker && npm install && wrangler deploy
+  //
+  // Cloudflare Dashboard etter deploy:
+  //   Email Routing → Routing Rules → legg til:
+  //   Match: Custom address  thread-*@vowfolio.com
+  //   Action: Send to Worker  vowfolio-email-worker
+}
