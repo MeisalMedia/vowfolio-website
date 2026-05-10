@@ -1977,7 +1977,7 @@ function render(data) {
   const sortableTiles = [
     { done: !!intake.submitted, html: intakeTileHtml },
     { done: !!gp.submitted, html: groupPhotosTileHtml },
-    { done: contract.status === 'signed', html: contractTileHtml },
+    { done: false, html: contractTileHtml },
   ];
   sortableTiles.sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0));
   const sortedTilesHtml = sortableTiles.map(t =>
