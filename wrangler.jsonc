@@ -1,14 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "vowfolio-website",
+  "name": "vowfolio-studio-web",
   "compatibility_date": "2026-04-12",
+  "pages_build_output_dir": "studio",
   "observability": {
     "enabled": true
-  },
-  "assets": {
-    "directory": "."
-  },
-  "compatibility_flags": [
-    "nodejs_compat"
-  ]
+  }
 }
