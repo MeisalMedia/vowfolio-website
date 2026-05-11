@@ -523,6 +523,11 @@ const t = {
     deliveriesStatusNotStarted: 'Coming',
     deliveriesDeliveredOn: 'Delivered',
     deliveriesExpected: 'Expected',
+    deliveriesComingSoon: 'soon',
+    deliveriesToday: 'today',
+    deliveriesInWord: 'in',
+    dayWord: 'day',
+    daysWord: 'days',
     deliveriesEmpty: 'No deliveries shared yet.',
     deliveriesLoading: 'Loading deliveries…',
     deliveryTypeSneakPeek: 'Sneak peek',
@@ -792,6 +797,11 @@ const t = {
     deliveriesStatusNotStarted: 'Kommer',
     deliveriesDeliveredOn: 'Levert',
     deliveriesExpected: 'Forventet',
+    deliveriesComingSoon: 'snart',
+    deliveriesToday: 'i dag',
+    deliveriesInWord: 'om',
+    dayWord: 'dag',
+    daysWord: 'dager',
     deliveriesEmpty: 'Ingen leveranser ennå.',
     deliveriesLoading: 'Laster leveranser…',
     deliveryTypeSneakPeek: 'Sneak peek',
@@ -1827,16 +1837,20 @@ function render(data) {
   const delivDone = delivStatus.delivered || 0;
   let delivStatusText = '';
   let delivStatusClass = '';
-  if (delivTotal > 0) {
-    if (delivDone === delivTotal) {
-      delivStatusText = tr('deliveriesStatusAll');
-      delivStatusClass = 'ok';
-    } else if (delivDone > 0) {
-      delivStatusText = `${delivDone}/${delivTotal} ${tr('deliveriesStatusPartial')}`;
-      delivStatusClass = 'preview';
-    } else {
-      delivStatusText = tr('deliveriesStatusNone');
+  if (delivTotal > 0 && delivDone === delivTotal) {
+    delivStatusText = tr('deliveriesStatusAll');
+    delivStatusClass = 'ok';
+  } else if (delivTotal > 0 && delivDone > 0) {
+    delivStatusText = `${delivDone}/${delivTotal} ${tr('deliveriesStatusPartial')}`;
+    delivStatusClass = 'preview';
+  } else {
+    // None delivered yet — show next expected delivery from photographer settings.
+    const next = nextExpectedDelivery();
+    if (next) {
+      delivStatusText = `${escapeHtml(next.title)} <span class="dot">·</span> ${escapeHtml(next.dateLabel)}`;
       delivStatusClass = '';
+    } else if (delivTotal > 0) {
+      delivStatusText = tr('deliveriesStatusNone');
     }
   }
 
@@ -2706,6 +2720,34 @@ function autoDeliveryItems() {
     due.setDate(due.getDate() + t.days);
     return { title: t.label, status: 'not_started', dueDate: due.toISOString().split('T')[0] };
   });
+}
+
+// Returns the next undelivered delivery for the overview tile,
+// preferring manual deliverables when loaded, otherwise auto-computed
+// from photographer settings + wedding date.
+function nextExpectedDelivery() {
+  const manual = (deliveriesData && deliveriesData.items) || [];
+  const items = (manual.length ? manual : autoDeliveryItems())
+    .filter(it => it && it.dueDate && (it.status || 'not_started') !== 'delivered');
+  if (!items.length) return null;
+  const sorted = items
+    .map(it => ({ ...it, dueMs: new Date(it.dueDate).getTime() }))
+    .sort((a, b) => a.dueMs - b.dueMs);
+  const todayMs = (() => { const d = new Date(); d.setHours(0,0,0,0); return d.getTime(); })();
+  const next = sorted.find(it => it.dueMs >= todayMs) || sorted[0];
+  if (!next) return null;
+  const days = daysUntil(next.dueDate);
+  let dateLabel;
+  if (days == null)         dateLabel = '';
+  else if (days < 0)        dateLabel = tr('deliveriesComingSoon');
+  else if (days === 0)      dateLabel = tr('deliveriesToday');
+  else if (days <= 14)      dateLabel = `${tr('deliveriesInWord')} ${days} ${days === 1 ? tr('dayWord') : tr('daysWord')}`;
+  else {
+    const d = new Date(next.dueDate);
+    const locale = lang === 'no' ? 'nb-NO' : 'en-GB';
+    dateLabel = d.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+  }
+  return { title: next.title, dateLabel };
 }
 
 function renderDeliveries() {
