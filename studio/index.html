@@ -607,6 +607,50 @@
     </div>
   </div>
 
+  <!-- Task modal -->
+  <div id="taskModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;align-items:center;justify-content:center;padding:16px">
+    <div class="card" style="width:100%;max-width:440px;padding:28px;border-radius:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 id="taskModalTitle" style="font-family:'Playfair Display',serif;font-size:20px;margin:0;color:var(--espresso)">Ny oppgave</h3>
+        <button onclick="hideTaskModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <input type="hidden" id="taskId">
+      <input type="text" id="taskTitle" placeholder="Oppgavetittel *" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:12px;box-sizing:border-box;color:var(--espresso);background:var(--cream)">
+      <textarea id="taskDescription" placeholder="Beskrivelse (valgfritt)" rows="2" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;resize:vertical;margin-bottom:12px;box-sizing:border-box;color:var(--espresso);background:var(--cream)"></textarea>
+      <label style="font-size:12px;font-weight:600;color:#8A7D72;display:block;margin-bottom:5px">Frist (valgfritt)</label>
+      <input type="date" id="taskDueDate" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:20px;box-sizing:border-box;color:var(--espresso);background:var(--cream)">
+      <div style="display:flex;justify-content:flex-end;gap:10px">
+        <button onclick="hideTaskModal()" class="btn-outline">Avbryt</button>
+        <button onclick="saveTask()" class="btn-primary">Lagre</button>
+      </div>
+      <p style="color:var(--danger);font-size:13px;margin-top:8px;min-height:18px" id="taskError"></p>
+    </div>
+  </div>
+
+  <!-- Crew wedding invite modal -->
+  <div id="crewWeddingInviteModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:1000;align-items:center;justify-content:center;padding:16px">
+    <div class="card" style="width:100%;max-width:440px;padding:28px;border-radius:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <h3 style="font-family:'Playfair Display',serif;font-size:20px;margin:0;color:var(--espresso)">Inviter crew</h3>
+        <button onclick="hideCrewWeddingInviteModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:#8A7D72;line-height:1">×</button>
+      </div>
+      <label style="font-size:12px;font-weight:600;color:#8A7D72;display:block;margin-bottom:5px">E-postadresse *</label>
+      <input type="email" id="crewInviteEmail" placeholder="fotograf@eksempel.no" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:12px;box-sizing:border-box;color:var(--espresso);background:var(--cream)">
+      <label style="font-size:12px;font-weight:600;color:#8A7D72;display:block;margin-bottom:5px">Rolle</label>
+      <select id="crewInviteRole" style="width:100%;padding:11px 14px;border:1.5px solid var(--sand);border-radius:8px;font-size:14px;font-family:inherit;margin-bottom:20px;box-sizing:border-box;appearance:none;color:var(--espresso);background:var(--cream)">
+        <option value="second_shooter">2nd Shooter</option>
+        <option value="videographer">Videograf</option>
+        <option value="photographer">Fotograf</option>
+        <option value="assistant">Assistent</option>
+      </select>
+      <div style="display:flex;justify-content:flex-end;gap:10px">
+        <button onclick="hideCrewWeddingInviteModal()" class="btn-outline">Avbryt</button>
+        <button onclick="sendCrewWeddingInvite()" class="btn-primary" id="crewInviteSendBtn">Send invitasjon</button>
+      </div>
+      <p style="color:var(--danger);font-size:13px;margin-top:8px;min-height:18px" id="crewInviteError"></p>
+    </div>
+  </div>
+
   <!-- Contact modal -->
   <div id="kontaktModal" style="display:none;position:fixed;inset:0;background:rgba(61,50,41,0.4);z-index:200;display:none;align-items:center;justify-content:center;padding:20px">
     <div style="background:var(--white);border-radius:16px;padding:32px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(61,50,41,0.15)">
@@ -1147,6 +1191,7 @@
         { key: 'alle', label: 'Alle' },
         { key: 'inquiry', label: 'Lead' },
         { key: 'booked', label: 'Booket' },
+        { key: 'archived', label: 'Arkiverte' },
       ];
 
       let html = `<div class="main-content">`;
@@ -1335,9 +1380,12 @@
 
       html += `<div class="tabs" style="padding:0 28px;flex-shrink:0">
         <div class="tab active" id="dtab-info" onclick="switchOppdragTab('info')">Info</div>
+        <div class="tab" id="dtab-oppgaver" onclick="switchOppdragTab('oppgaver')">Oppgaver</div>
+        <div class="tab" id="dtab-crew" onclick="switchOppdragTab('crew')">Crew</div>
         <div class="tab" id="dtab-moeter" onclick="switchOppdragTab('moeter')">Møter</div>
         <div class="tab" id="dtab-dokumenter" onclick="switchOppdragTab('dokumenter')">Dokumenter</div>
         <div class="tab" id="dtab-betalinger" onclick="switchOppdragTab('betalinger')">Betalinger</div>
+        <div class="tab" id="dtab-moodboard" onclick="switchOppdragTab('moodboard')">Moodboard</div>
       </div>`;
 
       html += `<div id="oppdragTabContent" style="flex:1;overflow-y:auto;padding:24px 28px"></div>`;
@@ -1354,9 +1402,12 @@
       const content = document.getElementById('oppdragTabContent');
       if (content) { content.style.cssText = 'flex:1;overflow-y:auto;padding:24px 28px'; }
       if (tab === 'info') renderOppdragInfoTab();
+      else if (tab === 'oppgaver') renderOppdragOppgaverTab();
+      else if (tab === 'crew') renderOppdragCrewTab();
       else if (tab === 'moeter') renderOppdragMoeterTab();
       else if (tab === 'dokumenter') renderOppdragDokumenterTab();
       else if (tab === 'betalinger') renderOppdragBetalingerTab();
+      else if (tab === 'moodboard') renderOppdragMoodboardTab();
     }
 
     async function renderOppdragInfoTab() {
@@ -1502,9 +1553,20 @@
         html += `</div>`;
       }
 
+      // Portaltilgangslogg
+      {
+        html += `<div class="card">`;
+        html += `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">${sectionTitle('Portaltilgang').replace('margin-bottom:12px','margin-bottom:0')}</div>`;
+        html += `<div id="portalLogContainer"><div style="font-size:13px;color:#A09080">Laster…</div></div>`;
+        html += `</div>`;
+      }
+
       html += `</div>`; // end right column
       html += `</div>`; // end grid
       el.innerHTML = html;
+      // Render portal log async
+      const logContainer = document.getElementById('portalLogContainer');
+      if (logContainer) renderPortalLog(logContainer, detailWeddingId);
     }
 
     // ── Møtenotat modal ──────────────────────────────────────────
@@ -1764,12 +1826,14 @@
       btn.textContent = '…'; btn.disabled = true;
       _intakeWeddingId = weddingId;
       try {
-        // Hent eksisterende intake + kontakt parallelt
-        const [intakeRes, contactRes] = await Promise.all([
+        // Hent eksisterende intake + kontakt + quiz-svar parallelt
+        const [intakeRes, contactRes, quizRes] = await Promise.all([
           sb.from('wedding_intake_forms').select('*').eq('wedding_id', weddingId).limit(1),
           Promise.resolve(contacts.find(x => x.linked_wedding_id === weddingId) || {}),
+          sb.from('quiz_responses').select('*,quiz_templates(name)').eq('project_id', weddingId).order('submitted_at', { ascending: false }),
         ]);
         const intake = intakeRes.data?.[0] || null;
+        const quizResponses = quizRes.data || [];
         const c = contactRes;
         const w = weddings.find(x => x.id === weddingId) || {};
         const couple = w.partner2 ? `${w.partner1} & ${w.partner2}` : (w.partner1 || '');
@@ -1812,6 +1876,19 @@
               ${intakeField('Pakke', intake.booked_package)}
             </div>
             ${intake.must_have_shots ? `<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:#A09080;margin-bottom:6px">MUST-HAVE BILDER</div><div style="font-size:13px;color:var(--espresso);line-height:1.7;white-space:pre-wrap;background:var(--cream);border-radius:8px;padding:10px 12px">${esc(intake.must_have_shots)}</div></div>` : ''}
+            ${quizResponses.length ? `<div style="margin-bottom:20px;padding-top:16px;border-top:1px solid var(--sand)">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.6px;color:#A09080;margin-bottom:12px">QUIZ-SVAR (${quizResponses.length})</div>
+              ${quizResponses.map(qr => {
+                const resp = qr.responses || {};
+                const keys = Object.keys(resp);
+                const dt = qr.submitted_at ? new Date(qr.submitted_at).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : '';
+                return `<div style="margin-bottom:14px;padding:12px;background:var(--cream);border-radius:8px">
+                  <div style="font-size:12px;font-weight:600;color:var(--taupe);margin-bottom:8px">${esc(qr.quiz_templates?.name||'Quiz')}${dt?' · <span style="font-weight:400;color:#A09080">'+dt+'</span>':''}</div>
+                  ${keys.slice(0,10).map(k=>`<div style="display:flex;gap:8px;padding:4px 0;border-bottom:1px solid var(--sand);font-size:12px"><span style="color:#A09080;min-width:120px;flex-shrink:0">${esc(String(k))}</span><span style="color:var(--espresso)">${esc(String(resp[k]??''))}</span></div>`).join('')}
+                  ${keys.length>10?`<div style="font-size:11px;color:#A09080;margin-top:6px">+${keys.length-10} flere felt</div>`:''}
+                </div>`;
+              }).join('')}
+            </div>` : ''}
             <div style="border-top:1px solid var(--sand);padding-top:16px">
               <div style="font-size:12px;color:#A09080;margin-bottom:12px">Send påminnelse / be om oppdatering</div>
               ${renderIntakeSendForm(couple, c.email || '')}
@@ -2930,6 +3007,7 @@
         <div style="display:flex;gap:0;margin-top:20px;border-bottom:2px solid var(--sand)">
           <button onclick="crewSetMode('finn')" id="crewTabFinn" style="padding:8px 20px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid var(--espresso);margin-bottom:-2px;background:none;color:var(--espresso)">Finn crew</button>
           <button onclick="crewSetMode('favoritter')" id="crewTabFav" style="padding:8px 20px;font-size:14px;font-weight:400;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;color:var(--taupe)">Favoritter</button>
+          <button onclick="crewSetMode('invitasjoner')" id="crewTabInv" style="padding:8px 20px;font-size:14px;font-weight:400;font-family:inherit;cursor:pointer;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;background:none;color:var(--taupe)">Invitasjoner</button>
         </div>
       </div>
       <div id="crewGrid" style="padding:28px 32px;overflow-y:auto"></div>`;
@@ -2950,9 +3028,16 @@
       _crewMode = mode;
       const fav = document.getElementById('crewTabFav');
       const finn = document.getElementById('crewTabFinn');
+      const inv = document.getElementById('crewTabInv');
       if (fav) { fav.style.borderBottomColor = mode==='favoritter'?'var(--espresso)':'transparent'; fav.style.fontWeight=mode==='favoritter'?'600':'400'; fav.style.color=mode==='favoritter'?'var(--espresso)':'var(--taupe)'; }
       if (finn) { finn.style.borderBottomColor = mode==='finn'?'var(--espresso)':'transparent'; finn.style.fontWeight=mode==='finn'?'600':'400'; finn.style.color=mode==='finn'?'var(--espresso)':'var(--taupe)'; }
-      renderCrewGrid();
+      if (inv) { inv.style.borderBottomColor = mode==='invitasjoner'?'var(--espresso)':'transparent'; inv.style.fontWeight=mode==='invitasjoner'?'600':'400'; inv.style.color=mode==='invitasjoner'?'var(--espresso)':'var(--taupe)'; }
+      if (mode === 'invitasjoner') {
+        const grid = document.getElementById('crewGrid');
+        if (grid) renderCrewInvitasjoner(grid);
+      } else {
+        renderCrewGrid();
+      }
     };
 
     window.crewSetRole = function(role) {
@@ -3514,6 +3599,20 @@
       html += `<div style="min-width:220px"><input type="email" value="${esc(settingsDraft.reply_to_email)}" oninput="settingsDraft.reply_to_email=this.value" placeholder="foto@eksempel.no" style="${fieldInput}"></div>`;
       html += `</div></div></div>`;
 
+      // ── Kontaktskjema ──
+      html += `<div class="settings-section"><h3>Kontaktskjema</h3>`;
+      html += `<p style="font-size:13px;color:#8A7D72;margin:-8px 0 14px;line-height:1.5">Velg hvilke felt som vises i det offentlige kontaktskjemaet på nettsiden din.</p>`;
+      html += `<div class="card" style="padding:0 20px" id="contactFormCard"><div style="padding:16px 0;text-align:center;color:#A09080;font-size:13px">Laster…</div></div></div>`;
+
+      // ── Team ──
+      html += `<div class="settings-section"><h3>Team</h3>`;
+      html += `<p style="font-size:13px;color:#8A7D72;margin:-8px 0 14px;line-height:1.5">Inviter kolleger til studioet ditt. Teammedlemmer kan logge inn og administrere oppdrag.</p>`;
+      html += `<div class="card" style="padding:0 16px" id="teamCard"><div style="padding:16px 0;text-align:center;color:#A09080;font-size:13px">Laster…</div></div>`;
+      html += `<div style="margin-top:14px;display:flex;gap:10px;align-items:flex-end">
+        <div style="flex:1"><label style="${fieldLabel}">Inviter med e-post</label><input type="email" id="teamInviteEmail" placeholder="kollega@eksempel.no" style="${fieldInput}"></div>
+        <button onclick="inviteTeamMember()" class="btn-primary" style="flex-shrink:0;height:42px">Inviter</button>
+      </div></div>`;
+
       // ── Konto ──
       html += `<div class="settings-section"><h3>Konto</h3><div class="card" style="display:flex;flex-direction:column;gap:12px">`;
       html += `<div style="font-size:14px;color:#8A7D72">${esc(currentUser?.email || '—')}</div>`;
@@ -3524,6 +3623,111 @@
 
       html += `</div>`;
       el.innerHTML = html;
+      // Load async sections
+      loadContactFormSettings();
+      loadTeamSettings();
+    }
+
+    async function loadContactFormSettings() {
+      const card = document.getElementById('contactFormCard');
+      if (!card) return;
+      const { data: form } = await sb.from('contact_forms').select('*').eq('user_id', currentUser.id).limit(1);
+      const f = form?.[0] || {};
+      const toggle = (key, label, desc) => {
+        const on = f[key] !== false;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--sand);gap:12px">
+          <div><div style="font-size:14px;font-weight:500">${label}</div>${desc?`<div style="font-size:12px;color:#A09080;margin-top:1px">${desc}</div>`:''}</div>
+          <label style="position:relative;display:inline-block;width:44px;height:26px;flex-shrink:0">
+            <input type="checkbox" ${on?'checked':''} onchange="saveContactFormField('${key}',this.checked)" style="opacity:0;width:0;height:0">
+            <span onclick="this.previousElementSibling.click()" style="position:absolute;inset:0;background:${on?'var(--sage)':'#ccc'};border-radius:13px;cursor:pointer;transition:0.2s" id="cfToggle_${key}">
+              <span style="position:absolute;left:${on?'20':'2'}px;top:2px;width:22px;height:22px;background:white;border-radius:50%;transition:0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.2)" id="cfKnob_${key}"></span>
+            </span>
+          </label>
+        </div>`;
+      };
+      card.innerHTML =
+        toggle('show_partner_name', 'Partner-navn', 'Feltet for partner/brudgom/brud 2') +
+        toggle('show_phone', 'Telefonnummer', null) +
+        toggle('show_wedding_date', 'Bryllupsdato', null) +
+        toggle('show_venue', 'Lokale', null) +
+        toggle('show_photo_style', 'Fotostil', 'Romantisk, dokumentarisk, etc.') +
+        toggle('show_guest_count', 'Antall gjester', null) +
+        toggle('show_preferred_contact', 'Foretrukket kontaktmetode', null) +
+        toggle('show_budget', 'Budsjett', null);
+      window._cfFormId = f.id || null;
+    }
+
+    window.saveContactFormField = async function(key, value) {
+      const span = document.getElementById('cfToggle_' + key);
+      const knob = document.getElementById('cfKnob_' + key);
+      if (span) span.style.background = value ? 'var(--sage)' : '#ccc';
+      if (knob) knob.style.left = value ? '20px' : '2px';
+      const payload = { [key]: value, user_id: currentUser.id, studio_id: studioSettings?.id || null, updated_at: new Date().toISOString() };
+      if (window._cfFormId) {
+        await sb.from('contact_forms').update(payload).eq('id', window._cfFormId);
+      } else {
+        const newId = crypto.randomUUID();
+        await sb.from('contact_forms').insert({ id: newId, ...payload });
+        window._cfFormId = newId;
+      }
+    };
+
+    async function loadTeamSettings() {
+      const card = document.getElementById('teamCard');
+      if (!card || !studioSettings?.id) {
+        if (card) card.innerHTML = `<div style="padding:16px 0;font-size:13px;color:#A09080">Studio-ID ikke funnet. Lagre studio-innstillinger først.</div>`;
+        return;
+      }
+      const [membersRes, invitesRes] = await Promise.all([
+        sb.from('studio_members').select('*,profiles:user_id(email)').eq('studio_id', studioSettings.id),
+        sb.from('studio_invites').select('*').eq('studio_id', studioSettings.id).neq('status', 'accepted'),
+      ]);
+      const members = membersRes.data || [];
+      const invites = invitesRes.data || [];
+      const roleLabel = r => r === 'owner' ? 'Eier' : 'Medlem';
+      let html = members.map(m => {
+        const email = m.profiles?.email || m.user_id.slice(0,12);
+        const isMe = m.user_id === currentUser.id;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sand)">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--taupe);flex-shrink:0">${(email[0]||'?').toUpperCase()}</div>
+          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${esc(email)}${isMe?' (deg)':''}</div><div style="font-size:11px;color:#A09080">${roleLabel(m.role)}</div></div>
+          ${!isMe&&m.role!=='owner'?`<button onclick="removeTeamMember('${m.user_id}')" style="background:none;border:1.5px solid var(--danger);border-radius:6px;cursor:pointer;color:var(--danger);font-size:11px;padding:3px 8px;font-family:inherit">Fjern</button>`:''}
+        </div>`;
+      }).join('');
+      html += invites.map(i =>
+        `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sand)">
+          <div style="width:34px;height:34px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:#A09080;flex-shrink:0;font-size:13px">✉</div>
+          <div style="flex:1;min-width:0"><div style="font-size:13px">${esc(i.invited_email)}</div><div style="font-size:11px;color:#A09080">Invitert · venter</div></div>
+          <button onclick="cancelTeamInvite('${i.id}')" style="background:none;border:1.5px solid var(--sand);border-radius:6px;cursor:pointer;color:#A09080;font-size:11px;padding:3px 8px;font-family:inherit">Avbryt</button>
+        </div>`
+      ).join('');
+      card.innerHTML = html || `<div style="padding:16px 0;font-size:13px;color:#A09080;text-align:center">Bare deg foreløpig. Inviter en kollega nedenfor.</div>`;
+    }
+
+    async function inviteTeamMember() {
+      const email = document.getElementById('teamInviteEmail')?.value.trim();
+      if (!email) { showToast('Skriv inn e-postadresse'); return; }
+      if (!studioSettings?.id) { showToast('Lagre studio-innstillinger først'); return; }
+      const { error } = await sb.from('studio_invites').insert({
+        id: crypto.randomUUID(), studio_id: studioSettings.id,
+        invited_email: email, role: 'member', status: 'pending',
+        token: await genToken(),
+      });
+      if (error) { showToast('Feil: ' + error.message); return; }
+      document.getElementById('teamInviteEmail').value = '';
+      showToast('Invitasjon sendt til ' + email);
+      loadTeamSettings();
+    }
+
+    async function removeTeamMember(userId) {
+      if (!confirm('Fjerne dette teammedlemmet?')) return;
+      await sb.from('studio_members').delete().eq('studio_id', studioSettings.id).eq('user_id', userId);
+      loadTeamSettings();
+    }
+
+    async function cancelTeamInvite(inviteId) {
+      await sb.from('studio_invites').delete().eq('id', inviteId);
+      loadTeamSettings();
     }
 
     async function uploadAvatar(input) {
@@ -4665,6 +4869,328 @@
           <div class="cmd-type">${r.type}</div>
         </div>`
       ).join('');
+    }
+
+    // ── Oppgaver per oppdrag ──────────────────────────────────────────────
+
+    async function renderOppdragOppgaverTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el || !detailWeddingId) return;
+      el.innerHTML = `<div style="text-align:center;padding:48px;color:#A09080;font-size:14px">Laster…</div>`;
+      const { data: tasks = [] } = await sb.from('tasks').select('*').eq('wedding_id', detailWeddingId).order('created_at', { ascending: true });
+      const today = new Date(); today.setHours(0,0,0,0);
+      const fmt = d => new Date(d).toLocaleDateString('nb-NO', { day:'numeric', month:'short' });
+      const isOverdue = t => !t.is_completed && t.due_date && new Date(t.due_date) < today;
+      const taskRow = t => {
+        const done = t.is_completed; const ov = isOverdue(t);
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--sand)" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">
+          <div onclick="toggleTask('${t.id}',${done})" style="width:20px;height:20px;border-radius:50%;border:2px solid ${done?'var(--sage)':'var(--sand)'};background:${done?'var(--sage)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;margin-top:1px">${done?'<svg width="10" height="10" viewBox="0 0 10 10" stroke="white" fill="none" stroke-width="2"><polyline points="1.5,5 4,7.5 8.5,2"/></svg>':''}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;${done?'text-decoration:line-through;color:#A09080':''}">${esc(t.title)}</div>
+            ${t.description?`<div style="font-size:12px;color:#A09080;margin-top:2px">${esc(t.description)}</div>`:''}
+            ${t.due_date?`<div style="font-size:11px;margin-top:3px;${ov?'color:#C0392B':'color:#A09080'}">${ov?'⚠ Forfalt · ':''}${fmt(t.due_date)}</div>`:''}
+          </div>
+          <div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">
+            <button onclick="showTaskModal(${JSON.stringify(t).replace(/"/g,'&quot;')})" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">✏️</button>
+            <button onclick="deleteTask('${t.id}')" style="background:none;border:none;cursor:pointer;color:#A09080;font-size:13px;padding:2px 4px">🗑</button>
+          </div>
+        </div>`;
+      };
+      const overdue = tasks.filter(isOverdue);
+      const upcoming = tasks.filter(t => !t.is_completed && t.due_date && new Date(t.due_date) >= today);
+      const noDate = tasks.filter(t => !t.is_completed && !t.due_date);
+      const done = tasks.filter(t => t.is_completed);
+      const section = (title, items, color) => !items.length ? '' :
+        `<div style="margin-bottom:20px"><div style="font-size:11px;font-weight:700;color:${color};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">${title} <span style="font-weight:400;opacity:0.7">(${items.length})</span></div>${items.map(taskRow).join('')}</div>`;
+      let html = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:24px;flex-wrap:wrap">
+        <button onclick="showTaskModal(null)" class="btn-primary btn-sm">+ Ny oppgave</button>
+        ${taskTemplates.length?`<select onchange="if(this.value){applyTaskTemplate(this.value);this.value=''}" style="padding:7px 12px;border:1.5px solid var(--sand);border-radius:8px;font-size:13px;font-family:inherit;background:var(--white);color:var(--espresso);cursor:pointer"><option value="">Importer fra mal…</option>${taskTemplates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('')}</select>`:''}
+        <span style="margin-left:auto;font-size:12px;color:#A09080">${done.length}/${tasks.length} fullført</span>
+      </div>`;
+      if (!tasks.length) {
+        html += `<div style="text-align:center;padding:48px 0;color:#A09080"><div style="font-size:40px;margin-bottom:12px;opacity:0.3">✓</div><div style="font-size:14px">Ingen oppgaver enda</div><div style="font-size:12px;margin-top:6px">Legg til eller importer fra mal</div></div>`;
+      } else {
+        html += section('Forfalt', overdue, '#C0392B');
+        html += section('Kommende', upcoming, 'var(--taupe)');
+        html += section('Uten frist', noDate, '#A09080');
+        if (done.length) html += `<details><summary style="font-size:11px;font-weight:700;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;cursor:pointer;user-select:none;list-style:none;margin-bottom:8px">Fullført (${done.length})</summary>${done.map(taskRow).join('')}</details>`;
+      }
+      el.innerHTML = html;
+    }
+
+    function showTaskModal(t) {
+      const task = typeof t === 'string' ? JSON.parse(t) : t;
+      document.getElementById('taskId').value = task?.id || '';
+      document.getElementById('taskTitle').value = task?.title || '';
+      document.getElementById('taskDescription').value = task?.description || '';
+      document.getElementById('taskDueDate').value = task?.due_date ? task.due_date.slice(0,10) : '';
+      document.getElementById('taskError').textContent = '';
+      document.getElementById('taskModalTitle').textContent = task?.id ? 'Rediger oppgave' : 'Ny oppgave';
+      document.getElementById('taskModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('taskTitle').focus(), 50);
+    }
+    function hideTaskModal() { document.getElementById('taskModal').style.display = 'none'; }
+
+    async function saveTask() {
+      const title = document.getElementById('taskTitle').value.trim();
+      const err = document.getElementById('taskError');
+      if (!title) { err.textContent = 'Tittel er påkrevd'; return; }
+      err.textContent = '';
+      const id = document.getElementById('taskId').value;
+      const due_date = document.getElementById('taskDueDate').value || null;
+      const description = document.getElementById('taskDescription').value.trim() || null;
+      const payload = { title, description, due_date, wedding_id: detailWeddingId, user_id: currentUser.id, updated_at: new Date().toISOString() };
+      const { error } = id
+        ? await sb.from('tasks').update(payload).eq('id', id)
+        : await sb.from('tasks').insert({ ...payload, id: crypto.randomUUID(), is_completed: false });
+      if (error) { err.textContent = error.message; return; }
+      hideTaskModal();
+      renderOppdragOppgaverTab();
+    }
+
+    async function deleteTask(id) {
+      if (!confirm('Slette oppgaven?')) return;
+      await sb.from('tasks').delete().eq('id', id);
+      renderOppdragOppgaverTab();
+    }
+
+    async function toggleTask(id, wasDone) {
+      await sb.from('tasks').update({ is_completed: !wasDone, updated_at: new Date().toISOString() }).eq('id', id);
+      renderOppdragOppgaverTab();
+    }
+
+    async function applyTaskTemplate(templateId) {
+      const tmpl = taskTemplates.find(t => t.id === templateId);
+      if (!tmpl) return;
+      const rows = (tmpl.stages||[]).flatMap(s => (s.tasks||[]).map(t => ({
+        id: crypto.randomUUID(), wedding_id: detailWeddingId, user_id: currentUser.id,
+        title: t.title || t.name || String(t), is_completed: false, updated_at: new Date().toISOString(),
+      })));
+      if (!rows.length) { showToast('Ingen oppgaver i malen'); return; }
+      const { error } = await sb.from('tasks').insert(rows);
+      if (error) { showToast('Feil: ' + error.message); return; }
+      showToast(`${rows.length} oppgaver importert`);
+      renderOppdragOppgaverTab();
+    }
+
+    // ── Crew-tildeling per oppdrag ────────────────────────────────────────
+
+    async function renderOppdragCrewTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el || !detailWeddingId) return;
+      el.innerHTML = `<div style="text-align:center;padding:48px;color:#A09080;font-size:14px">Laster…</div>`;
+      const [accessRes, inviteRes] = await Promise.all([
+        sb.from('crew_wedding_access').select('*').eq('wedding_id', detailWeddingId),
+        sb.from('crew_wedding_invites').select('*').eq('wedding_id', detailWeddingId),
+      ]);
+      const crew = accessRes.data || [];
+      const invites = (inviteRes.data || []).filter(i => !i.accepted_at);
+      const roleLabel = r => ({ second_shooter:'2nd Shooter', videographer:'Videograf', photographer:'Fotograf', assistant:'Assistent' }[r] || r || 'Crew');
+      const crewRows = crew.map(a => {
+        const p = crewProfilesById[a.user_id];
+        const name = p?.display_name || a.user_id.slice(0,8);
+        const initials = (name||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sand)" class="edit-row" onmouseenter="this.querySelector('.row-acts').style.opacity=1" onmouseleave="this.querySelector('.row-acts').style.opacity=0">
+          ${p?.avatar_url?`<img src="${esc(p.avatar_url)}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0">`:`<div style="width:36px;height:36px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--taupe);flex-shrink:0">${initials}</div>`}
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600">${esc(name)}</div>
+            <div style="font-size:11px;color:#A09080;margin-top:1px">${roleLabel(a.role)}${a.shoot_role&&a.shoot_role!==a.role?' · '+esc(a.shoot_role):''}</div>
+          </div>
+          <div class="row-acts" style="opacity:0;display:flex;gap:4px;flex-shrink:0;transition:opacity 0.15s">
+            ${a.user_id!==currentUser.id?`<button onclick="removeCrewFromWedding('${a.id}')" style="background:none;border:1.5px solid var(--danger);border-radius:6px;cursor:pointer;color:var(--danger);font-size:11px;padding:4px 8px;font-family:inherit">Fjern</button>`:`<span style="font-size:11px;color:#A09080;padding:4px 8px">Deg</span>`}
+          </div>
+        </div>`;
+      }).join('');
+      const pendingRows = invites.map(i =>
+        `<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--sand)">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--cream);display:flex;align-items:center;justify-content:center;color:#A09080;flex-shrink:0">✉</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500">${esc(i.email)}</div>
+            <div style="font-size:11px;color:#A09080">Invitert · ${roleLabel(i.role)}${i.expires_at?' · utløper '+new Date(i.expires_at).toLocaleDateString('nb-NO'):''}</div>
+          </div>
+          <button onclick="cancelCrewInvite('${i.id}')" style="background:none;border:1.5px solid var(--sand);border-radius:6px;cursor:pointer;color:#A09080;font-size:11px;padding:4px 8px;font-family:inherit">Avbryt</button>
+        </div>`
+      ).join('');
+      let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div style="font-size:14px;font-weight:600;color:var(--espresso)">${crew.length} crew-medlem${crew.length===1?'':'mer'}</div>
+        <button onclick="showCrewWeddingInviteModal()" class="btn-primary btn-sm">+ Inviter crew</button>
+      </div>`;
+      if (!crew.length && !invites.length) {
+        html += `<div style="text-align:center;padding:48px 0;color:#A09080"><div style="font-size:40px;margin-bottom:12px;opacity:0.3">👥</div><div style="font-size:14px">Ingen crew tildelt enda</div><div style="font-size:12px;margin-top:6px">Inviter via e-post</div></div>`;
+      } else {
+        if (crew.length) html += `<div class="card" style="margin-bottom:16px;padding:0 16px">${crewRows}</div>`;
+        if (pendingRows) html += `<div style="font-size:11px;font-weight:700;color:#A09080;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;margin-top:4px">Ventende invitasjoner</div><div class="card" style="padding:0 16px">${pendingRows}</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    function showCrewWeddingInviteModal() {
+      document.getElementById('crewInviteEmail').value = '';
+      document.getElementById('crewInviteError').textContent = '';
+      document.getElementById('crewWeddingInviteModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('crewInviteEmail').focus(), 50);
+    }
+    function hideCrewWeddingInviteModal() { document.getElementById('crewWeddingInviteModal').style.display = 'none'; }
+
+    async function sendCrewWeddingInvite() {
+      const email = document.getElementById('crewInviteEmail').value.trim();
+      const role = document.getElementById('crewInviteRole').value;
+      const err = document.getElementById('crewInviteError');
+      const btn = document.getElementById('crewInviteSendBtn');
+      if (!email) { err.textContent = 'E-post er påkrevd'; return; }
+      err.textContent = ''; btn.disabled = true; btn.textContent = 'Sender…';
+      const expires = new Date(); expires.setDate(expires.getDate() + 14);
+      const { error } = await sb.from('crew_wedding_invites').insert({
+        id: crypto.randomUUID(), wedding_id: detailWeddingId, email, role,
+        token: await genToken(), invited_by: currentUser.id, expires_at: expires.toISOString(),
+      });
+      btn.disabled = false; btn.textContent = 'Send invitasjon';
+      if (error) { err.textContent = error.message; return; }
+      hideCrewWeddingInviteModal();
+      showToast('Invitasjon sendt til ' + email);
+      renderOppdragCrewTab();
+    }
+
+    async function removeCrewFromWedding(accessId) {
+      if (!confirm('Fjerne denne personen fra bryllupet?')) return;
+      await sb.from('crew_wedding_access').delete().eq('id', accessId);
+      renderOppdragCrewTab();
+    }
+    async function cancelCrewInvite(inviteId) {
+      await sb.from('crew_wedding_invites').delete().eq('id', inviteId);
+      renderOppdragCrewTab();
+    }
+
+    // ── Moodboard per oppdrag ─────────────────────────────────────────────
+
+    async function renderOppdragMoodboardTab() {
+      const el = document.getElementById('oppdragTabContent');
+      if (!el || !detailWeddingId) return;
+      el.innerHTML = `<div style="text-align:center;padding:48px;color:#A09080;font-size:14px">Laster…</div>`;
+      const { data: images = [] } = await sb.from('moodboard_images').select('*').eq('wedding_id', detailWeddingId).order('sort_order', { ascending: true });
+      let html = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+        <div style="font-size:14px;font-weight:600;color:var(--espresso)">${images.length} bilde${images.length===1?'':'r'}</div>
+        <label style="display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;background:var(--sage);color:var(--white);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">
+          + Last opp<input type="file" accept="image/*" multiple onchange="uploadMoodboardImages(this)" style="display:none">
+        </label>
+      </div>`;
+      if (!images.length) {
+        html += `<div style="text-align:center;padding:48px 0;color:#A09080"><div style="font-size:40px;margin-bottom:12px;opacity:0.3">🖼</div><div style="font-size:14px">Ingen bilder enda</div><div style="font-size:12px;margin-top:6px">Last opp inspirasjon og referansebilder</div></div>`;
+      } else {
+        html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">`;
+        for (const img of images) {
+          const { data: ud } = sb.storage.from('moodboard-images').getPublicUrl(img.storage_path);
+          html += `<div style="position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:var(--sand)" class="edit-row" onmouseenter="this.querySelector('.mb-ov').style.opacity=1" onmouseleave="this.querySelector('.mb-ov').style.opacity=0">
+            <img src="${esc(ud?.publicUrl||'')}" style="width:100%;height:100%;object-fit:cover" loading="lazy">
+            ${img.caption?`<div style="position:absolute;bottom:0;left:0;right:0;padding:5px 7px;background:linear-gradient(transparent,rgba(0,0,0,0.55));font-size:11px;color:white">${esc(img.caption)}</div>`:''}
+            <div class="mb-ov" style="opacity:0;position:absolute;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;transition:opacity 0.15s">
+              <button onclick="deleteMoodboardImage('${img.id}','${esc(img.storage_path)}')" style="background:rgba(255,255,255,0.9);border:none;border-radius:6px;cursor:pointer;font-size:11px;padding:4px 10px;color:#C0392B;font-family:inherit;font-weight:600">Slett</button>
+            </div>
+          </div>`;
+        }
+        html += `</div>`;
+      }
+      el.innerHTML = html;
+    }
+
+    async function uploadMoodboardImages(input) {
+      const files = Array.from(input.files || []);
+      if (!files.length) return;
+      showToast('Laster opp…');
+      let uploaded = 0;
+      for (const file of files) {
+        const path = `${currentUser.id}/${detailWeddingId}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+        const { error } = await sb.storage.from('moodboard-images').upload(path, file, { contentType: file.type });
+        if (!error) {
+          await sb.from('moodboard_images').insert({ id: crypto.randomUUID(), wedding_id: detailWeddingId, user_id: currentUser.id, storage_path: path, sort_order: Date.now(), source: 'photographer' });
+          uploaded++;
+        }
+      }
+      showToast(`${uploaded} bilde${uploaded===1?'':'r'} lastet opp`);
+      renderOppdragMoodboardTab();
+    }
+
+    async function deleteMoodboardImage(id, path) {
+      if (!confirm('Slette bildet?')) return;
+      await Promise.all([sb.from('moodboard_images').delete().eq('id', id), sb.storage.from('moodboard-images').remove([path])]);
+      renderOppdragMoodboardTab();
+    }
+
+    // ── Portaltilgangslogg ────────────────────────────────────────────────
+
+    async function renderPortalLog(container, weddingId) {
+      const { data: logs = [] } = await sb.from('portal_access_log').select('*').eq('wedding_id', weddingId).order('created_at', { ascending: false }).limit(20);
+      if (!logs.length) { container.innerHTML = `<div style="font-size:13px;color:#A09080;padding:8px 0">Ingen registrert tilgang enda</div>`; return; }
+      const eventLabel = e => ({ otp_request:'Kode forespurt', otp_verify:'Logget inn', session_validate:'Sesjon validert', logout:'Logget ut' }[e] || e);
+      container.innerHTML = logs.map(l => {
+        const dt = new Date(l.created_at).toLocaleString('nb-NO', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+        return `<div style="display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px solid var(--sand);font-size:12px">
+          <span style="color:#A09080;min-width:90px;flex-shrink:0">${dt}</span>
+          <span style="flex:1;color:var(--espresso)">${eventLabel(l.event_type)}</span>
+          <span style="${l.success?'color:var(--sage)':'color:var(--danger)'}">${l.success?'✓':'✗'}</span>
+          ${l.email_used?`<span style="color:#A09080;font-size:11px;overflow:hidden;text-overflow:ellipsis;max-width:140px">${esc(l.email_used)}</span>`:''}
+        </div>`;
+      }).join('');
+    }
+
+    // ── Crew-invitasjoner ─────────────────────────────────────────────────
+
+    async function renderCrewInvitasjoner(el) {
+      el.innerHTML = `<div style="padding:28px 32px;color:#A09080;font-size:14px">Laster…</div>`;
+      const [sentRes, receivedRes] = await Promise.all([
+        sb.from('crew_wedding_invites').select('*,weddings(partner1,partner2,wedding_date)').eq('invited_by', currentUser.id).order('created_at', { ascending: false }).limit(30),
+        sb.from('crew_wedding_invites').select('*,weddings(partner1,partner2,wedding_date)').eq('email', currentUser.email).order('created_at', { ascending: false }).limit(30),
+      ]);
+      const sent = sentRes.data || [];
+      const received = receivedRes.data || [];
+      const roleLabel = r => ({ second_shooter:'2nd Shooter', videographer:'Videograf', photographer:'Fotograf', assistant:'Assistent' }[r] || r || '—');
+      const coupleName = w => w ? (w.partner2 ? `${w.partner1} & ${w.partner2}` : w.partner1) : '—';
+      const dfShort = d => d ? new Date(d).toLocaleDateString('nb-NO', { day:'numeric', month:'short', year:'numeric' }) : '—';
+      const statusBadge = i => i.accepted_at
+        ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#E8F4EA;color:#4A8A55">Akseptert</span>`
+        : new Date(i.expires_at) < new Date()
+        ? `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#F0EBE4;color:#9B7E5E">Utløpt</span>`
+        : `<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:#EAF0F8;color:#5577A0">Venter</span>`;
+      const inviteRow = (i, isReceived) => {
+        const w = i.weddings;
+        const canAccept = isReceived && !i.accepted_at && new Date(i.expires_at) > new Date();
+        return `<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--sand);flex-wrap:wrap">
+          <div style="flex:1;min-width:140px">
+            <div style="font-size:13px;font-weight:600;color:var(--espresso)">${esc(coupleName(w))}</div>
+            <div style="font-size:11px;color:#A09080;margin-top:2px">${dfShort(w?.wedding_date)} · ${roleLabel(i.role)}${!isReceived?' · til '+esc(i.email):''}</div>
+          </div>
+          ${statusBadge(i)}
+          ${canAccept?`<button onclick="acceptCrewInvite('${i.id}','${i.wedding_id}',this)" style="padding:5px 12px;border-radius:6px;border:none;background:var(--sage);color:var(--white);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">Aksepter</button>`:''}
+        </div>`;
+      };
+      let html = `<div style="padding:28px 32px">`;
+      if (received.length) {
+        html += `<h3 style="font-size:15px;font-weight:700;color:var(--espresso);margin:0 0 4px">Innkommende invitasjoner</h3><p style="font-size:13px;color:#8A7D72;margin:0 0 14px">Andre fotografer har invitert deg til sine bryllup</p>`;
+        html += `<div class="card" style="padding:0 16px;margin-bottom:28px">${received.map(i => inviteRow(i, true)).join('')}</div>`;
+      }
+      html += `<h3 style="font-size:15px;font-weight:700;color:var(--espresso);margin:0 0 4px">Sendte invitasjoner</h3><p style="font-size:13px;color:#8A7D72;margin:0 0 14px">Crew du har invitert til dine bryllup</p>`;
+      if (!sent.length) {
+        html += `<div style="text-align:center;padding:32px;color:#A09080;background:var(--white);border-radius:12px;border:1px solid var(--sand)"><div style="font-size:13px">Du har ikke sendt noen crew-invitasjoner enda.</div><div style="font-size:12px;margin-top:6px">Gå til et oppdrag → Crew-fanen for å invitere.</div></div>`;
+      } else {
+        html += `<div class="card" style="padding:0 16px">${sent.map(i => inviteRow(i, false)).join('')}</div>`;
+      }
+      html += `</div>`;
+      el.innerHTML = html;
+    }
+
+    async function acceptCrewInvite(inviteId, weddingId, btn) {
+      btn.disabled = true; btn.textContent = 'Aksepterer…';
+      const { error } = await sb.from('crew_wedding_access').insert({
+        id: crypto.randomUUID(), wedding_id: weddingId, user_id: currentUser.id, role: 'photographer', invited_by: currentUser.id,
+      });
+      if (!error) {
+        await sb.from('crew_wedding_invites').update({ accepted_by: currentUser.id, accepted_at: new Date().toISOString() }).eq('id', inviteId);
+        showToast('Invitasjon akseptert!');
+        renderCrew(document.getElementById('mainContent'));
+      } else {
+        btn.disabled = false; btn.textContent = 'Aksepter';
+        showToast('Feil: ' + error.message);
+      }
     }
 
     function handleCmdKey(event) {
