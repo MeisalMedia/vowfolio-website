@@ -1611,6 +1611,7 @@ async function loadOverview() {
     }
     lastData = data;
     render(data);
+    fetchDeliveries();
     updateFooterLogout();
     stopAuthTicker();
   } catch (e) {
@@ -2796,6 +2797,18 @@ function renderDeliveries() {
   }).join('');
 }
 
+function updateDeliveryTileStatus() {
+  const tile = document.getElementById('deliveries-tile');
+  if (!tile) return;
+  const statusEl = tile.querySelector('.tile-status');
+  if (!statusEl) return;
+  const next = nextExpectedDelivery();
+  if (next) {
+    statusEl.className = 'tile-status';
+    statusEl.innerHTML = `${escapeHtml(next.title)} <span class="dot">·</span> ${escapeHtml(next.dateLabel)}`;
+  }
+}
+
 async function fetchDeliveries() {
   if (!token) return;
   const scroll = document.getElementById('deliveries-scroll');
@@ -2809,6 +2822,7 @@ async function fetchDeliveries() {
     deliveriesData = data;
     deliveriesLoaded = true;
     renderDeliveries();
+    updateDeliveryTileStatus();
   } catch (_) {
     if (scroll) scroll.innerHTML = `<div class="delivery-empty">${escapeHtml(tr('intakeError'))}</div>`;
   }
