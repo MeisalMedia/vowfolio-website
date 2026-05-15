@@ -935,6 +935,12 @@
       }
     }
 
+    function dismissBellItem(idx) {
+      if (!window._bellActivities) return;
+      window._bellActivities.splice(idx, 1);
+      updateBellBadge(window._bellActivities.length);
+    }
+
     function renderBellPanel() {
       const content = document.getElementById('bellContent');
       if (!content) return;
@@ -943,9 +949,12 @@
         content.innerHTML = '<div style="padding:32px 20px;text-align:center;color:#A09080;font-size:14px">Ingen aktivitet siste 7 dager</div>';
         return;
       }
-      content.innerHTML = acts.map(a => {
+      content.innerHTML = acts.map((a, i) => {
         const dest = a.threadId ? `navigate('conversation','${a.threadId}')` : a.weddingId ? `navigate('oppdragDetail','${a.weddingId}')` : a.contactId ? `navigate('kontaktDetail','${a.contactId}')` : '';
-        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 20px;border-bottom:1px solid var(--sand);${dest ? 'cursor:pointer' : ''}" ${dest ? `onclick="toggleBell();${dest}"` : ''}>
+        const clickHandler = dest
+          ? `dismissBellItem(${i});toggleBell();${dest}`
+          : `dismissBellItem(${i});renderBellPanel()`;
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 20px;border-bottom:1px solid var(--sand);cursor:pointer" onclick="${clickHandler}">
           <div style="width:8px;height:8px;border-radius:50%;background:${a.dot};flex-shrink:0;margin-top:5px"></div>
           <div style="flex:1"><div style="font-size:13px;color:var(--espresso)">${esc(a.text)}</div><div style="font-size:11px;color:#A09080;margin-top:2px">${relativeTime(a.t.toISOString())}</div></div>
         </div>`;
