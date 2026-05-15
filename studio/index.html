@@ -944,7 +944,7 @@
         return;
       }
       content.innerHTML = acts.map(a => {
-        const dest = a.weddingId ? `navigate('oppdragDetail','${a.weddingId}')` : a.contactId ? `navigate('kontaktDetail','${a.contactId}')` : '';
+        const dest = a.threadId ? `navigate('conversation','${a.threadId}')` : a.weddingId ? `navigate('oppdragDetail','${a.weddingId}')` : a.contactId ? `navigate('kontaktDetail','${a.contactId}')` : '';
         return `<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 20px;border-bottom:1px solid var(--sand);${dest ? 'cursor:pointer' : ''}" ${dest ? `onclick="toggleBell();${dest}"` : ''}>
           <div style="width:8px;height:8px;border-radius:50%;background:${a.dot};flex-shrink:0;margin-top:5px"></div>
           <div style="flex:1"><div style="font-size:13px;color:var(--espresso)">${esc(a.text)}</div><div style="font-size:11px;color:#A09080;margin-top:2px">${relativeTime(a.t.toISOString())}</div></div>
@@ -1059,7 +1059,7 @@
       }
       for (const th of messageThreads) {
         if (!th.last_message_at || (now - new Date(th.last_message_at).getTime()) >= sevenDayMs) continue;
-        acts.push({ t: new Date(th.last_message_at), text:`Ny melding fra ${threadDisplayName(th)}`, dot:'#8A7D72', weddingId: th.wedding_id });
+        acts.push({ t: new Date(th.last_message_at), text:`Ny melding fra ${threadDisplayName(th)}`, dot:'#8A7D72', threadId: th.id, weddingId: th.wedding_id });
       }
       acts.sort((a,b) => b.t - a.t);
       const recentActs = acts.slice(0, 6);
