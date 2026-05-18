@@ -101,6 +101,16 @@
     .expand-row span{color:#8A7D6E}
     .expand-row strong{color:#3D3229;font-weight:600}
     .expand-row.total strong{color:#6B8F71}
+    .pay-list{margin-top:8px}
+    .pay-list-title{font-size:12px;color:#8A7D6E;text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px}
+    .pay-allset{font-size:13px;color:#6B8F71;padding:12px 0 4px}
+    .pay-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F0EBE4}
+    .pay-row:last-child{border-bottom:none}
+    .pay-row-info{display:flex;flex-direction:column;gap:2px;min-width:0}
+    .pay-row-title{font-size:14px;color:#3D3229;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .pay-row-amount{font-size:14px;color:#3D3229;font-weight:700}
+    .pay-btn{flex:none;background:#9B7E5E;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+    .pay-btn:disabled{opacity:.6;cursor:default}
 
     .tile-badge{background:#C2847A;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;margin-left:6px;flex-shrink:0}
     .tile-status.preview{color:#6B5E4F}
@@ -502,6 +512,11 @@ const t = {
     depositPending: 'Not yet paid',
     depositPaid: 'Paid',
     depositAmount: 'Amount',
+    payNow: 'Pay now',
+    payListTitle: 'Outstanding payments',
+    payAllSettled: 'Nothing outstanding — you\'re all paid up.',
+    payOpening: 'Opening secure checkout…',
+    payError: 'Could not open payment. Please try again or contact your photographer.',
 
     yourPhotog: 'Your photographer',
     photogReplies: 'Usually replies within a day',
@@ -776,6 +791,11 @@ const t = {
     depositPending: 'Ikke betalt ennå',
     depositPaid: 'Betalt',
     depositAmount: 'Beløp',
+    payNow: 'Betal nå',
+    payListTitle: 'Utestående betalinger',
+    payAllSettled: 'Ingenting utestående — alt er betalt.',
+    payOpening: 'Åpner sikker betaling…',
+    payError: 'Kunne ikke åpne betaling. Prøv igjen, eller kontakt fotografen.',
 
     yourPhotog: 'Fotografen deres',
     photogReplies: 'Svarer vanligvis innen en dag',
@@ -1950,6 +1970,7 @@ function render(data) {
         <div class="expand-row"><span>${tr('paidSoFar')}</span><strong>${formatMoney(deposit.amountPaid, p.currencySymbol)}</strong></div>
         <div class="expand-row total"><span>${tr('remaining')}</span><strong>${formatMoney(Math.max(0, (deposit.contractValue || 0) - (deposit.amountPaid || 0)), p.currencySymbol)}</strong></div>
         ${deposit.finalPaymentDueDate ? `<div class="expand-row"><span>${tr('finalDue')}</span><strong>${formatDate(deposit.finalPaymentDueDate)}</strong></div>` : ''}
+        <div id="portal-pay-list" class="pay-list"></div>
       </div>
     </div>
     `;
@@ -2145,6 +2166,59 @@ function render(data) {
     ${faqs}
   `;
   updateChatFab();
+  populatePortalPayments();
+}
+
+// ─── Etappe 2b: couple-initiated payments in the portal ──────────────────
+
+async function populatePortalPayments() {
+  const box = document.getElementById('portal-pay-list');
+  if (!box || !token) return;
+  try {
+    const res = await authedFetch(`${API}?action=payments&token=${encodeURIComponent(token)}`);
+    if (!res.ok) { box.innerHTML = ''; return; }
+    const data = await res.json();
+    const unpaid = (data.items || []).filter(p => p.canPay);
+    if (unpaid.length === 0) {
+      box.innerHTML = `<div class="pay-allset">${tr('payAllSettled')}</div>`;
+      return;
+    }
+    const sym = (lastData && lastData.photographer && lastData.photographer.currencySymbol) || '';
+    box.innerHTML = `<div class="pay-list-title">${tr('payListTitle')}</div>` +
+      unpaid.map(p => `
+        <div class="pay-row">
+          <div class="pay-row-info">
+            <span class="pay-row-title">${escapeHtml(p.title || '')}</span>
+            <strong class="pay-row-amount">${formatMoney(p.amount, sym)}</strong>
+          </div>
+          <button class="pay-btn" data-pid="${p.id}" onclick="payPortalPayment('${p.id}', this)">${tr('payNow')}</button>
+        </div>`).join('');
+  } catch (_e) {
+    box.innerHTML = '';
+  }
+}
+
+async function payPortalPayment(paymentId, btnEl) {
+  if (!paymentId || !token) return;
+  const original = btnEl ? btnEl.textContent : '';
+  if (btnEl) { btnEl.disabled = true; btnEl.textContent = tr('payOpening'); }
+  try {
+    const res = await authedFetch(`${API}?action=create-portal-payment-link&token=${encodeURIComponent(token)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payment_id: paymentId }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) {
+      if (btnEl) { btnEl.disabled = false; btnEl.textContent = original; }
+      alert(tr('payError'));
+      return;
+    }
+    window.location.href = data.url;
+  } catch (_e) {
+    if (btnEl) { btnEl.disabled = false; btnEl.textContent = original; }
+    alert(tr('payError'));
+  }
 }
 
 function updateChatFab() {
