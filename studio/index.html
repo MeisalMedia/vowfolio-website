@@ -2711,9 +2711,10 @@
           html += `<div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
           html += `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:${st.bg};color:${st.color};flex-shrink:0;white-space:nowrap">${st.label}</span>`;
           html += `</div>`;
+          // Preview shows phone only — you call a number, not an email.
+          // Email stays in the contact detail view.
           const infoLine = [];
-          if (c.email) infoLine.push(`<span style="color:#8A7D72">✉ ${esc(c.email)}</span>`);
-          else if (c.phone) infoLine.push(`<span style="color:#8A7D72">📞 ${esc(c.phone)}</span>`);
+          if (c.phone) infoLine.push(`<span style="color:#8A7D72">📞 ${esc(c.phone)}</span>`);
           if (infoLine.length) html += `<div style="font-size:12px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${infoLine.join('')}</div>`;
           html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">`;
           if (wDate) html += `<span style="font-size:11px;padding:2px 7px;border-radius:6px;background:#EAF0F8;color:#4A7FB5;font-weight:500">📅 ${wDate}</span>`;
