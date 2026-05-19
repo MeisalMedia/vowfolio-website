@@ -2741,19 +2741,16 @@
           const wDate = w?.wedding_date ? new Date(w.wedding_date).toLocaleDateString('nb-NO',{day:'numeric',month:'short',year:'numeric'}) : null;
           html += `<div onclick="navigate('kontaktDetail','${c.id}')" style="display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--white);border-radius:10px;box-shadow:0 1px 4px rgba(61,50,41,0.04);cursor:pointer;transition:transform 0.12s,box-shadow 0.12s" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 10px rgba(61,50,41,0.08)'" onmouseout="this.style.transform='';this.style.boxShadow='0 1px 4px rgba(61,50,41,0.04)'">`;
           html += `<div style="flex:1;min-width:0">`;
-          html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">`;
-          html += `<div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
-          html += `<span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;background:${st.bg};color:${st.color};flex-shrink:0;white-space:nowrap">${st.label}</span>`;
-          html += `</div>`;
+          html += `<div style="font-size:14px;font-weight:600;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(displayName)}</div>`;
           // Preview shows phone only — you call a number, not an email.
-          // Email stays in the contact detail view.
-          const infoLine = [];
-          if (c.phone) infoLine.push(`<span style="color:#8A7D72">📞 ${esc(c.phone)}</span>`);
-          if (infoLine.length) html += `<div style="font-size:12px;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${infoLine.join('')}</div>`;
-          html += `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">`;
-          if (wDate) html += `<span style="font-size:11px;padding:2px 7px;border-radius:6px;background:#EAF0F8;color:#4A7FB5;font-weight:500">📅 ${wDate}</span>`;
-          if (c.source) html += `<span style="font-size:11px;padding:2px 7px;border-radius:6px;background:var(--cream);border:1px solid var(--sand);color:var(--taupe);font-weight:500">${esc(c.source)}</span>`;
-          html += `<span style="font-size:11px;color:#C0B0A0;margin-left:auto">Sist: ${lastContact}</span>`;
+          if (c.phone) html += `<div style="font-size:12px;color:#8A7D72;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📞 ${esc(c.phone)}</div>`;
+          // One quiet meta line — status as subtle coloured text (no chip),
+          // date as plain grey. "Website form"-style source dropped (it's
+          // in the contact detail). No filled badge boxes = far less noise.
+          html += `<div style="display:flex;align-items:center;gap:6px;font-size:11px">`;
+          html += `<span style="color:${st.color};font-weight:600">${st.label}</span>`;
+          if (wDate) html += `<span style="color:#B0A090">·</span><span style="color:#8A7D72">${wDate}</span>`;
+          html += `<span style="color:#C0B0A0;margin-left:auto">Sist: ${lastContact}</span>`;
           html += `</div>`;
           html += `</div></div>`;
         }
