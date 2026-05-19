@@ -4406,10 +4406,29 @@
       if (doc.pdf_storage_path) {
         const { data: urlData } = await sb.storage.from('document-files').createSignedUrl(doc.pdf_storage_path, 3600);
         if (urlData?.signedUrl) {
-          html += `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);overflow:hidden;height:80vh">`;
-          html += `<iframe src="${urlData.signedUrl}" style="width:100%;height:100%;border:none" title="${esc(doc.title)}"></iframe>`;
-          html += `</div>`;
-          html += `<div style="text-align:center;margin-top:10px"><a href="${urlData.signedUrl}" target="_blank" style="font-size:13px;color:var(--taupe);text-decoration:none">↗ Åpne i nytt vindu</a></div>`;
+          const isPdf = /\.pdf(\?|$)/i.test(doc.pdf_storage_path);
+          if (isPdf) {
+            html += `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);overflow:hidden;height:80vh">`;
+            html += `<iframe src="${urlData.signedUrl}" style="width:100%;height:100%;border:none" title="${esc(doc.title)}"></iframe>`;
+            html += `</div>`;
+            html += `<div style="text-align:center;margin-top:10px"><a href="${urlData.signedUrl}" target="_blank" style="font-size:13px;color:var(--taupe);text-decoration:none">↗ Åpne i nytt vindu</a></div>`;
+          } else {
+            // The stored signed file is .html. Supabase serves it as
+            // text/plain, so `src=` would show the raw source. Fetch it and
+            // render via sandboxed srcdoc, which forces HTML rendering
+            // regardless of the object's content-type.
+            let docHtml = '';
+            try { docHtml = await (await fetch(urlData.signedUrl)).text(); } catch (_e) {}
+            if (docHtml.trim()) {
+              const safe = docHtml.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+              html += `<div style="background:var(--white);border-radius:12px;box-shadow:0 2px 12px rgba(61,50,41,0.06);overflow:hidden;height:80vh">`;
+              html += `<iframe srcdoc="${safe}" style="width:100%;height:100%;border:none" title="${esc(doc.title)}" sandbox="allow-same-origin"></iframe>`;
+              html += `</div>`;
+              html += `<div style="text-align:center;margin-top:10px"><a href="${urlData.signedUrl}" target="_blank" style="font-size:13px;color:var(--taupe);text-decoration:none">↗ Åpne i nytt vindu</a></div>`;
+            } else {
+              html += renderContractContent(doc);
+            }
+          }
         } else {
           html += renderContractContent(doc);
         }
