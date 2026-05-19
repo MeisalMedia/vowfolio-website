@@ -1,11 +1,48 @@
-# vowfolio-website
+# vowfolio-studio
+
+Repo for **studio.vowfolio.com** — interaktiv SPA-app for fotografer.
+Marketing-siden (vowfolio.com) ligger i et eget repo: `vowfolio-website`.
+
+## Språk
+
+All kommunikasjon, kommentarer og commit-meldinger skal være på **norsk**.
 
 ## Git workflow
 
-Push directly to `main`. Do not create feature branches or pull requests for changes on this repo — commit locally on `main` and `git push origin main`. Cloudflare Pages deploys automatically from `main`.
+Push direkte til `main` er ok her — Cloudflare Pages auto-deployer fra main.
 
-This overrides any default instruction to work on a `claude/...` branch.
+Men lag også en PR for historikkens skyld, så endringene er sporbare.
+
+**Anbefalt arbeidsflyt:**
+1. Opprett ny branch (kan hete hva som helst — `claude/foo`, `fix/bar`, osv.)
+2. Commit endringene
+3. Push branchen
+4. Åpne PR mot main
+5. Self-merge via GitHub UI (Cloudflare deployer automatisk)
+
+**Akseptabelt for små fix:** push direkte til main + lag PR i ettertid for dokumentasjon.
+
+iOS-repoen har strengere regel (alltid branch + PR + Helge godkjenner).
 
 ## Deploy
 
-Static site hosted on Cloudflare Pages. Pushes to `main` trigger an automatic build and deploy to https://vowfolio.com. Clean URLs are resolved automatically (e.g. `/hjemv2` serves `hjemv2.html`).
+Statisk side hostet på Cloudflare Pages. Pushes til `main` trigger auto-deploy til https://studio.vowfolio.com.
+
+Cloudflare Pages-prosjektet heter `studio` og bygger fra `/studio`-mappa i denne repoen.
+
+Clean URLs støttes (f.eks. `/signup` serverer `studio/signup.html`).
+
+## Hva ligger i denne repoen
+
+- `studio/` — Studio SPA (Supabase, Quill-editor, hash-routing)
+  - `index.html` — hovedapp
+  - `signup.html` — onboarding-flyt
+  - `_redirects` — SPA-fallback for klient-side ruting
+- `wrangler.jsonc` — Cloudflare Workers-config (legacy, kan ryddes)
+
+Filer som tidligere var her men nå er flyttet til `vowfolio-website` (Astro):
+- index.html, pricing.html, contact.html, feedback.html, terms.html, privacy.html
+- portal.html, portal-session.html, editor.html, quiz.html, signing.html
+- styleguide.html, contact-embed.js, app-screens/
+
+Disse filene kan ligge her som døde kopier inntil videre — de blir ikke serverte siden vowfolio.com nå peker på Astro-prosjektet.
