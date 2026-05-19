@@ -935,8 +935,42 @@
       }
     }
 
+    // Bell items are a DERIVED feed (recent activity, last 7 days) — there is
+    // no notifications table to mark read. Persist dismissals in localStorage
+    // so they stay gone after renderHjem() rebuilds the feed.
+    function _bellKey(a) {
+      const ts = (a && a.t && a.t.toISOString) ? a.t.toISOString() : String(a && a.t || '');
+      return `${a && a.text || ''}|${ts}`;
+    }
+    function _getDismissedBell() {
+      try {
+        const raw = JSON.parse(localStorage.getItem('vf_dismissed_bell') || '[]');
+        // Prune anything whose embedded timestamp is older than 14 days —
+        // the feed only covers 7 days so older keys are dead weight.
+        const cutoff = Date.now() - 14 * 86400000;
+        const kept = raw.filter(k => {
+          const iso = String(k).split('|')[1];
+          const t = iso ? Date.parse(iso) : NaN;
+          return isNaN(t) ? true : t >= cutoff;
+        });
+        if (kept.length !== raw.length) {
+          localStorage.setItem('vf_dismissed_bell', JSON.stringify(kept));
+        }
+        return new Set(kept);
+      } catch (_e) { return new Set(); }
+    }
+    function _addDismissedBell(key) {
+      try {
+        const s = _getDismissedBell();
+        s.add(key);
+        localStorage.setItem('vf_dismissed_bell', JSON.stringify([...s]));
+      } catch (_e) {}
+    }
+
     function dismissBellItem(idx) {
       if (!window._bellActivities) return;
+      const a = window._bellActivities[idx];
+      if (a) _addDismissedBell(_bellKey(a));
       window._bellActivities.splice(idx, 1);
       updateBellBadge(window._bellActivities.length);
     }
@@ -1071,7 +1105,8 @@
         acts.push({ t: new Date(th.last_message_at), text:`Ny melding fra ${threadDisplayName(th)}`, dot:'#8A7D72', threadId: th.id, weddingId: th.wedding_id });
       }
       acts.sort((a,b) => b.t - a.t);
-      const recentActs = acts.slice(0, 6);
+      const _dismissedBell = _getDismissedBell();
+      const recentActs = acts.filter(a => !_dismissedBell.has(_bellKey(a))).slice(0, 6);
 
       let html = `<div class="main-content" style="padding-top:24px">`;
 
