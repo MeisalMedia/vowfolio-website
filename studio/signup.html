@@ -39,6 +39,11 @@
     .link-row a { color: var(--taupe); text-decoration: none; font-weight: 500; }
     .link-row a:hover { text-decoration: underline; }
     .confirm-icon { font-size: 44px; margin-bottom: 16px; }
+    .terms-row { display: flex; align-items: flex-start; gap: 10px; text-align: left; margin-bottom: 8px; margin-top: 4px; }
+    .terms-row input[type="checkbox"] { width: 18px; height: 18px; min-width: 18px; margin: 0; margin-top: 2px; cursor: pointer; accent-color: var(--taupe); }
+    .terms-row label { font-size: 13px; color: #8A7D72; cursor: pointer; line-height: 1.4; }
+    .terms-row a { color: var(--taupe); text-decoration: none; font-weight: 500; }
+    .terms-row a:hover { text-decoration: underline; }
     @media (max-width: 480px) { .card { padding: 32px 24px; } }
   </style>
 </head>
@@ -57,6 +62,10 @@
       <input type="email" id="email" placeholder="E-post" autocomplete="email">
       <input type="password" id="password" placeholder="Passord" autocomplete="new-password">
       <input type="password" id="passwordConfirm" placeholder="Bekreft passord" autocomplete="new-password">
+      <div class="terms-row">
+        <input type="checkbox" id="termsCheck">
+        <label for="termsCheck">Jeg godtar <a href="https://vowfolio.com/terms" target="_blank">vilkårene for bruk</a></label>
+      </div>
       <button class="btn" id="step1Btn" onclick="submitStep1()">Neste</button>
       <p class="error" id="step1Error"></p>
       <p class="link-row">Har du allerede konto? <a href="/">Logg inn</a></p>
@@ -127,6 +136,7 @@
       if (!email) { err.textContent = 'E-post er påkrevd'; return; }
       if (pass.length < 6) { err.textContent = 'Passordet må være minst 6 tegn'; return; }
       if (pass !== confirm) { err.textContent = 'Passordene stemmer ikke overens'; return; }
+      if (!document.getElementById('termsCheck').checked) { err.textContent = 'Du må godta vilkårene for å fortsette'; return; }
 
       btn.disabled = true; btn.textContent = 'Oppretter konto…';
       const { data, error } = await sb.auth.signUp({ email, password: pass });
