@@ -4373,15 +4373,41 @@
     async function downloadSignedContract(docId) {
       const doc = documents.find(d => d.id === docId);
       if (!doc?.pdf_storage_path) { showToast('Ingen PDF tilgjengelig'); return; }
-      const { data, error } = await sb.storage.from('document-files').createSignedUrl(doc.pdf_storage_path, 60);
-      if (error || !data?.signedUrl) { showToast('Kunne ikke hente PDF'); return; }
-      const a = document.createElement('a');
-      a.href = data.signedUrl;
-      a.download = (doc.title || 'Kontrakt').replace(/[^a-zA-Z0-9æøåÆØÅ \-_]/g, '') + '.pdf';
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const isPdf = /\.pdf(\?|$)/i.test(doc.pdf_storage_path);
+
+      if (isPdf) {
+        const { data, error } = await sb.storage.from('document-files').createSignedUrl(doc.pdf_storage_path, 60);
+        if (error || !data?.signedUrl) { showToast('Kunne ikke hente dokumentet'); return; }
+        const a = document.createElement('a');
+        a.href = data.signedUrl;
+        a.download = (doc.title || 'Kontrakt').replace(/[^a-zA-Z0-9æøåÆØÅ \-_]/g, '') + '.pdf';
+        a.target = '_blank';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        return;
+      }
+
+      // The stored signed file is styled HTML (generate-pdf produces HTML,
+      // not a PDF). Match the iOS app: render it and use the browser's
+      // native "Save as PDF". Open the window synchronously inside the click
+      // gesture so it isn't popup-blocked, then fill it after fetch.
+      const w = window.open('', '_blank');
+      if (!w) { showToast('Tillat popup for å laste ned PDF'); return; }
+      w.document.write('<!DOCTYPE html><meta charset="utf-8"><body style="font-family:-apple-system,sans-serif;color:#8A7D6E;padding:40px">Forbereder PDF…</body>');
+      try {
+        const { data, error } = await sb.storage.from('document-files').createSignedUrl(doc.pdf_storage_path, 60);
+        if (error || !data?.signedUrl) throw new Error('signurl');
+        const docHtml = await (await fetch(data.signedUrl)).text();
+        if (!docHtml.trim()) throw new Error('empty');
+        const fileName = (doc.title || 'Kontrakt').replace(/[^a-zA-Z0-9æøåÆØÅ \-_]/g, '').trim() || 'Kontrakt';
+        const printJs = '<scr' + 'ipt>window.onload=function(){setTimeout(function(){window.focus();window.print();},350);};</scr' + 'ipt>';
+        let out = docHtml;
+        out = /<\/head>/i.test(out) ? out.replace(/<\/head>/i, '<title>' + fileName + '</title></head>') : '<title>' + fileName + '</title>' + out;
+        out = /<\/body>/i.test(out) ? out.replace(/<\/body>/i, printJs + '</body>') : out + printJs;
+        w.document.open(); w.document.write(out); w.document.close();
+      } catch (_e) {
+        try { w.close(); } catch (__e) {}
+        showToast('Kunne ikke hente dokumentet');
+      }
     }
 
     async function renderDocumentView(el, docId) {
